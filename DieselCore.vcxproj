@@ -1,0 +1,164 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="12.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|Win32">
+      <Configuration>Debug</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|Win32">
+      <Configuration>Release</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <ProjectGuid>{06303B62-8BCD-4AC5-BE6C-26B56D7144EA}</ProjectGuid>
+    <RootNamespace>DieselCore</RootNamespace>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <PlatformToolset>v120</PlatformToolset>
+    <CharacterSet>MultiByte</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <PlatformToolset>v120</PlatformToolset>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <CharacterSet>MultiByte</CharacterSet>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings">
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <IncludePath>$(IncludePath);$(DXSDK_DIR)Include;..\math</IncludePath>
+    <LibraryPath>$(LibraryPath);$(DXSDK_DIR)Lib\x86</LibraryPath>
+    <OutDir>$(Configuration)\</OutDir>
+    <IntDir>$(Configuration)\</IntDir>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <IncludePath>$(IncludePath);$(DXSDK_DIR)Include;..\math</IncludePath>
+    <LibraryPath>$(LibraryPath);$(DXSDK_DIR)Lib\x86</LibraryPath>
+    <OutDir>$(Configuration)\</OutDir>
+    <IntDir />
+    <TargetExt>.lib</TargetExt>
+  </PropertyGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <Optimization>Disabled</Optimization>
+      <SDLCheck>true</SDLCheck>
+      <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
+      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+      <BasicRuntimeChecks>UninitializedLocalUsageCheck</BasicRuntimeChecks>
+    </ClCompile>
+    <Link>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <AdditionalDependencies>d3d11.lib;d3dx11.lib;dxerr.lib;dxgi.lib;%(AdditionalDependencies)</AdditionalDependencies>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <Optimization>Disabled</Optimization>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <SDLCheck>true</SDLCheck>
+      <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+    </ClCompile>
+    <Link>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
+      <AdditionalDependencies>d3d11.lib;d3dx11.lib;dxerr.lib;dxgi.lib;%(AdditionalDependencies)</AdditionalDependencies>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <ClCompile Include="base\CrashReporter.cpp" />
+    <ClCompile Include="base\EventStream.cpp" />
+    <ClCompile Include="base\system_info.cpp" />
+    <ClCompile Include="data\DynamicSettings.cpp" />
+    <ClCompile Include="graphics\Color.cpp" />
+    <ClCompile Include="io\BinaryFile.cpp" />
+    <ClCompile Include="io\DataFile.cpp" />
+    <ClCompile Include="io\FileRepository.cpp" />
+    <ClCompile Include="io\Huffmann.cpp" />
+    <ClCompile Include="io\json.cpp" />
+    <ClCompile Include="io\TextCompressor.cpp" />
+    <ClCompile Include="lib\BlockArray.cpp" />
+    <ClCompile Include="log\Log.cpp" />
+    <ClCompile Include="math\CubicBezierPath.cpp" />
+    <ClCompile Include="math\GameMath.cpp" />
+    <ClCompile Include="math\hex.cpp" />
+    <ClCompile Include="math\math.cpp" />
+    <ClCompile Include="math\matrix.cpp" />
+    <ClCompile Include="math\StraightPath.cpp" />
+    <ClCompile Include="math\tweening.cpp" />
+    <ClCompile Include="memory\DefaultAllocator.cpp" />
+    <ClCompile Include="profiler\Profiler.cpp" />
+    <ClCompile Include="string\GlobalStringBuffer.cpp" />
+    <ClCompile Include="string\StaticHash.cpp" />
+    <ClCompile Include="string\StringUtils.cpp" />
+    <ClCompile Include="utils\StateManager.cpp" />
+    <ClCompile Include="utils\TileMapReader.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="base\Assert.h" />
+    <ClInclude Include="base\CrashReporter.h" />
+    <ClInclude Include="base\EventStream.h" />
+    <ClInclude Include="base\system_info.h" />
+    <ClInclude Include="Common.h" />
+    <ClInclude Include="data\DynamicSettings.h" />
+    <ClInclude Include="data\HighscoreService.h" />
+    <ClInclude Include="graphics\Color.h" />
+    <ClInclude Include="graphics\Texture.h" />
+    <ClInclude Include="io\BinaryFile.h" />
+    <ClInclude Include="io\DataFile.h" />
+    <ClInclude Include="io\FileRepository.h" />
+    <ClInclude Include="io\Huffmann.h" />
+    <ClInclude Include="io\json.h" />
+    <ClInclude Include="io\TextCompressor.h" />
+    <ClInclude Include="lib\BlockArray.h" />
+    <ClInclude Include="lib\collection_types.h" />
+    <ClInclude Include="lib\DataArray.h" />
+    <ClInclude Include="lib\Grid.h" />
+    <ClInclude Include="log\Log.h" />
+    <ClInclude Include="math\AABBox.h" />
+    <ClInclude Include="math\BezierCurve.h" />
+    <ClInclude Include="math\Bitset.h" />
+    <ClInclude Include="math\CubicBezierPath.h" />
+    <ClInclude Include="math\FloatArray.h" />
+    <ClInclude Include="math\GameMath.h" />
+    <ClInclude Include="math\hex.h" />
+    <ClInclude Include="math\HexGrid.h" />
+    <ClInclude Include="math\math.h" />
+    <ClInclude Include="math\math_types.h" />
+    <ClInclude Include="math\matrix.h" />
+    <ClInclude Include="math\StraightPath.h" />
+    <ClInclude Include="math\tweening.h" />
+    <ClInclude Include="memory\DefaultAllocator.h" />
+    <ClInclude Include="memory\memory_types.h" />
+    <ClInclude Include="profiler\Profiler.h" />
+    <ClInclude Include="string\GlobalStringBuffer.h" />
+    <ClInclude Include="string\StaticHash.h" />
+    <ClInclude Include="string\StringUtils.h" />
+    <ClInclude Include="utils\GameTimer.h" />
+    <ClInclude Include="utils\StateManager.h" />
+    <ClInclude Include="utils\TileMapReader.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="TODO.md" />
+  </ItemGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets">
+  </ImportGroup>
+</Project>

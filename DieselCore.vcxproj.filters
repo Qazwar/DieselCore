@@ -1,10 +1,6 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
-    <Filter Include="Resource Files">
-      <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
-      <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
-    </Filter>
     <Filter Include="utils">
       <UniqueIdentifier>{6f5bd609-4015-48cc-888b-2250c859c9f7}</UniqueIdentifier>
     </Filter>
@@ -40,213 +36,219 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="io\json.cpp">
-      <Filter>io</Filter>
+    <ClCompile Include="core\base\CrashReporter.cpp">
+      <Filter>base</Filter>
     </ClCompile>
-    <ClCompile Include="memory\DefaultAllocator.cpp">
-      <Filter>memory</Filter>
+    <ClCompile Include="core\base\EventStream.cpp">
+      <Filter>base</Filter>
     </ClCompile>
-    <ClCompile Include="lib\BlockArray.cpp">
-      <Filter>lib</Filter>
+    <ClCompile Include="core\base\system_info.cpp">
+      <Filter>base</Filter>
     </ClCompile>
-    <ClCompile Include="io\FileRepository.cpp">
-      <Filter>io</Filter>
-    </ClCompile>
-    <ClCompile Include="io\DataFile.cpp">
-      <Filter>io</Filter>
-    </ClCompile>
-    <ClCompile Include="io\TextCompressor.cpp">
-      <Filter>io</Filter>
-    </ClCompile>
-    <ClCompile Include="math\math.cpp">
-      <Filter>math</Filter>
-    </ClCompile>
-    <ClCompile Include="math\matrix.cpp">
-      <Filter>math</Filter>
-    </ClCompile>
-    <ClCompile Include="math\tweening.cpp">
-      <Filter>math</Filter>
-    </ClCompile>
-    <ClCompile Include="math\CubicBezierPath.cpp">
-      <Filter>math</Filter>
-    </ClCompile>
-    <ClCompile Include="math\hex.cpp">
-      <Filter>math</Filter>
-    </ClCompile>
-    <ClCompile Include="math\StraightPath.cpp">
-      <Filter>math</Filter>
-    </ClCompile>
-    <ClCompile Include="math\GameMath.cpp">
-      <Filter>math</Filter>
-    </ClCompile>
-    <ClCompile Include="utils\StateManager.cpp">
-      <Filter>utils</Filter>
-    </ClCompile>
-    <ClCompile Include="data\DynamicSettings.cpp">
+    <ClCompile Include="core\data\DynamicSettings.cpp">
       <Filter>data</Filter>
     </ClCompile>
-    <ClCompile Include="io\BinaryFile.cpp">
-      <Filter>io</Filter>
-    </ClCompile>
-    <ClCompile Include="utils\TileMapReader.cpp">
-      <Filter>utils</Filter>
-    </ClCompile>
-    <ClCompile Include="io\Huffmann.cpp">
-      <Filter>io</Filter>
-    </ClCompile>
-    <ClCompile Include="base\CrashReporter.cpp">
-      <Filter>base</Filter>
-    </ClCompile>
-    <ClCompile Include="base\EventStream.cpp">
-      <Filter>base</Filter>
-    </ClCompile>
-    <ClCompile Include="base\system_info.cpp">
-      <Filter>base</Filter>
-    </ClCompile>
-    <ClCompile Include="profiler\Profiler.cpp">
-      <Filter>profiler</Filter>
-    </ClCompile>
-    <ClCompile Include="graphics\Color.cpp">
+    <ClCompile Include="core\graphics\Color.cpp">
       <Filter>graphics</Filter>
     </ClCompile>
-    <ClCompile Include="string\GlobalStringBuffer.cpp">
-      <Filter>string</Filter>
+    <ClCompile Include="core\io\BinaryFile.cpp">
+      <Filter>io</Filter>
     </ClCompile>
-    <ClCompile Include="string\StaticHash.cpp">
-      <Filter>string</Filter>
+    <ClCompile Include="core\io\DataFile.cpp">
+      <Filter>io</Filter>
     </ClCompile>
-    <ClCompile Include="string\StringUtils.cpp">
-      <Filter>string</Filter>
+    <ClCompile Include="core\io\FileRepository.cpp">
+      <Filter>io</Filter>
     </ClCompile>
-    <ClCompile Include="log\Log.cpp">
+    <ClCompile Include="core\io\FileUtils.cpp">
+      <Filter>io</Filter>
+    </ClCompile>
+    <ClCompile Include="core\io\Huffmann.cpp">
+      <Filter>io</Filter>
+    </ClCompile>
+    <ClCompile Include="core\io\json.cpp">
+      <Filter>io</Filter>
+    </ClCompile>
+    <ClCompile Include="core\io\TextCompressor.cpp">
+      <Filter>io</Filter>
+    </ClCompile>
+    <ClCompile Include="core\lib\BlockArray.cpp">
+      <Filter>lib</Filter>
+    </ClCompile>
+    <ClCompile Include="core\log\Log.cpp">
       <Filter>log</Filter>
+    </ClCompile>
+    <ClCompile Include="core\math\CubicBezierPath.cpp">
+      <Filter>math</Filter>
+    </ClCompile>
+    <ClCompile Include="core\math\GameMath.cpp">
+      <Filter>math</Filter>
+    </ClCompile>
+    <ClCompile Include="core\math\hex.cpp">
+      <Filter>math</Filter>
+    </ClCompile>
+    <ClCompile Include="core\math\math.cpp">
+      <Filter>math</Filter>
+    </ClCompile>
+    <ClCompile Include="core\math\matrix.cpp">
+      <Filter>math</Filter>
+    </ClCompile>
+    <ClCompile Include="core\math\StraightPath.cpp">
+      <Filter>math</Filter>
+    </ClCompile>
+    <ClCompile Include="core\math\tweening.cpp">
+      <Filter>math</Filter>
+    </ClCompile>
+    <ClCompile Include="core\memory\DefaultAllocator.cpp">
+      <Filter>memory</Filter>
+    </ClCompile>
+    <ClCompile Include="core\profiler\Profiler.cpp">
+      <Filter>profiler</Filter>
+    </ClCompile>
+    <ClCompile Include="core\string\GlobalStringBuffer.cpp">
+      <Filter>string</Filter>
+    </ClCompile>
+    <ClCompile Include="core\string\StaticHash.cpp">
+      <Filter>string</Filter>
+    </ClCompile>
+    <ClCompile Include="core\string\StringUtils.cpp">
+      <Filter>string</Filter>
+    </ClCompile>
+    <ClCompile Include="core\utils\StateManager.cpp">
+      <Filter>utils</Filter>
+    </ClCompile>
+    <ClCompile Include="core\utils\TileMapReader.cpp">
+      <Filter>utils</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="io\json.h">
-      <Filter>io</Filter>
+    <ClInclude Include="core\base\Assert.h">
+      <Filter>base</Filter>
     </ClInclude>
-    <ClInclude Include="memory\DefaultAllocator.h">
-      <Filter>memory</Filter>
+    <ClInclude Include="core\base\CrashReporter.h">
+      <Filter>base</Filter>
     </ClInclude>
-    <ClInclude Include="memory\memory_types.h">
-      <Filter>memory</Filter>
+    <ClInclude Include="core\base\EventStream.h">
+      <Filter>base</Filter>
     </ClInclude>
-    <ClInclude Include="lib\BlockArray.h">
-      <Filter>lib</Filter>
+    <ClInclude Include="core\base\system_info.h">
+      <Filter>base</Filter>
     </ClInclude>
-    <ClInclude Include="lib\collection_types.h">
-      <Filter>lib</Filter>
-    </ClInclude>
-    <ClInclude Include="lib\DataArray.h">
-      <Filter>lib</Filter>
-    </ClInclude>
-    <ClInclude Include="io\FileRepository.h">
-      <Filter>io</Filter>
-    </ClInclude>
-    <ClInclude Include="io\DataFile.h">
-      <Filter>io</Filter>
-    </ClInclude>
-    <ClInclude Include="io\TextCompressor.h">
-      <Filter>io</Filter>
-    </ClInclude>
-    <ClInclude Include="math\math.h">
-      <Filter>math</Filter>
-    </ClInclude>
-    <ClInclude Include="Common.h" />
-    <ClInclude Include="math\math_types.h">
-      <Filter>math</Filter>
-    </ClInclude>
-    <ClInclude Include="math\matrix.h">
-      <Filter>math</Filter>
-    </ClInclude>
-    <ClInclude Include="math\tweening.h">
-      <Filter>math</Filter>
-    </ClInclude>
-    <ClInclude Include="math\Bitset.h">
-      <Filter>math</Filter>
-    </ClInclude>
-    <ClInclude Include="math\CubicBezierPath.h">
-      <Filter>math</Filter>
-    </ClInclude>
-    <ClInclude Include="math\FloatArray.h">
-      <Filter>math</Filter>
-    </ClInclude>
-    <ClInclude Include="math\hex.h">
-      <Filter>math</Filter>
-    </ClInclude>
-    <ClInclude Include="math\HexGrid.h">
-      <Filter>math</Filter>
-    </ClInclude>
-    <ClInclude Include="math\StraightPath.h">
-      <Filter>math</Filter>
-    </ClInclude>
-    <ClInclude Include="math\BezierCurve.h">
-      <Filter>math</Filter>
-    </ClInclude>
-    <ClInclude Include="math\GameMath.h">
-      <Filter>math</Filter>
-    </ClInclude>
-    <ClInclude Include="utils\GameTimer.h">
-      <Filter>utils</Filter>
-    </ClInclude>
-    <ClInclude Include="lib\Grid.h">
-      <Filter>lib</Filter>
-    </ClInclude>
-    <ClInclude Include="utils\StateManager.h">
-      <Filter>utils</Filter>
-    </ClInclude>
-    <ClInclude Include="data\DynamicSettings.h">
+    <ClInclude Include="core\data\DynamicSettings.h">
       <Filter>data</Filter>
     </ClInclude>
-    <ClInclude Include="io\BinaryFile.h">
-      <Filter>io</Filter>
-    </ClInclude>
-    <ClInclude Include="utils\TileMapReader.h">
-      <Filter>utils</Filter>
-    </ClInclude>
-    <ClInclude Include="data\HighscoreService.h">
+    <ClInclude Include="core\data\HighscoreService.h">
       <Filter>data</Filter>
     </ClInclude>
-    <ClInclude Include="io\Huffmann.h">
+    <ClInclude Include="core\graphics\Color.h">
+      <Filter>graphics</Filter>
+    </ClInclude>
+    <ClInclude Include="core\graphics\Texture.h">
+      <Filter>graphics</Filter>
+    </ClInclude>
+    <ClInclude Include="core\io\BinaryFile.h">
       <Filter>io</Filter>
     </ClInclude>
-    <ClInclude Include="base\CrashReporter.h">
-      <Filter>base</Filter>
+    <ClInclude Include="core\io\DataFile.h">
+      <Filter>io</Filter>
     </ClInclude>
-    <ClInclude Include="base\EventStream.h">
-      <Filter>base</Filter>
+    <ClInclude Include="core\io\FileRepository.h">
+      <Filter>io</Filter>
     </ClInclude>
-    <ClInclude Include="base\system_info.h">
-      <Filter>base</Filter>
+    <ClInclude Include="core\io\FileUtils.h">
+      <Filter>io</Filter>
     </ClInclude>
-    <ClInclude Include="graphics\Texture.h">
-      <Filter>graphics</Filter>
+    <ClInclude Include="core\io\Huffmann.h">
+      <Filter>io</Filter>
     </ClInclude>
-    <ClInclude Include="math\AABBox.h">
-      <Filter>math</Filter>
+    <ClInclude Include="core\io\json.h">
+      <Filter>io</Filter>
     </ClInclude>
-    <ClInclude Include="profiler\Profiler.h">
-      <Filter>profiler</Filter>
+    <ClInclude Include="core\io\TextCompressor.h">
+      <Filter>io</Filter>
     </ClInclude>
-    <ClInclude Include="graphics\Color.h">
-      <Filter>graphics</Filter>
+    <ClInclude Include="core\lib\BlockArray.h">
+      <Filter>lib</Filter>
     </ClInclude>
-    <ClInclude Include="string\GlobalStringBuffer.h">
-      <Filter>string</Filter>
+    <ClInclude Include="core\lib\collection_types.h">
+      <Filter>lib</Filter>
     </ClInclude>
-    <ClInclude Include="string\StaticHash.h">
-      <Filter>string</Filter>
+    <ClInclude Include="core\lib\DataArray.h">
+      <Filter>lib</Filter>
     </ClInclude>
-    <ClInclude Include="string\StringUtils.h">
-      <Filter>string</Filter>
+    <ClInclude Include="core\lib\Grid.h">
+      <Filter>lib</Filter>
     </ClInclude>
-    <ClInclude Include="log\Log.h">
+    <ClInclude Include="core\log\Log.h">
       <Filter>log</Filter>
     </ClInclude>
-    <ClInclude Include="base\Assert.h">
-      <Filter>base</Filter>
+    <ClInclude Include="core\math\AABBox.h">
+      <Filter>math</Filter>
     </ClInclude>
+    <ClInclude Include="core\math\BezierCurve.h">
+      <Filter>math</Filter>
+    </ClInclude>
+    <ClInclude Include="core\math\Bitset.h">
+      <Filter>math</Filter>
+    </ClInclude>
+    <ClInclude Include="core\math\CubicBezierPath.h">
+      <Filter>math</Filter>
+    </ClInclude>
+    <ClInclude Include="core\math\FloatArray.h">
+      <Filter>math</Filter>
+    </ClInclude>
+    <ClInclude Include="core\math\GameMath.h">
+      <Filter>math</Filter>
+    </ClInclude>
+    <ClInclude Include="core\math\hex.h">
+      <Filter>math</Filter>
+    </ClInclude>
+    <ClInclude Include="core\math\HexGrid.h">
+      <Filter>math</Filter>
+    </ClInclude>
+    <ClInclude Include="core\math\math.h">
+      <Filter>math</Filter>
+    </ClInclude>
+    <ClInclude Include="core\math\math_types.h">
+      <Filter>math</Filter>
+    </ClInclude>
+    <ClInclude Include="core\math\matrix.h">
+      <Filter>math</Filter>
+    </ClInclude>
+    <ClInclude Include="core\math\StraightPath.h">
+      <Filter>math</Filter>
+    </ClInclude>
+    <ClInclude Include="core\math\tweening.h">
+      <Filter>math</Filter>
+    </ClInclude>
+    <ClInclude Include="core\memory\DefaultAllocator.h">
+      <Filter>memory</Filter>
+    </ClInclude>
+    <ClInclude Include="core\memory\memory_types.h">
+      <Filter>memory</Filter>
+    </ClInclude>
+    <ClInclude Include="core\profiler\Profiler.h">
+      <Filter>profiler</Filter>
+    </ClInclude>
+    <ClInclude Include="core\string\GlobalStringBuffer.h">
+      <Filter>string</Filter>
+    </ClInclude>
+    <ClInclude Include="core\string\StaticHash.h">
+      <Filter>string</Filter>
+    </ClInclude>
+    <ClInclude Include="core\string\StringUtils.h">
+      <Filter>string</Filter>
+    </ClInclude>
+    <ClInclude Include="core\utils\GameTimer.h">
+      <Filter>utils</Filter>
+    </ClInclude>
+    <ClInclude Include="core\utils\StateManager.h">
+      <Filter>utils</Filter>
+    </ClInclude>
+    <ClInclude Include="core\utils\TileMapReader.h">
+      <Filter>utils</Filter>
+    </ClInclude>
+    <ClInclude Include="core\Common.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="TODO.md" />

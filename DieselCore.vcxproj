@@ -11,7 +11,7 @@
     </ProjectConfiguration>
   </ItemGroup>
   <PropertyGroup Label="Globals">
-    <ProjectGuid>{06303B62-8BCD-4AC5-BE6C-26B56D7144EA}</ProjectGuid>
+    <ProjectGuid>{81265BED-6F81-404B-86DF-6306B3A251CE}</ProjectGuid>
     <RootNamespace>DieselCore</RootNamespace>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
@@ -83,77 +83,79 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="base\CrashReporter.cpp" />
-    <ClCompile Include="base\EventStream.cpp" />
-    <ClCompile Include="base\system_info.cpp" />
-    <ClCompile Include="data\DynamicSettings.cpp" />
-    <ClCompile Include="graphics\Color.cpp" />
-    <ClCompile Include="io\BinaryFile.cpp" />
-    <ClCompile Include="io\DataFile.cpp" />
-    <ClCompile Include="io\FileRepository.cpp" />
-    <ClCompile Include="io\Huffmann.cpp" />
-    <ClCompile Include="io\json.cpp" />
-    <ClCompile Include="io\TextCompressor.cpp" />
-    <ClCompile Include="lib\BlockArray.cpp" />
-    <ClCompile Include="log\Log.cpp" />
-    <ClCompile Include="math\CubicBezierPath.cpp" />
-    <ClCompile Include="math\GameMath.cpp" />
-    <ClCompile Include="math\hex.cpp" />
-    <ClCompile Include="math\math.cpp" />
-    <ClCompile Include="math\matrix.cpp" />
-    <ClCompile Include="math\StraightPath.cpp" />
-    <ClCompile Include="math\tweening.cpp" />
-    <ClCompile Include="memory\DefaultAllocator.cpp" />
-    <ClCompile Include="profiler\Profiler.cpp" />
-    <ClCompile Include="string\GlobalStringBuffer.cpp" />
-    <ClCompile Include="string\StaticHash.cpp" />
-    <ClCompile Include="string\StringUtils.cpp" />
-    <ClCompile Include="utils\StateManager.cpp" />
-    <ClCompile Include="utils\TileMapReader.cpp" />
+    <ClCompile Include="core\base\CrashReporter.cpp" />
+    <ClCompile Include="core\base\EventStream.cpp" />
+    <ClCompile Include="core\base\system_info.cpp" />
+    <ClCompile Include="core\data\DynamicSettings.cpp" />
+    <ClCompile Include="core\graphics\Color.cpp" />
+    <ClCompile Include="core\io\BinaryFile.cpp" />
+    <ClCompile Include="core\io\DataFile.cpp" />
+    <ClCompile Include="core\io\FileRepository.cpp" />
+    <ClCompile Include="core\io\FileUtils.cpp" />
+    <ClCompile Include="core\io\Huffmann.cpp" />
+    <ClCompile Include="core\io\json.cpp" />
+    <ClCompile Include="core\io\TextCompressor.cpp" />
+    <ClCompile Include="core\lib\BlockArray.cpp" />
+    <ClCompile Include="core\log\Log.cpp" />
+    <ClCompile Include="core\math\CubicBezierPath.cpp" />
+    <ClCompile Include="core\math\GameMath.cpp" />
+    <ClCompile Include="core\math\hex.cpp" />
+    <ClCompile Include="core\math\math.cpp" />
+    <ClCompile Include="core\math\matrix.cpp" />
+    <ClCompile Include="core\math\StraightPath.cpp" />
+    <ClCompile Include="core\math\tweening.cpp" />
+    <ClCompile Include="core\memory\DefaultAllocator.cpp" />
+    <ClCompile Include="core\profiler\Profiler.cpp" />
+    <ClCompile Include="core\string\GlobalStringBuffer.cpp" />
+    <ClCompile Include="core\string\StaticHash.cpp" />
+    <ClCompile Include="core\string\StringUtils.cpp" />
+    <ClCompile Include="core\utils\StateManager.cpp" />
+    <ClCompile Include="core\utils\TileMapReader.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="base\Assert.h" />
-    <ClInclude Include="base\CrashReporter.h" />
-    <ClInclude Include="base\EventStream.h" />
-    <ClInclude Include="base\system_info.h" />
-    <ClInclude Include="Common.h" />
-    <ClInclude Include="data\DynamicSettings.h" />
-    <ClInclude Include="data\HighscoreService.h" />
-    <ClInclude Include="graphics\Color.h" />
-    <ClInclude Include="graphics\Texture.h" />
-    <ClInclude Include="io\BinaryFile.h" />
-    <ClInclude Include="io\DataFile.h" />
-    <ClInclude Include="io\FileRepository.h" />
-    <ClInclude Include="io\Huffmann.h" />
-    <ClInclude Include="io\json.h" />
-    <ClInclude Include="io\TextCompressor.h" />
-    <ClInclude Include="lib\BlockArray.h" />
-    <ClInclude Include="lib\collection_types.h" />
-    <ClInclude Include="lib\DataArray.h" />
-    <ClInclude Include="lib\Grid.h" />
-    <ClInclude Include="log\Log.h" />
-    <ClInclude Include="math\AABBox.h" />
-    <ClInclude Include="math\BezierCurve.h" />
-    <ClInclude Include="math\Bitset.h" />
-    <ClInclude Include="math\CubicBezierPath.h" />
-    <ClInclude Include="math\FloatArray.h" />
-    <ClInclude Include="math\GameMath.h" />
-    <ClInclude Include="math\hex.h" />
-    <ClInclude Include="math\HexGrid.h" />
-    <ClInclude Include="math\math.h" />
-    <ClInclude Include="math\math_types.h" />
-    <ClInclude Include="math\matrix.h" />
-    <ClInclude Include="math\StraightPath.h" />
-    <ClInclude Include="math\tweening.h" />
-    <ClInclude Include="memory\DefaultAllocator.h" />
-    <ClInclude Include="memory\memory_types.h" />
-    <ClInclude Include="profiler\Profiler.h" />
-    <ClInclude Include="string\GlobalStringBuffer.h" />
-    <ClInclude Include="string\StaticHash.h" />
-    <ClInclude Include="string\StringUtils.h" />
-    <ClInclude Include="utils\GameTimer.h" />
-    <ClInclude Include="utils\StateManager.h" />
-    <ClInclude Include="utils\TileMapReader.h" />
+    <ClInclude Include="core\base\Assert.h" />
+    <ClInclude Include="core\base\CrashReporter.h" />
+    <ClInclude Include="core\base\EventStream.h" />
+    <ClInclude Include="core\base\system_info.h" />
+    <ClInclude Include="core\Common.h" />
+    <ClInclude Include="core\data\DynamicSettings.h" />
+    <ClInclude Include="core\data\HighscoreService.h" />
+    <ClInclude Include="core\graphics\Color.h" />
+    <ClInclude Include="core\graphics\Texture.h" />
+    <ClInclude Include="core\io\BinaryFile.h" />
+    <ClInclude Include="core\io\DataFile.h" />
+    <ClInclude Include="core\io\FileRepository.h" />
+    <ClInclude Include="core\io\FileUtils.h" />
+    <ClInclude Include="core\io\Huffmann.h" />
+    <ClInclude Include="core\io\json.h" />
+    <ClInclude Include="core\io\TextCompressor.h" />
+    <ClInclude Include="core\lib\BlockArray.h" />
+    <ClInclude Include="core\lib\collection_types.h" />
+    <ClInclude Include="core\lib\DataArray.h" />
+    <ClInclude Include="core\lib\Grid.h" />
+    <ClInclude Include="core\log\Log.h" />
+    <ClInclude Include="core\math\AABBox.h" />
+    <ClInclude Include="core\math\BezierCurve.h" />
+    <ClInclude Include="core\math\Bitset.h" />
+    <ClInclude Include="core\math\CubicBezierPath.h" />
+    <ClInclude Include="core\math\FloatArray.h" />
+    <ClInclude Include="core\math\GameMath.h" />
+    <ClInclude Include="core\math\hex.h" />
+    <ClInclude Include="core\math\HexGrid.h" />
+    <ClInclude Include="core\math\math.h" />
+    <ClInclude Include="core\math\math_types.h" />
+    <ClInclude Include="core\math\matrix.h" />
+    <ClInclude Include="core\math\StraightPath.h" />
+    <ClInclude Include="core\math\tweening.h" />
+    <ClInclude Include="core\memory\DefaultAllocator.h" />
+    <ClInclude Include="core\memory\memory_types.h" />
+    <ClInclude Include="core\profiler\Profiler.h" />
+    <ClInclude Include="core\string\GlobalStringBuffer.h" />
+    <ClInclude Include="core\string\StaticHash.h" />
+    <ClInclude Include="core\string\StringUtils.h" />
+    <ClInclude Include="core\utils\GameTimer.h" />
+    <ClInclude Include="core\utils\StateManager.h" />
+    <ClInclude Include="core\utils\TileMapReader.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="TODO.md" />

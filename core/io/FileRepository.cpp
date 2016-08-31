@@ -7,6 +7,7 @@
 #include "..\io\FileUtils.h"
 #include "..\string\GlobalStringBuffer.h"
 #include "..\string\StaticHash.h"
+#include "BinaryFile.h"
 
 namespace ds {
 
@@ -40,8 +41,10 @@ namespace ds {
 
 		static FileRepo* _repository = 0;
 
+		// -----------------------------------------------------------
+		// find files recursively in all directories
+		// -----------------------------------------------------------
 		void find_files(std::string& dir) {
-			LOG << "dir: " << dir;
 			WIN32_FIND_DATAA ffd;
 			HANDLE hFind = INVALID_HANDLE_VALUE;
 			hFind = FindFirstFileA((dir + "\\*").c_str(), &ffd);
@@ -49,7 +52,6 @@ namespace ds {
 				do {
 					if (!(ffd.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY)) {
 						std::string fn = dir + "\\" + std::string(ffd.cFileName);
-						LOG << "adding: " << fn;
 						FileDescriptor fd;
 						fd.hash = StaticHash(fn.c_str());
 						fd.dataFile = 0;
@@ -79,22 +81,19 @@ namespace ds {
 			_repository = new FileRepo;
 			_repository->mode = mode;
 			if (mode == RM_RELEASE) {
-				FILE* f = fopen("data\\e.pak", "rb");
-				if (f) {
+				BinaryFile bf;
+				if (bf.open("data\\e.pak", FileMode::READ)) {
 					int sz = 0;
-					fread(&sz, sizeof(int), 1, f);
+					bf.read(&sz);
 					LOG << "repository entries: " << sz;
 					for ( int i = 0; i < sz; ++i ) {
-						/*
-						RepositoryEntry entry;
-						fread(&entry.hash, sizeof(StaticHash), 1, f);
-						fread(&entry.size, sizeof(int), 1, f);
-						fread(&entry.index, sizeof(int), 1, f);
-						fread(&entry.encoded, sizeof(bool), 1, f);
-						_repository->entries.push_back(entry);
-						*/
+						FileDescriptor desc;
+						uint32_t h = 0;
+						bf.read(&h);
+						desc.hash = StaticHash(h);
+						bf.read(&desc.index);
+						bf.read(&desc.size);
 					}
-					fclose(f);
 				}
 			}
 			else {
@@ -124,6 +123,9 @@ namespace ds {
 			return false;
 		}
 
+		// -----------------------------------------------------------
+		// find index of file
+		// -----------------------------------------------------------
 		int find_index(const StaticHash& hash) {
 			for (uint32_t i = 0; i < _repository->files.size(); ++i) {
 				if (_repository->files[i].hash == hash) {
@@ -143,16 +145,8 @@ namespace ds {
 				if (idx != -1) {
 					_repository->files[idx].dataFile = file;
 				}
-				//sprintf_s(buffer, 256, "content\\%s", file->getFileName());
-				//FileInfo info;
-				//file::getFileTime(buffer, info.filetime);
-				//_repository->infos.push_back(info);
 			}
 		}
-
-		
-
-		
 
 		// -----------------------------------------------------------
 		// already in the watch list
@@ -161,47 +155,44 @@ namespace ds {
 			return find_index(hash) == -1;
 		}
 
+		// -----------------------------------------------------------
+		// add DataFile to FileDescriptor
+		// -----------------------------------------------------------
 		void add(DataFile* file) {
 			if (!already_watching(file->getFileName())) {
 				int idx = find_index(file->getFileName());
 				if (idx != -1) {
 					_repository->files[idx].dataFile = file;
-					/*
-					int size = 0;
-					FileInfo info;
-					info.dataFile = file;
-					info.hash = StaticHash(file->getFileName());
-					file::getFileTime(file->getFileName(), info.filetime);
-					_repository->infos.push_back(info);
-					*/
 				}
 			}
 		}
 
 		// -----------------------------------------------------------
-		// reload
+		// reload (only in debug mode)
 		// -----------------------------------------------------------
 		void reload() {
-			int reloaded = 0;
-			for (uint32_t i = 0; i < _repository->files.size(); ++i) {
-				FileDescriptor& info = _repository->files[i];
-				const char* name = _repository->name_buffer.data + info.name_index;
-				if (file::compareFileTime(name, info.filetime)) {
-					HANDLE hData = CreateFile(name, GENERIC_READ, FILE_SHARE_READ, 0, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, 0);
-					if (hData != INVALID_HANDLE_VALUE) {
-						CloseHandle(hData);
-						LOG << "Reloading file: " << name;
-						info.dataFile->load();
-						file::getFileTime(name, info.filetime);
-						++reloaded;						
-					}
-					else {
-						LOGE << "Cannot read file: '" << name << "'";
+			if (_repository->mode == RM_DEBUG) {
+				int reloaded = 0;
+				for (uint32_t i = 0; i < _repository->files.size(); ++i) {
+					FileDescriptor& info = _repository->files[i];
+					const char* name = _repository->name_buffer.data + info.name_index;
+					if (file::compareFileTime(name, info.filetime)) {
+						HANDLE hData = CreateFile(name, GENERIC_READ, FILE_SHARE_READ, 0, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, 0);
+						if (hData != INVALID_HANDLE_VALUE) {
+							CloseHandle(hData);
+							LOG << "Reloading file: " << name;
+							info.dataFile->load();
+							file::getFileTime(name, info.filetime);
+							++reloaded;
+						}
+						else {
+							LOGE << "Cannot read file: '" << name << "'";
+						}
 					}
 				}
-			}
-			if (reloaded > 0) {
-				LOG << "Number of reloaded files: " << reloaded;
+				if (reloaded > 0) {
+					LOG << "Number of reloaded files: " << reloaded;
+				}
 			}
 		}
 
@@ -231,22 +222,6 @@ namespace ds {
 					buffer[sz] = '\0';
 					fclose(fp);
 					*size = sz;
-					/*
-					if (!already_loaded(fileName)) {
-						RepositoryEntry entry;
-						entry.hash = StaticHash(fileName);
-						entry.name_index = _repository->name_buffer.append(fileName);
-						entry.size = sz;
-						entry.index = -1;
-						if (type == FT_TEXT) {
-							entry.encoded = true;
-						}
-						else {
-							entry.encoded = false;
-						}
-						_repository->entries.push_back(entry);						
-					}
-					*/
 					return buffer;
 				}
 				else {
@@ -306,21 +281,23 @@ namespace ds {
 		// shutdown
 		// -----------------------------------------------------------
 		void shutdown() {
-			/*
 			if (_repository->mode == RM_DEBUG) {
-				LOG << "entries: " << _repository->entries.size();
-				FILE* fp = fopen("data\\c.pak", "wb");
+				LOG << "entries: " << _repository->files.size();
+				BinaryFile cf;
 				int index = 0;
-				for (size_t i = 0; i < _repository->entries.size(); ++i) {
-					RepositoryEntry& entry = _repository->entries[i];										
-					entry.index = index;
-					// read file
-					int fileSize = -1;
-					char* content = read_file(entry.name, &fileSize);
-					LOG << "adding file: " << entry.name << " file size: " << fileSize;
-					if (content != 0) {
-						// encode
-						if (entry.encoded) {
+				if (cf.open("data\\c.pak", FileMode::WRITE)) {
+					for (size_t i = 0; i < _repository->files.size(); ++i) {
+						FileDescriptor& entry = _repository->files[i];
+						entry.index = index;
+						// read file
+						int fileSize = -1;
+						const char* name = _repository->name_buffer.data + entry.name_index;
+						char* content = read_file(name, &fileSize);						
+						LOG << "adding file: " << name << " file size: " << fileSize;
+						if (content != 0) {
+							// encode
+								/*
+							if (entry.encoded) {
 							LOG << "file will be encoded";
 							int size = -1;
 							char* encoded = compression::encode(content, &size);
@@ -328,19 +305,20 @@ namespace ds {
 							int counter = 0;
 							// write buffer
 							for (int j = 0; j < size; ++j) {
-								fputc(encoded[j], fp);
-								++counter;
+							fputc(encoded[j], fp);
+							++counter;
 							}
 							entry.size = counter;
 							index += counter;
 							delete[] encoded;
-						}
-						else {
+							}
+							else {
 							LOG << "saving raw data";
+							*/
 							int counter = 0;
 							// write buffer
 							for (int j = 0; j < fileSize; ++j) {
-								fputc(content[j], fp);
+								cf.write(content[j]);
 								++counter;
 							}
 							entry.size = counter;
@@ -348,28 +326,19 @@ namespace ds {
 							delete[] content;
 						}
 					}
-					else {
-						LOGE << "Cannot find file: '" << entry.name << "'";
-					}
 				}
-				fclose(fp);
 				// save directory
-				FILE* f = fopen("data\\e.pak", "wb");
-				if (f) {
-					int sz = _repository->entries.size();
-					fwrite(&sz, sizeof(int), 1, f);
-					for (size_t i = 0; i < _repository->entries.size(); ++i) {
-						const RepositoryEntry& entry = _repository->entries[i];
-						LOG << i << " - name: '" << entry.name << "' index: " << entry.index;
-						fwrite(&entry.hash, sizeof(IdString), 1, f);
-						fwrite(&entry.size, sizeof(int), 1, f);
-						fwrite(&entry.index, sizeof(int), 1, f);
-						fwrite(&entry.encoded, sizeof(bool), 1, f);
+				BinaryFile bf;
+				if (bf.open("data\\e.pak", FileMode::WRITE)) {
+					bf.write(_repository->files.size());
+					for (uint32_t i = 0; i < _repository->files.size(); ++i) {
+						const FileDescriptor& entry = _repository->files[i];
+						bf.write(entry.hash.get());
+						bf.write(entry.index);
+						bf.write(entry.size);
 					}
-					fclose(f);
 				}
 			}
-			*/
 			delete _repository;
 		}
 

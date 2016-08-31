@@ -5,7 +5,7 @@
 #include <tchar.h> 
 #include <stdio.h>
 #include <strsafe.h>
-#include "Log.h"
+#include "..\log\Log.h"
 #include <assert.h>
 
 namespace ds {

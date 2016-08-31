@@ -40,7 +40,7 @@ namespace ds {
 
 		};
 
-		static FileRepo* _repository = 0;
+		static FileRepo* _repository = nullptr;
 
 		// -----------------------------------------------------------
 		// find files recursively in all directories
@@ -55,7 +55,7 @@ namespace ds {
 						std::string fn = dir + "\\" + std::string(ffd.cFileName);
 						FileDescriptor fd;
 						fd.hash = StaticHash(fn.c_str());
-						fd.dataFile = 0;
+						fd.dataFile = nullptr;
 						fd.index = -1;
 						fd.size = -1;
 						fd.loaded = false;
@@ -96,6 +96,8 @@ namespace ds {
 						desc.hash = StaticHash(h);
 						bf.read(&desc.index);
 						bf.read(&desc.size);
+						_repository->files.push_back(desc);
+						LOG << "hash: " << h << " index: " << desc.index << " size: " << desc.size;
 					}
 				}
 			}
@@ -130,10 +132,12 @@ namespace ds {
 		// find index of file
 		// -----------------------------------------------------------
 		int find_index(const StaticHash& hash) {
-			for (uint32_t i = 0; i < _repository->files.size(); ++i) {
-				if (_repository->files[i].hash == hash) {
+			int i = 0;
+			for (const auto& entry : _repository->files) {
+				if (entry.hash == hash) {
 					return i;
 				}
+				++i;
 			}
 			return -1;
 		}
@@ -177,8 +181,7 @@ namespace ds {
 		void reload() {
 			if (_repository->mode == RM_DEBUG) {
 				int reloaded = 0;
-				for (uint32_t i = 0; i < _repository->files.size(); ++i) {
-					FileDescriptor& info = _repository->files[i];
+				for (auto& info : _repository->files) {
 					const char* name = _repository->name_buffer.data + info.name_index;
 					if (file::compareFileTime(name, info.filetime)) {
 						HANDLE hData = CreateFile(name, GENERIC_READ, FILE_SHARE_READ, 0, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, 0);
@@ -291,15 +294,14 @@ namespace ds {
 				BinaryFile cf;
 				int index = 0;
 				if (cf.open("data\\c.pak", FileMode::WRITE)) {
-					for (size_t i = 0; i < _repository->files.size(); ++i) {
-						FileDescriptor& entry = _repository->files[i];
+					for (auto& entry : _repository->files) {
 						if (entry.loaded) {
 							entry.index = index;
 							// read file
 							int fileSize = -1;
 							const char* name = _repository->name_buffer.data + entry.name_index;
 							char* content = read_file(name, &fileSize);
-							LOG << "adding file: " << name << " file size: " << fileSize;
+							LOG << "adding file: " << name << " index: " << index << " file size: " << fileSize << " hash: " << entry.hash.get();
 							if (content != 0) {
 								// encode
 								/*
@@ -345,7 +347,7 @@ namespace ds {
 				LOG << "number of loaded files: " << total;
 				if (bf.open("data\\e.pak", FileMode::WRITE)) {
 					bf.write(total);
-					for (uint32_t i = 0; i < total; ++i) {
+					for (int i = 0; i < _repository->files.size(); ++i) {
 						const FileDescriptor& entry = _repository->files[i];
 						if (entry.loaded) {
 							bf.write(entry.hash.get());

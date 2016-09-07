@@ -242,7 +242,7 @@ namespace ds {
 				if (fp) {
 					LOG << "reading at " << fd.index << " size: " << fd.size;
 					fseek(fp, fd.index, SEEK_SET);
-					char* buffer = new char[fd.size];
+					char* buffer = new char[fd.size + 1];
 					fread(buffer, 1, fd.size, fp);
 					if (!fd.binary) {
 						LOG << "file is encoded";
@@ -254,6 +254,7 @@ namespace ds {
 					}
 					else {
 						LOG << "raw data";
+						buffer[fd.size] = '\0';
 						*size = fd.size;
 						return buffer;
 					}

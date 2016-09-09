@@ -206,6 +206,70 @@ namespace ds {
 		// -----------------------------------------------------------
 		// load
 		// -----------------------------------------------------------
+		FileStatus load(File* file) {
+			//XASSERT(_repository != 0,"No repository created yet");
+			file->size = 0;
+			int fidx = find_index(file->name);
+			if (fidx == -1) {
+				LOG << "No matching file found";
+				return FS_NOT_FOUND;
+			}
+			FileDescriptor& fd = _repository->files[fidx];
+			if (_repository->mode == RM_DEBUG) {
+				const char* fileName = _repository->name_buffer.data + fd.name_index;
+				FILE *fp = fopen(fileName, "rb");
+				if (fp) {
+					fd.loaded = true;
+					LOG << "Loading '" << fileName << "'";
+					fseek(fp, 0, SEEK_END);
+					int sz = ftell(fp);
+					fseek(fp, 0, SEEK_SET);
+					LOG << "size: " << sz;
+					file->data = new char[sz + 1];
+					fread(file->data, 1, sz, fp);
+					file->data[sz] = '\0';
+					fclose(fp);
+					file->size = sz;
+					return FS_OK;
+				}
+				else {
+					LOGE << "Cannot find file: '" << fileName << "'";
+					return FS_NOT_FOUND;
+				}
+			}
+			else {
+				FILE* fp = fopen("data\\c.pak", "rb");
+				if (fp) {
+					LOG << "reading at " << fd.index << " size: " << fd.size;
+					fseek(fp, fd.index, SEEK_SET);
+					file->data = new char[fd.size + 1];
+					fread(file->data, 1, fd.size, fp);
+					if (!fd.binary) {
+						LOG << "file is encoded";
+						char* result = compression::decode(file->data);
+						fclose(fp);
+						delete[] file->data;
+						file->data = result;
+						file->size = fd.size;
+						return FS_OK;
+					}
+					else {
+						LOG << "raw data";
+						file->data[fd.size] = '\0';
+						file->size = fd.size;
+						return FS_OK;
+					}
+				}
+				else {
+					LOGE << "Cannot find content PAK";
+					return FS_NO_CPAK;
+				}
+			}
+		}
+
+		// -----------------------------------------------------------
+		// load
+		// -----------------------------------------------------------
 		char* load(const StaticHash& fileName, int* size, FileType type) {
 			//XASSERT(_repository != 0,"No repository created yet");
 			*size = -1;
@@ -304,26 +368,6 @@ namespace ds {
 							char* content = read_file(name, &fileSize);
 							LOG << "adding file: " << name << " index: " << index << " file size: " << fileSize << " hash: " << entry.hash.get();
 							if (content != 0) {
-								// encode
-								/*
-							if (entry.encoded) {
-							LOG << "file will be encoded";
-							int size = -1;
-							char* encoded = compression::encode(content, &size);
-							delete[] content;
-							int counter = 0;
-							// write buffer
-							for (int j = 0; j < size; ++j) {
-							fputc(encoded[j], fp);
-							++counter;
-							}
-							entry.size = counter;
-							index += counter;
-							delete[] encoded;
-							}
-							else {
-							LOG << "saving raw data";
-							*/
 								int counter = 0;
 								// write buffer
 								for (int j = 0; j < fileSize; ++j) {
@@ -345,7 +389,8 @@ namespace ds {
 						++total;
 					}
 				}
-				LOG << "number of loaded files: " << total;
+				LOG << "number of added files: " << total;
+				LOG << "saving e.pak";
 				if (bf.open("data\\e.pak", FileMode::WRITE)) {
 					bf.write(total);
 					for (int i = 0; i < _repository->files.size(); ++i) {

@@ -64,8 +64,6 @@ namespace ds {
 		JSONReader();
 		~JSONReader();
 		bool parse(const StaticHash& fileName);
-		void save_binary(const char* fileName);
-		bool load_binary(const char* fileName);
 		int get_categories(int* result, int max, int parent = -1) const;
 		int find_category(const char* name, int parent = -1) const;
 		bool matches(int category_id, const char* name) const;
@@ -103,7 +101,6 @@ namespace ds {
 		void add(int pIndex, char c);
 		float get(int index) const;
 		const char* get_char(int index) const;
-		char* _text;
 
 		BlockArray _category_buffer;
 		StaticHash* _hashes;
@@ -162,11 +159,7 @@ namespace ds {
 
 	public:
 		FlatJSONReader();
-		~FlatJSONReader() {
-			if (_text) {
-				delete _text;
-			}
-		}
+		~FlatJSONReader() {}
 		bool parse(const StaticHash& fileName);
 		bool get_float(const char* name, float* ret) const;
 		bool get(const char* name, float* ret) const;
@@ -186,7 +179,6 @@ namespace ds {
 		void alloc(int elements);
 		float get(int index) const;
 		int get_index(const char* name) const;
-		char* _text;
 		CharBuffer _name_buffer;
 		BlockArray _data_buffer;
 		StaticHash* _data_keys;

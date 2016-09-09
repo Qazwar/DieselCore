@@ -15,30 +15,31 @@ namespace ds {
 	}
 
 	bool TileMapReader::parse(const char* fileName) {
-		int size = -1;
-		const char* txt = ds::repository::load(SID(fileName), &size);
-		ds::Tokenizer t;
-		t.parse(txt);
-		LOG << "file: " << fileName;
-		LOG << "Tokens: " << t.size();
-		_sizeY = 0;
-		_sizeX = 0;
-		for (int i = 0; i < t.size(); ++i) {
-			ds::Token& tok = t.get(i);
-			if (tok.type == ds::Token::NUMBER) {
-				_data.push_back(static_cast<uint16_t>(tok.value));
-			}
-			else if (tok.type == ds::Token::NEWLINE) {
-				if (_sizeX == 0) {
-					_sizeX = i;
+		ds::File f(SID(fileName));
+		if (ds::repository::load(&f) == ds::FileStatus::FS_OK) {
+			ds::Tokenizer t;
+			t.parse(f.data);
+			LOG << "file: " << fileName;
+			LOG << "Tokens: " << t.size();
+			_sizeY = 0;
+			_sizeX = 0;
+			for (int i = 0; i < t.size(); ++i) {
+				ds::Token& tok = t.get(i);
+				if (tok.type == ds::Token::NUMBER) {
+					_data.push_back(static_cast<uint16_t>(tok.value));
 				}
-				++_sizeY;
+				else if (tok.type == ds::Token::NEWLINE) {
+					if (_sizeX == 0) {
+						_sizeX = i;
+					}
+					++_sizeY;
+				}
 			}
+			++_sizeY;
+			LOG << "SX: " << _sizeX << " SY:" << _sizeY;
+			return true;
 		}
-		++_sizeY;
-		LOG << "SX: " << _sizeX << " SY:" << _sizeY;
-		delete[] txt;
-		return true;
+		return false;
 	}
 
 	uint16_t TileMapReader::width() const {

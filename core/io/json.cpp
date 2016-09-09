@@ -91,7 +91,7 @@ namespace ds {
 // -------------------------------------------
 //
 // -------------------------------------------
-JSONReader::JSONReader() : _text(0) {
+JSONReader::JSONReader() {
 	int sizes[] = { sizeof(unsigned int), sizeof(int), sizeof(int) };
 	_category_buffer.init(sizes, 3);
 	int data_sizes[] = { sizeof(unsigned int), sizeof(int), sizeof(int), sizeof(int) };
@@ -103,15 +103,10 @@ JSONReader::JSONReader() : _text(0) {
 // -------------------------------------------
 JSONReader::~JSONReader() {
 	if (_category_buffer.data != 0) {
-		//gDefaultMemory->deallocate(_category_buffer.data);
 		DEALLOC(_category_buffer.data);
 	}
 	if (_data_buffer.data != 0) {
-		//gDefaultMemory->deallocate(_data_buffer.data);
 		DEALLOC(_data_buffer.data);
-	}
-	if (_text != 0) {
-		delete[] _text;
 	}
 }
 
@@ -166,100 +161,16 @@ int JSONReader::add_category(const char* name, int parent) {
 }
 
 // -------------------------------------------
-// save binary
-// -------------------------------------------
-void JSONReader::save_binary(const char* fileName) {
-
-	FILE* fp = fopen(fileName, "wb");
-	if (fp) {
-		// buffer
-		fwrite(&_category_buffer.size, sizeof(int), 1, fp);
-		for (int i = 0; i < _category_buffer.size; ++i) {
-			fwrite(&_hashes[i], sizeof(unsigned int), 1, fp);
-		}
-		for (int i = 0; i < _category_buffer.size; ++i) {
-			fwrite(&_parents[i], sizeof(int), 1, fp);
-		}
-		for (int i = 0; i < _category_buffer.size; ++i) {
-			fwrite(&_indices[i], sizeof(int), 1, fp);
-		}
-		save_buffer(&_name_buffer, fp);
-
-		fwrite(&_data_buffer.size, sizeof(int), 1, fp);
-		for (int i = 0; i < _values.size; ++i) {
-			fwrite(&_data_keys[i], sizeof(unsigned int), 1, fp);
-		}
-		for (int i = 0; i < _data_buffer.size; ++i) {
-			fwrite(&_data_categories[i], sizeof(int), 1, fp);
-		}
-		for (int i = 0; i < _data_buffer.size; ++i) {
-			fwrite(&_data_indices[i], sizeof(int), 1, fp);
-		}
-		for (int i = 0; i < _data_buffer.size; ++i) {
-			fwrite(&_data_sizes[i], sizeof(int), 1, fp);
-		}
-	
-		save_buffer(&_values, fp);
-		fclose(fp);
-	}
-}
-
-// -------------------------------------------
-// load binary
-// -------------------------------------------
-bool JSONReader::load_binary(const char* fileName) {
-	FILE* fp = fopen(fileName, "rb");
-	if (fp) {
-		int size = 0;
-		fread(&size, sizeof(int), 1, fp);
-		allocCategoryBuffer(size);
-		for (int i = 0; i < size; ++i) {
-			fread(&_hashes[i], sizeof(unsigned int), 1, fp);
-		}
-		for (int i = 0; i < size; ++i) {
-			fread(&_parents[i], sizeof(int), 1, fp);
-		}
-		for (int i = 0; i < size; ++i) {
-			fread(&_indices[i], sizeof(int), 1, fp);
-		}
-		_category_buffer.size = size;
-
-		load_buffer(&_name_buffer, fp);
-
-		fread(&size, sizeof(int), 1, fp);
-		alloc(size);
-		for (int i = 0; i < size; ++i) {
-			fread(&_data_keys[i], sizeof(unsigned int), 1, fp);
-		}
-		for (int i = 0; i < size; ++i) {
-			fread(&_data_categories[i], sizeof(int), 1, fp);
-		}
-		for (int i = 0; i < size; ++i) {
-			fread(&_data_indices[i], sizeof(int), 1, fp);
-		}
-		for (int i = 0; i < size; ++i) {
-			fread(&_data_sizes[i], sizeof(int), 1, fp);
-		}
-		_data_buffer.size = size;
-		load_buffer(&_values, fp);
-		return true;
-	}
-	return false;
-}
-
-// -------------------------------------------
 // parse
 // -------------------------------------------
 bool JSONReader::parse(const StaticHash& fileName) {
-	//Token tokens[1024];
 	int fileSize = -1;
-	_text = repository::load(fileName, &fileSize);
-	if (fileSize == -1) {
+	File f(fileName);
+	if (repository::load(&f) != FileStatus::FS_OK) {
 		return false;
 	}
-	//tokenize(_text);// , tokens, 1024);
 	Tokenizer tokenizer;
-	tokenizer.parse(_text);
+	tokenizer.parse(f.data);
 	char name[128];
 	int n = 0;
 	int category_index = 0;
@@ -270,7 +181,7 @@ bool JSONReader::parse(const StaticHash& fileName) {
 		if (t.type == Token::NAME) {
 			if (tokenizer.get(n + 1).type == Token::OPEN_BRACES) {
 				++n;
-				strncpy(name, _text + t.index, t.size);
+				strncpy(name, f.data + t.index, t.size);
 				name[t.size] = '\0';
 				++category_index;
 				int parent = -1;
@@ -283,7 +194,7 @@ bool JSONReader::parse(const StaticHash& fileName) {
 			}
 			else if (tokenizer.get(n + 1).type == Token::SEPARATOR) {
 				++n;
-				strncpy(name, _text + t.index, t.size);
+				strncpy(name, f.data + t.index, t.size);
 				name[t.size] = '\0';
 				int parent = -1;
 				if (!cat_stack.empty()) {
@@ -295,11 +206,11 @@ bool JSONReader::parse(const StaticHash& fileName) {
 				if (v.type == Token::STRING) {
 					int start = v.index;
 					int end = v.index + v.size;
-					add(p, _text + start, v.size);
+					add(p, f.data + start, v.size);
 					++n;
 				}
 				else if (v.type == Token::NAME) {
-					strncpy(name, _text + v.index, v.size);
+					strncpy(name, f.data + v.index, v.size);
 					name[v.size] = '\0';
 					if (strcmp(name, "true") == 0) {
 						add(p, 1.0f);
@@ -1038,7 +949,7 @@ void JSONWriter::writeIdent() {
 	}
 }
 
-FlatJSONReader::FlatJSONReader() : _text(0) {
+FlatJSONReader::FlatJSONReader() {
 	int data_sizes[] = { sizeof(unsigned int), sizeof(int), sizeof(int), sizeof(int) };
 	_data_buffer.init(data_sizes, 4);
 }
@@ -1256,13 +1167,12 @@ bool FlatJSONReader::contains(const char* name) const {
 // parse
 // -------------------------------------------
 bool FlatJSONReader::parse(const StaticHash& fileName) {
-	int fileSize = -1;
-	_text = repository::load(fileName, &fileSize);
-	if (fileSize == -1) {
+	File f(fileName);
+	if (repository::load(&f) != FileStatus::FS_OK) {
 		return false;
 	}
 	Tokenizer tokenizer;
-	tokenizer.parse(_text);
+	tokenizer.parse(f.data);
 	char name[128];
 	char fullName[256];
 	int n = 0;
@@ -1275,7 +1185,7 @@ bool FlatJSONReader::parse(const StaticHash& fileName) {
 		if (t.type == Token::NAME) {
 			if (tokenizer.get(n + 1).type == Token::OPEN_BRACES) {
 				++n;
-				strncpy(name, _text + t.index, t.size);
+				strncpy(name, f.data + t.index, t.size);
 				name[t.size] = '\0';
 				CategoryEntry cat;
 				cat.text_index = add_category(name);
@@ -1286,7 +1196,7 @@ bool FlatJSONReader::parse(const StaticHash& fileName) {
 			}
 			else if (tokenizer.get(n + 1).type == Token::SEPARATOR) {
 				++n;
-				strncpy(name, _text + t.index, t.size);
+				strncpy(name, f.data + t.index, t.size);
 				name[t.size] = '\0';
 				sprintf(fullName, "%s%s", cat_name, name);
 				int p = create_property(fullName);
@@ -1295,11 +1205,11 @@ bool FlatJSONReader::parse(const StaticHash& fileName) {
 				if (v.type == Token::STRING) {
 					int start = v.index;
 					int end = v.index + v.size;
-					add(p, _text + start, v.size);
+					add(p, f.data + start, v.size);
 					++n;
 				}
 				else if (v.type == Token::NAME) {
-					strncpy(name, _text + v.index, v.size);
+					strncpy(name, f.data + v.index, v.size);
 					name[v.size] = '\0';
 					if (strcmp(name, "true") == 0) {
 						add(p, 1.0f);

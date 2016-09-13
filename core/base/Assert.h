@@ -5,4 +5,7 @@
 #ifndef XASSERT
 #define XASSERT(Expr, s, ...) do { MyAssert_fmt(#Expr, Expr,__FILE__,__LINE__,s,__VA_ARGS__); } while(false);
 #endif
+#ifndef FAIL
+#define FAIL(s, ...) do { MyAssert_fmt(__FILE__,__LINE__,s,__VA_ARGS__); } while(false);
+#endif
 

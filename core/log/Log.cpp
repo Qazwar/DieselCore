@@ -47,6 +47,20 @@ void MyAssert_fmt(char* expr_str, bool expr, char* file, int line, char* format,
 	}
 }
 
+void MyAssert_fmt(char* file, int line, char* format, ...) {
+	va_list args;
+	va_start(args, format);
+	char buffer[1024];
+	memset(buffer, 0, sizeof(buffer));
+	int written = vsnprintf_s(buffer, sizeof(buffer), _TRUNCATE, format, args);
+	LOG << "---------------------------------------------------------------";
+	LOGE << buffer;
+	LOG << "---------------------------------------------------------------";
+	MessageBoxA(GetDesktopWindow(), buffer, "ERROR", NULL);
+	va_end(args);
+	abort();
+}
+
 static LogContext* _logContext;
 
 void init_logger(int logTypes, int width, int height) {

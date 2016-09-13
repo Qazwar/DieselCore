@@ -32,13 +32,18 @@ namespace ds {
 			}
 			if (idx != -1) {				
 				for (int j = _count - 1; j >= idx; --j) {
-					_scores[j + 1] = _scores[j];
+					if (j < SIZE - 1) {
+						_scores[j + 1] = _scores[j];
+					}
 				}
 				_scores[idx] = score;
-				++_count;
+				if (_count < SIZE) {
+					++_count;
+				}
 			}
 			else if (_count < SIZE) {
 				_scores[_count++] = score;
+				idx = _count - 1;
 			}
 			return idx;
 		}

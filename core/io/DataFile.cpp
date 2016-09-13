@@ -14,17 +14,12 @@ namespace ds {
 	bool JSONAssetFile::load() {
 		bool ret = false;
 		// check length
-		StopWatch s;
-		s.start();
-		//LOG << "Reading simplified json file: " << _name;
 		JSONReader reader;
 		if (reader.parse(_hash)) {
 			if (_loaded) {
-				LOG << "-> Reloading";
 				ret = reloadData(reader);
 			}
 			else {
-				LOG << "-> Loading";
 				ret = loadData(reader);
 				if (ret) {
 					_loaded = true;
@@ -33,11 +28,9 @@ namespace ds {
 			repository::add(this);
 		}
 		else {
-			//LOG << "Error: Cannot parse file: " << _hash;
+			LOGE << "Error: Cannot parse file";
 			ret = false;
 		}
-		s.end();
-		LOG << "----> elapsed: " << s.elapsed();
 		return ret;
 	}
 

@@ -17,6 +17,13 @@ enum LogTypes {
 	LT_FILE
 };
 
+class AssertOutputHandler {
+
+public:
+	virtual void write(char* file, int line, char* msg) = 0;
+};
+
+
 void MyAssert(char* expr_str, bool expr, char* file, int line, char* msg);
 void MyAssert_fmt(char* expr_str, bool expr, char* file, int line, char* fomat, ...);
 void MyAssert_fmt(char* file, int line, char* format, ...);

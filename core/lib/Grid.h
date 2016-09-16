@@ -1,7 +1,7 @@
 #pragma once
 #include "..\lib\collection_types.h"
 #include "..\math\math_types.h"
-#include "..\utils\Log.h"
+#include <core\log\Log.h>
 #include <Point.h>
 
 namespace ds {

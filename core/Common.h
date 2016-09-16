@@ -9,6 +9,10 @@ const RID INVALID_RID = UINT32_MAX;
 
 const ID INVALID_ID = UINT32_MAX;
 
+enum InternalEvents {
+	ENGINE_SHUTDOWN
+};
+
 #define DEGTORAD( degree ) ((degree) * (PI / 180.0f))
 #define RADTODEG( radian ) ((radian) * (180.0f / PI))
 

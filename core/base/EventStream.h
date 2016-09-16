@@ -3,10 +3,6 @@
 
 namespace ds {
 
-	enum InternalEvents {
-		ENGINE_SHUTDOWN
-	};
-
 	namespace events {
 
 		void init();

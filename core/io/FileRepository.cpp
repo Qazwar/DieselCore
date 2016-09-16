@@ -167,12 +167,12 @@ namespace ds {
 		// add DataFile to FileDescriptor
 		// -----------------------------------------------------------
 		void add(DataFile* file) {
-			if (!already_watching(file->getFileName())) {
+			//if (!already_watching(file->getFileName())) {
 				int idx = find_index(file->getFileName());
 				if (idx != -1) {
 					_repository->files[idx].dataFile = file;
 				}
-			}
+			//}
 		}
 
 		// -----------------------------------------------------------

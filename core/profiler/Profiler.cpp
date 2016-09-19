@@ -16,7 +16,7 @@ StopWatch::StopWatch() {
 StopWatch::StopWatch(const char* name) {
 	//QueryPerformanceFrequency(&_frequency);
 	_running = false;
-	sprintf_s(_name, 32, name);
+	sprintf_s(_name, 32, "%s", name);
 }
 
 StopWatch::~StopWatch() {

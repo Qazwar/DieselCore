@@ -27,7 +27,7 @@ namespace ds {
 	class State {
 
 	public:
-		State() {}
+		State() : _timer(0.0f) , _ctx(0) {}
 		virtual ~State() {}
 		void prepare(StateContext* context) {
 			_ctx = context;
@@ -83,7 +83,7 @@ namespace ds {
 	class StateManager {
 
 	public:
-		StateManager(StateContext* ctx) : _current(-1), _next(-1), _context(ctx), _dialogState(1), _dialogPos(10, 720) {}
+		StateManager(StateContext* ctx) : _current(-1), _next(-1), _context(ctx), _dialogState(1), _dialogPos(10, 720) , _ttl(0.0f) {}
 		~StateManager();
 		template<class T>
 		State* add() {

@@ -10,8 +10,6 @@ namespace ds {
 
 	struct Texture {
 
-		//IdString hashName;
-		//v4 uv;
 		v2 uv[4];
 		v2 dim;
 		int textureID;
@@ -26,10 +24,17 @@ namespace ds {
 		}
 
 		explicit Texture(const Rect& r) {
+			textureSize = v2(1024.0f, 1024.0f);
 			build(r);
 		}
 
 		Texture(int top, int left, int width, int height) {
+			textureSize = v2(1024.0f, 1024.0f);
+			build(Rect(top, left, width, height));
+		}
+
+		Texture(int top, int left, int width, int height, float ts) {
+			textureSize = v2(ts,ts);
 			build(Rect(top, left, width, height));
 		}
 

@@ -12,7 +12,7 @@ namespace ds {
 		const char* p = text;
 		while (*p != 0) {
 			Token token(Token::EMPTY);
-			if (string::isDigit(*p)) {
+			if (string::isDigit(p)) {
 				char *out;
 				token = Token(Token::NUMBER, string::strtof(p, &out));
 				p = out;
@@ -32,7 +32,7 @@ namespace ds {
 				token = Token(Token::STRING, identifier - text, p - identifier);
 				++p;
 			}
-			else if (*p == '/' && skipComments) {
+			else if (*p == '/' && *(p+1) == '/' && skipComments) {
 				++p;
 				if (*p == '/') {
 					++p;
@@ -54,6 +54,9 @@ namespace ds {
 					case '}': token = Token(Token::CLOSE_BRACES); break;
 					case '(': token = Token(Token::OPEN_BRACKET); break;
 					case ')': token = Token(Token::CLOSE_BRACKET); break;
+					case '+': token = Token(Token::PLUS); break;
+					case '-': token = Token(Token::MINUS); break;
+					case '*': token = Token(Token::MULTIPLY); break;
 					case '/': token = Token(Token::SLASH); break;
 					case ' ': case '\t': case '\r': break;
 					case '\n': token = Token(Token::NEWLINE); break;
@@ -84,6 +87,11 @@ namespace ds {
 			case Token::SEMICOLON: return "SEMICOLON"; break;
 			case Token::OPEN_BRACKET: return "OPEN_BRACKET"; break;
 			case Token::CLOSE_BRACKET: return "CLOSE_BRACKET"; break;
+			case Token::SLASH: return "SLASH"; break;
+			case Token::NEWLINE: return "NEWLINE"; break;
+			case Token::PLUS: return "PLUS"; break;
+			case Token::MINUS: return "MINUS"; break;
+			case Token::MULTIPLY: return "MULITPLY"; break;
 			default: return "UNKNOWN"; break;
 		}
 	}

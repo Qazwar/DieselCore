@@ -44,4 +44,14 @@ namespace ds {
 		bool load();
 	};
 
+	class TextAssetFile : public DataFile {
+
+	public:
+		TextAssetFile(const char* name) : DataFile(name) {}
+		virtual ~TextAssetFile() {}
+		virtual bool loadData(const char* text) = 0;
+		virtual bool reloadData(const char* text) = 0;
+		bool load();
+	};
+
 }

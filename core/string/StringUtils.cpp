@@ -289,6 +289,19 @@ namespace ds {
 			return ((c >= '0' && c <= '9') || c == '-' || c == '+' || c == '.');
 		}
 
+		bool isDigit(const char* c) {
+			if ((*c >= '0' && *c <= '9') || *c == '.') {
+				return true;
+			}
+			if (*c == '-' || *c == '+') {
+				const char* n = c + 1;
+				if (n) {
+					return (*n >= '0' && *n <= '9');
+				}
+			}
+			return false;
+		}
+
 		bool isNumeric(const char c) {
 			return ((c >= '0' && c <= '9'));
 		}

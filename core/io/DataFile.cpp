@@ -67,5 +67,31 @@ namespace ds {
 		return ret;
 	}
 
+	// -----------------------------------------------
+	// load text file
+	// -----------------------------------------------
+	bool TextAssetFile::load() {
+		bool ret = false;
+		LOG << "Reading text file: " << _hash.get();
+		File f(_hash);
+		if (repository::load(&f) != FileStatus::FS_OK) {
+			LOG << "Error: Cannot load file: " << _hash.get();
+			return false;
+		}
+		if (_loaded) {
+			LOG << "-> Reloading";
+			ret = reloadData(f.data);
+		}
+		else {
+			LOG << "-> Loading";
+			ret = loadData(f.data);
+			if (ret) {
+				_loaded = true;
+			}
+		}
+		repository::add(this);
+		return ret;
+	}
+
 
 }

@@ -90,6 +90,8 @@ namespace string {
 
 	bool isDigit(const char c);
 
+	bool isDigit(const char* c);
+
 	bool isNumeric(const char* text);
 
 	bool isWhitespace(const char c);

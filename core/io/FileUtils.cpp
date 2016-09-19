@@ -36,6 +36,25 @@ namespace file {
 		return false;
 	}
 
+	char* loadTextFile(const char* name) {
+		FILE *fp = fopen(name, "r");
+		if (fp) {
+			//LOG << "Loading '" << name << "'";
+			fseek(fp, 0, SEEK_END);
+			int sz = ftell(fp);
+			fseek(fp, 0, SEEK_SET);
+			//LOG << "size: " << sz;
+			char* data = new char[sz + 1];
+			for (int i = 0; i < sz + 1; ++i) {
+				data[i] = '\0';
+			}
+			fread(data, 1, sz, fp);
+			fclose(fp);
+			return data;
+		}
+		return 0;
+	}
+
 	bool loadTextFile(const char* name,std::vector<std::string>& lines) {    
 		std::string line;
 		std::ifstream myfile(name);

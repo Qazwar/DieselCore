@@ -13,6 +13,7 @@
 #pragma warning(disable: 4996)
 
 struct LogContext {
+
 	bool useConsole;
 	bool useFile;
 	HANDLE console;

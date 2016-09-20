@@ -2,6 +2,7 @@
 #include <Vector.h>
 #include "..\string\StaticHash.h"
 #include "..\lib\collection_types.h"
+#include "..\io\DataFile.h"
 
 namespace ds {
 
@@ -40,7 +41,7 @@ namespace ds {
 		};
 
 		enum FunctionType {
-			FT_SIN,FT_COS
+			FT_SIN,FT_COS,FT_LRP
 		};
 
 		struct FunctionArgument {
@@ -55,12 +56,36 @@ namespace ds {
 			FunctionArgument args[4];
 		};
 
-		struct VMContext {
+		struct VMContext : public TextAssetFile {
+
 			v4 data[6];
 			Array<Line> lines;
 			Array<VMVariable> variables;
 			Array<v4> constants;
 			Array<Function> functions;
+
+			VMContext(const char* name) : TextAssetFile(name) {}
+
+			int registerVar(StaticHash hash) {
+				int idx = -1;
+				for (uint32_t i = 0; i < variables.size(); ++i) {
+					if (variables[i].hash == hash) {
+						idx = i;
+					}
+				}
+				if (idx == -1) {
+					VMVariable c;
+					c.hash = hash;
+					c.value = v4(0.0f);
+					variables.push_back(c);
+					idx = variables.size() - 1;
+				}
+				return idx;
+			}
+
+			void set(int idx, const v4& v) {
+				variables[idx].value = v;
+			}
 
 			void set(StaticHash hash, const v4& v) {
 				int idx = -1;
@@ -84,6 +109,21 @@ namespace ds {
 			int add(const v4& v) {
 				constants.push_back(v);
 				return constants.size() - 1;
+			}
+
+			void parse(const char* text);
+
+			bool loadData(const char* text) {
+				parse(text);
+				return true;
+			}
+
+			bool reloadData(const char* text) {
+				lines.clear();
+				constants.clear();
+				functions.clear();
+				parse(text);
+				return true;
 			}
 		};
 

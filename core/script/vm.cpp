@@ -7,21 +7,70 @@ namespace ds {
 
 	namespace vm {
 
+		// -------------------------------------------------------
+		// function pointer
+		// -------------------------------------------------------
+		typedef v4(*VMFunc)(v4*, int);
+
+		// -------------------------------------------------------
+		// vm SIN
+		// -------------------------------------------------------
+		v4 vm_sin(v4* args, int num) {
+			v4 ret(0.0f);
+			for (int i = 0; i < 4; ++i) {
+				ret.data[i] = sin(args[0].data[i]);
+			}
+			return ret;
+		}
+
+		// -------------------------------------------------------
+		// vm COS
+		// -------------------------------------------------------
+		v4 vm_cos(v4* args, int num) {
+			v4 ret(0.0f);
+			for (int i = 0; i < 4; ++i) {
+				ret.data[i] = cos(args[0].data[i]);
+			}
+			return ret;
+		}
+
+		// -------------------------------------------------------
+		// vm LERP
+		// -------------------------------------------------------
+		v4 vm_lerp(v4* args, int num) {
+			v4 ret(0.0f);
+			for (int i = 0; i < 4; ++i) {
+				ret.data[i] = (1.0f - args[2].data[i]) * args[0].data[i] + args[2].data[i] * args[1].data[i];
+			}
+			return ret;
+		}
+
+		// -------------------------------------------------------
+		// function definition
+		// -------------------------------------------------------
 		struct FunctionDefinition {
 
 			FunctionType type;
 			const char* name;
 			int arguments;
+			VMFunc function;
 
-			FunctionDefinition(FunctionType t, const char* n, int a) : type(t) , name(n), arguments(a) {}
+			FunctionDefinition(FunctionType t, const char* n, int a,VMFunc f) : type(t) , name(n), arguments(a) , function(f) {}
 
 		};
 
+		// -------------------------------------------------------
+		// all functions
+		// -------------------------------------------------------
 		FunctionDefinition FUNCTIONS[] = {
-			{FT_SIN, "SIN", 1 },
-			{FT_COS, "COS", 1 }
+			{FT_SIN, "SIN", 1, &vm_sin},
+			{FT_COS, "COS", 1, &vm_cos},
+			{FT_LRP, "LRP", 3, &vm_lerp}
 		};
 
+		// -------------------------------------------------------
+		// extract register
+		// -------------------------------------------------------
 		int get_register(const char* t) {
 			if (t[0] == 'R') {
 				return t[1] - '0';
@@ -29,13 +78,16 @@ namespace ds {
 			return -1;
 		}
 
+		// -------------------------------------------------------
+		// find function index
+		// -------------------------------------------------------
 		int function_index(const char* name) {
 			char t[4];
 			for (int i = 0; i < 3; ++i) {
 				t[i] = name[i];
 			}
 			t[3] = '\0';
-			for (int i = 0; i < 2; ++i) {
+			for (int i = 0; i < 3; ++i) {
 				if (strcmp(FUNCTIONS[i].name, t) == 0) {
 					return i;
 				}
@@ -43,11 +95,13 @@ namespace ds {
 			return -1;
 		}
 
+		// -------------------------------------------------------
+		// parse operand
+		// -------------------------------------------------------
 		int parseOperand(VMContext* context, Variable* var, const char* name, int index) {
 			int idx = index;
 			int fi = function_index(name);
 			if (fi != -1) {
-				printf("FOUND FUNCTION!!!\n");
 				var->type = VT_FUNCTION;
 				var->index = fi;
 			}
@@ -76,16 +130,19 @@ namespace ds {
 			return idx;
 		}
 
+		// -------------------------------------------------------
+		// parse function
+		// -------------------------------------------------------
 		int parseFunction(VMContext* context, const char* data, const Tokenizer& t, int index, Variable* var) {
 			int idx = index + 1;
 			char name[128] = { '\0' };
 			const FunctionDefinition& def = FUNCTIONS[var->index];
+			Function f;
+			f.type = def.type;
+			f.arguments = def.arguments;
+			f.function_index = var->index;
 			for (int i = 0; i < def.arguments; ++i) {				
-				const Token& tok = t.get(idx);
-				Function f;
-				f.type = def.type;
-				f.arguments = def.arguments;
-				f.function_index = var->index;
+				const Token& tok = t.get(idx);				
 				FunctionArgument& arg = f.args[i];
 				if (tok.type == Token::NAME) {
 					strncpy(name, data + tok.index, tok.size);
@@ -112,14 +169,17 @@ namespace ds {
 					arg.type = VT_CONSTANT;
 					arg.index = context->add(v4(tok.value));
 				}
-				idx += 2;
-				context->functions.push_back(f);
-				var->index = context->functions.size() - 1;
+				idx += 2;				
 			}
+			context->functions.push_back(f);
+			var->index = context->functions.size() - 1;
 			++idx;
 			return idx;
 		}
 
+		// -------------------------------------------------------
+		// parse line
+		// -------------------------------------------------------
 		int parseLine(const char* data, VMContext* context, Tokenizer& t, int index, Line* line) {
 			char name[128] = { '\0' };
 			Token& tok = t.get(index);
@@ -146,6 +206,12 @@ namespace ds {
 				++index;
 			}
 			tok = t.get(index);
+			// simple assignment
+			if (tok.type == Token::SEMICOLON) {
+				line->operation = OP_NONE;
+				index += 2;
+				return index;
+			}
 			switch (tok.type) {
 				case Token::PLUS: line->operation = OP_PLUS; break;
 				case Token::MINUS: line->operation = OP_MINUS; break;
@@ -197,26 +263,43 @@ namespace ds {
 			}
 		}
 
+		// -------------------------------------------------------
+		// parse
+		// -------------------------------------------------------
+		void VMContext::parse(const char* text) {
+			Tokenizer t;
+			t.parse(text);
+			int n = 0;
+			while (n < t.size()) {
+				Line line;
+				n = parseLine(text, this, t, n, &line);
+				lines.push_back(line);
+			}
+		}
+
+		// -------------------------------------------------------
+		// execute function
+		// -------------------------------------------------------
 		v4 executeFunction(VMContext* context,const Function& f) {
 			v4 ret(0, 0, 0, 0);
-			if (f.type == FT_SIN) {
-				const FunctionArgument& arg = f.args[0];
-				v4 s(0, 0, 0, 0);
+			v4 args[4];
+			for (int i = 0; i < f.arguments; ++i) {
+				const FunctionArgument& arg = f.args[i];
 				if (arg.type == VT_CONSTANT) {
-					s = context->constants[arg.index];
+					args[i] = context->constants[arg.index];
 				}
 				else if (arg.type == VT_REG) {
-					s = context->data[arg.index];
+					args[i] = context->data[arg.index];
 				}
 				else if (arg.type == VT_VARIABLE) {
-					s =  context->variables[arg.index].value;
-				}
-				for (int i = 0; i < 4; ++i) {
-					ret.data[i] = sin(s.data[i]);
+					args[i] = context->variables[arg.index].value;
 				}
 			}
+			const FunctionDefinition& def = FUNCTIONS[f.function_index];
+			ret = (*def.function)(args, f.arguments);
 			return ret;
 		}
+
 		// -------------------------------------------------------
 		// get data from context by variable
 		// -------------------------------------------------------
@@ -248,6 +331,9 @@ namespace ds {
 					Variable v = l.var1;
 					if (v.type == VT_CONSTANT) {
 						context->data[oi] = context->constants[v.index];
+					}
+					else if (v.type == VT_FUNCTION) {
+						context->data[oi] = executeFunction(context,context->functions[v.index]);
 					}
 				}
 				else {

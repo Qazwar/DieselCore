@@ -1,6 +1,6 @@
 #pragma once
 #include "math_types.h"
-#include <d3dx9math.h>
+//#include <d3dx9math.h>
 
 ds::mat3 operator * (const ds::mat3& m1,const ds::mat3& m2);
 
@@ -96,7 +96,7 @@ namespace ds {
 
 		mat4 mat4Inverse(const mat4& m);
 
-		D3DXMATRIX convert(const mat4& m);
+		//D3DXMATRIX convert(const mat4& m);
 
 		mat3 rotationAlign(const Vector2f& d);
 

@@ -143,6 +143,22 @@ namespace ds {
 			return cnt;
 		}
 
+		int count_delimiters(const char* text, int* positions, int max, const char delimiter) {
+			const char* p = text;
+			int cnt = 0;
+			int idx = 0;
+			while (*p) {
+				if (*p == delimiter) {
+					if (cnt < max) {
+						positions[cnt++] = idx;
+					}
+				}
+				++p;
+				++idx;
+			}
+			return cnt;
+		}
+
 		int split(const char* text, float* array, int max, const char delimiter) {
 			std::string word;
 			std::stringstream stream(text);

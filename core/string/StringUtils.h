@@ -60,6 +60,8 @@ namespace string {
 
 	int count_delimiters(const char* text, const char delimiter = ',');
 
+	int count_delimiters(const char* text, int* positions, int max, const char delimiter = ',');
+
 	int split(const char* text, float* array, int max, const char delimiter = ',');
 
 	void split(const std::string& str,Array<std::string>& list,const char delimiter = ',');

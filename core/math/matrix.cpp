@@ -696,7 +696,7 @@ namespace matrix {
 		}
 		return ret;
 	}
-
+	/*
 	D3DXMATRIX convert(const mat4& m) {
 		D3DXMATRIX tmp;
 		for ( int x = 0; x < 4; ++x ) {
@@ -706,7 +706,7 @@ namespace matrix {
 		}
 		return tmp;
 	}
-
+	*/
 	mat3 rotationAlign(const Vector2f& d) {
 		return rotation(Vector3f(d.x,d.y,0.0f),Vector3f(1,0,0));
 	}

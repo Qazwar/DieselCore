@@ -12,7 +12,8 @@ namespace ds {
 			VT_REG,
 			VT_CONSTANT,
 			VT_FUNCTION,
-			VT_VARIABLE
+			VT_VARIABLE,
+			VT_NUMBER
 		};
 
 		enum Operation {
@@ -41,7 +42,7 @@ namespace ds {
 		};
 
 		enum FunctionType {
-			FT_SIN,FT_COS,FT_LRP
+			FT_SIN,FT_COS,FT_LRP,FT_D2R
 		};
 
 		struct FunctionArgument {
@@ -55,82 +56,67 @@ namespace ds {
 			int function_index;
 			FunctionArgument args[4];
 		};
+	
+		struct Method {
+			StaticHash hash;
+			Array<Line> lines;
+		};
+		// ------------------------------------------------------
+		// Script
+		// ------------------------------------------------------
+		class Script : public TextAssetFile {
 
-		struct VMContext : public TextAssetFile {
-
+		public:
+			Script(const char* name) : TextAssetFile(name) {
+				addConstant(SID("TWO_PI"), v4(TWO_PI));
+				addConstant(SID("PI"), v4(PI));
+				addConstant(SID("HALF_PI"), v4(HALF_PI));
+			}
+			~Script() {}
+			int registerVar(StaticHash hash);
+			void set(int idx, const v4& v);
+			void set(StaticHash hash, const v4& v);
+			int addConstant(StaticHash hash, const v4& v);
+			int add(const v4& v) {
+				numbers.push_back(v);
+				return numbers.size() - 1;
+			}
+			const Method& getMethod(StaticHash hash) const;
+			void execute();
+			//void execute(StaticHash name);
+			const v4& getRegister(int idx) const {
+				return data[idx];
+			}
+			void parse(const char* text);
+			bool loadData(const char* text);
+			bool reloadData(const char* text);
+			const uint32_t numLines() const {
+				return lines.size();
+			}
+			const Line& getLine(int index) const {
+				return lines[index];
+			}
+		private:		
+			int getMethod(const char* data, const Tokenizer& t, int index, Method* m);
+			v4 get_data(const Variable& var);
+			v4 executeFunction(const Function& f);
+			int parseLine(const char* data, Tokenizer& t, int index, Line* line);
+			int parseFunction(const char* data, const Tokenizer& t, int index, Variable* var);
+			int parseOperand(Variable* var, const char* name, int index);
+			int function_index(const char* name);
+			int constant_index(const char* name);
+			int get_register(const char* t);
 			v4 data[6];
+			Array<Method> _methods;
 			Array<Line> lines;
 			Array<VMVariable> variables;
-			Array<v4> constants;
+			Array<VMVariable> constants;
+			Array<v4> numbers;
 			Array<Function> functions;
 
-			VMContext(const char* name) : TextAssetFile(name) {}
-
-			int registerVar(StaticHash hash) {
-				int idx = -1;
-				for (uint32_t i = 0; i < variables.size(); ++i) {
-					if (variables[i].hash == hash) {
-						idx = i;
-					}
-				}
-				if (idx == -1) {
-					VMVariable c;
-					c.hash = hash;
-					c.value = v4(0.0f);
-					variables.push_back(c);
-					idx = variables.size() - 1;
-				}
-				return idx;
-			}
-
-			void set(int idx, const v4& v) {
-				variables[idx].value = v;
-			}
-
-			void set(StaticHash hash, const v4& v) {
-				int idx = -1;
-				for (uint32_t i = 0; i < variables.size(); ++i) {
-					if (variables[i].hash == hash) {
-						idx = i;
-					}
-				}
-				if (idx == -1) {
-					VMVariable c;
-					c.hash = hash;
-					c.value = v;
-					variables.push_back(c);
-				}
-				else {
-					VMVariable& c = variables[idx];
-					c.value = v;
-				}
-			}
-
-			int add(const v4& v) {
-				constants.push_back(v);
-				return constants.size() - 1;
-			}
-
-			void parse(const char* text);
-
-			bool loadData(const char* text) {
-				parse(text);
-				return true;
-			}
-
-			bool reloadData(const char* text) {
-				lines.clear();
-				constants.clear();
-				functions.clear();
-				parse(text);
-				return true;
-			}
 		};
-
-		void parse(const char* text,VMContext* context);
-
-		void execute(VMContext* context);
-
 	}
+
+	
 
 }

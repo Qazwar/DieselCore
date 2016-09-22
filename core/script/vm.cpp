@@ -58,6 +58,42 @@ namespace ds {
 		}
 
 		// -------------------------------------------------------
+		// vm clamp
+		// -------------------------------------------------------
+		v4 vm_clamp(v4* args, int num) {
+			v4 ret(0.0f);
+			v4 mn = args[1];
+			v4 mx = args[2];
+			for (int i = 0; i < 4; ++i) {
+				ret.data[i] = args[0].data[i];
+				if (ret.data[i] < mn.data[i]) {
+					ret.data[i] = mn.data[i];
+				}
+				if (ret.data[i] > mx.data[i]) {
+					ret.data[i] = mx.data[i];
+				}
+			}
+			return ret;
+		}
+
+		// -------------------------------------------------------
+		// vm saturate
+		// -------------------------------------------------------
+		v4 vm_saturate(v4* args, int num) {
+			v4 ret(0.0f);
+			for (int i = 0; i < 4; ++i) {
+				ret.data[i] = args[0].data[i];
+				if (ret.data[i] < 0.0f) {
+					ret.data[i] = 0.0f;
+				}
+				if (ret.data[i] > 1.0f) {
+					ret.data[i] = 1.0f;
+				}
+			}
+			return ret;
+		}
+
+		// -------------------------------------------------------
 		// function definition
 		// -------------------------------------------------------
 		struct FunctionDefinition {
@@ -71,6 +107,28 @@ namespace ds {
 
 		};
 
+		const char* translate(VarType type) {
+			switch (type) {
+				case VT_REG: return "REG"; break;
+				case VT_CONSTANT: return "CONSTANT"; break;
+				case VT_FUNCTION: return "FUNCTION"; break;
+				case VT_VARIABLE: return "VARIABLE"; break;
+				case VT_NUMBER: return "NUMBER"; break;
+				case VT_NONE: return "NONE"; break;
+				default: return "?????";
+			}
+		}
+
+		const char* translate(Operation op) {
+			switch (op) {
+				case OP_PLUS: return "+"; break;
+				case OP_MINUS: return "-"; break;
+				case OP_MUL: return "*"; break;
+				case OP_DIV: return "/"; break;
+				case OP_NONE: return "="; break;
+				default: return "?";
+			}
+		}
 		// -------------------------------------------------------
 		// all functions
 		// -------------------------------------------------------
@@ -78,10 +136,13 @@ namespace ds {
 			{ FT_SIN, "SIN", 1, &vm_sin},
 			{ FT_COS, "COS", 1, &vm_cos},
 			{ FT_LRP, "LRP", 3, &vm_lerp},
+			{ FT_LRP, "LRP", 3, &vm_lerp },
+			{ FT_SAT, "SAT", 1, &vm_saturate },
+			{ FT_CLM, "CLM", 3, &vm_clamp },
 			{ FT_D2R, "D2R", 3, &vm_degtorad }
 		};
 
-		const int NUM_FUNCTIONS = 4;
+		const int NUM_FUNCTIONS = 7;
 
 		// -------------------------------------------------------
 		// Script
@@ -215,7 +276,7 @@ namespace ds {
 					arg.type = VT_NUMBER;
 					arg.index = add(v4(tok.value));
 				}
-				idx += 2;				
+				idx += 1;				
 			}
 			functions.push_back(f);
 			var->index = functions.size() - 1;
@@ -255,6 +316,8 @@ namespace ds {
 			// simple assignment
 			if (tok.type == Token::SEMICOLON) {
 				line->operation = OP_NONE;
+				line->var2.type = VT_NONE;
+				line->var2.index = -1;
 				index += 2;
 				return index;
 			}
@@ -264,6 +327,9 @@ namespace ds {
 				case Token::MULTIPLY: line->operation = OP_MUL; break;
 				case Token::SLASH: line->operation = OP_DIV; break;
 				default: line->operation = OP_NONE;
+			}
+			for (int i = 0; i < 128; ++i) {
+				name[i] = '\0';
 			}
 			++index;
 			tok = t.get(index);
@@ -357,7 +423,7 @@ namespace ds {
 					else {
 						if (isClosing(t, n)) {
 							idx = -1;
-							++n;
+							n += 2;
 						}
 						if (idx != -1) {
 							Method& m = _methods[idx];
@@ -500,11 +566,47 @@ namespace ds {
 			}
 			return UNKNOWN;
 		}
+
+		void Script::debugMethod(StaticHash hash) {
+			const Method& m = getMethod(hash);
+			LOG << "----- Method ------";
+			for (uint32_t i = 0; i < m.lines.size(); ++i) {
+				const Line& l = m.lines[i];
+				LOG << i << " => Reg: " << l.register_index << " Op: " << translate(l.operation) << " Var1: " << translate(l.var1.type) << " (" << l.var1.index << ") Var2: " << translate(l.var2.type) << " (" << l.var2.index << ")";
+			}
+		}
 		// -------------------------------------------------------
-		// execute
+		// execute default method
 		// -------------------------------------------------------
 		void Script::execute() {
 			const Method& m = _methods[0];
+			execute(m);
+		}
+
+		// -------------------------------------------------------
+		// execute method
+		// -------------------------------------------------------
+		void Script::execute(StaticHash hash) {
+			for (uint32_t i = 0; i < _methods.size(); ++i) {
+				const Method& m = _methods[i];
+				if (m.hash == hash) {
+					execute(m);
+				}
+			}
+		}
+
+		// -------------------------------------------------------
+		// execute method by index
+		// -------------------------------------------------------
+		void Script::execute(uint32_t idx) {
+			const Method& m = _methods[idx];
+			execute(m);
+		}
+
+		// -------------------------------------------------------
+		// execute specific method
+		// -------------------------------------------------------
+		void Script::execute(const Method& m) {			
 			for (uint32_t i = 0; i < m.lines.size(); ++i) {
 				const Line& l = m.lines[i];
 				int oi = l.register_index;
@@ -554,7 +656,7 @@ namespace ds {
 		// reload data
 		// -------------------------------------------------------
 		bool Script::reloadData(const char* text) {
-			lines.clear();
+			_methods.clear();
 			constants.clear();
 			functions.clear();
 			parse(text);

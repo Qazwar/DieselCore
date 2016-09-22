@@ -13,7 +13,8 @@ namespace ds {
 			VT_CONSTANT,
 			VT_FUNCTION,
 			VT_VARIABLE,
-			VT_NUMBER
+			VT_NUMBER,
+			VT_NONE
 		};
 
 		enum Operation {
@@ -42,7 +43,7 @@ namespace ds {
 		};
 
 		enum FunctionType {
-			FT_SIN,FT_COS,FT_LRP,FT_D2R
+			FT_SIN,FT_COS,FT_LRP,FT_D2R,FT_SAT,FT_CLM
 		};
 
 		struct FunctionArgument {
@@ -83,20 +84,17 @@ namespace ds {
 			}
 			const Method& getMethod(StaticHash hash) const;
 			void execute();
-			//void execute(StaticHash name);
+			void execute(uint32_t index);
+			void execute(StaticHash name);
+			void execute(const Method& m);
 			const v4& getRegister(int idx) const {
 				return data[idx];
 			}
 			void parse(const char* text);
 			bool loadData(const char* text);
 			bool reloadData(const char* text);
-			const uint32_t numLines() const {
-				return lines.size();
-			}
-			const Line& getLine(int index) const {
-				return lines[index];
-			}
-		private:		
+			void debugMethod(StaticHash hash);
+		private:					
 			int getMethod(const char* data, const Tokenizer& t, int index, Method* m);
 			v4 get_data(const Variable& var);
 			v4 executeFunction(const Function& f);
@@ -108,7 +106,6 @@ namespace ds {
 			int get_register(const char* t);
 			v4 data[6];
 			Array<Method> _methods;
-			Array<Line> lines;
 			Array<VMVariable> variables;
 			Array<VMVariable> constants;
 			Array<v4> numbers;

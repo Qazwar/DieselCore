@@ -276,11 +276,12 @@ namespace ds {
 					arg.type = VT_NUMBER;
 					arg.index = add(v4(tok.value));
 				}
-				idx += 1;				
+				idx += 2;				
 			}
 			functions.push_back(f);
 			var->index = functions.size() - 1;
-			++idx;
+			const Token& tok = t.get(idx);
+			//++idx;
 			return idx;
 		}
 

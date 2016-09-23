@@ -163,6 +163,10 @@ namespace ds {
 		// extract register
 		// -------------------------------------------------------
 		int Script::get_register(const char* t) {
+			// OUT is special case and it is mapped to 10
+			if (t[0] == 'O' && t[1] == 'U' && t[2] == 'T') {
+				return 10;
+			}
 			if (t[0] == 'R') {
 				return t[1] - '0';
 			}
@@ -211,7 +215,7 @@ namespace ds {
 			}
 			else {
 				int ri = get_register(name);
-				if (ri >= 0 && ri < 5) {
+				if (ri >= 0 && ri < 6) {
 					var->type = VT_REG;
 					var->index = ri;
 				}
@@ -258,7 +262,7 @@ namespace ds {
 				if (tok.type == Token::NAME) {
 					strncpy(name, data + tok.index, tok.size);
 					int ri = get_register(name);
-					if (ri > 0 && ri < 5) {
+					if (ri >= 0 && ri < 6) {
 						arg.type = VT_REG;
 						arg.index = ri;
 					}
@@ -296,6 +300,60 @@ namespace ds {
 			return idx;
 		}
 
+		const Token::TokenType V4_DEF[] = { Token::NUMBER, Token::DELIMITER, Token::NUMBER, Token::DELIMITER, Token::NUMBER, Token::DELIMITER, Token::NUMBER, Token::CLOSE_BRACKET };
+
+		int Script::parseNumber(const Tokenizer& t, int index, Variable* var) {
+			int idx = index;
+			const Token& tok = t.get(idx);
+			if (tok.type == Token::OPEN_BRACKET) {
+				++idx;
+				for (int i = 0; i < 8; ++i) {
+					const Token& tc = t.get(idx + i);
+					if (tc.type != V4_DEF[i]) {
+						LOGE << "Syntax error. Wrong v4 number definition";
+						return -1;
+					}
+				}
+				var->type = VT_NUMBER;
+				v4 r(0.0f);
+				for (int i = 0; i < 4; ++i) {
+					const Token& nn = t.get(idx);
+					r.data[i] = nn.value;
+					idx += 2;
+				}
+				var->index = add(r);
+			}
+			return idx;
+		}
+
+		int Script::parseOperand(const char* data, const Tokenizer& t,int index,Variable* var) {
+			int idx = index;
+			char name[128] = { '\0' };
+			const Token& tok = t.get(idx);
+			if (tok.type == Token::NAME) {
+				strncpy(name, data + tok.index, tok.size);
+				idx = parseOperand(var, name, idx);
+				if (var->type == VT_FUNCTION) {
+					idx = parseFunction(data, t, idx, var);
+				}
+			}
+			else if (tok.type == Token::NUMBER) {
+				var->type = VT_NUMBER;
+				var->index = add(v4(tok.value));
+				//line->var1 = v1;
+				++idx;
+			}
+			else if (tok.type == Token::OPEN_BRACKET) {
+				idx = parseNumber(t, index, var);
+				if (idx == -1) {
+					return -1;
+				}
+			}
+			else {
+				++idx;
+			}
+			return idx;
+		}
 		// -------------------------------------------------------
 		// parse line
 		// -------------------------------------------------------
@@ -307,23 +365,7 @@ namespace ds {
 			++index;
 			++index; // ASSIGN
 			tok = t.get(index);
-			if (tok.type == Token::NAME) {
-				strncpy(name, data + tok.index, tok.size);
-				index = parseOperand(&line->var1, name, index);
-				if (line->var1.type == VT_FUNCTION) {
-					index = parseFunction(data, t, index, &line->var1);
-				}
-			}
-			else if (tok.type == Token::NUMBER) {
-				Variable v1;
-				v1.type = VT_NUMBER;
-				v1.index = add(v4(tok.value));
-				line->var1 = v1;
-				++index;
-			}
-			else {
-				++index;
-			}
+			index = parseOperand(data, t, index, &line->var1);
 			tok = t.get(index);
 			// simple assignment
 			if (tok.type == Token::SEMICOLON) {
@@ -340,28 +382,8 @@ namespace ds {
 				case Token::SLASH: line->operation = OP_DIV; break;
 				default: line->operation = OP_NONE;
 			}
-			for (int i = 0; i < 128; ++i) {
-				name[i] = '\0';
-			}
 			++index;
-			tok = t.get(index);
-			if (tok.type == Token::NAME) {
-				strncpy(name, data + tok.index, tok.size);
-				index = parseOperand(&line->var2, name, index);
-				if (line->var2.type == VT_FUNCTION) {
-					index = parseFunction(data, t, index, &line->var2);
-				}
-			}
-			else if (tok.type == Token::NUMBER) {
-				Variable v;
-				v.type = VT_NUMBER;
-				v.index = add(v4(tok.value));
-				line->var2 = v;
-				++index;
-			}
-			else {
-				++index;
-			}
+			index = parseOperand(data, t, index, &line->var2);
 			tok = t.get(index);
 			if (tok.type == Token::SEMICOLON) {
 				++index;
@@ -590,35 +612,53 @@ namespace ds {
 		// -------------------------------------------------------
 		// execute default method
 		// -------------------------------------------------------
-		void Script::execute() {
+		v4 Script::execute() {
 			const Method& m = _methods[0];
-			execute(m);
+			return execute(m);
 		}
 
 		// -------------------------------------------------------
 		// execute method
 		// -------------------------------------------------------
-		void Script::execute(StaticHash hash) {
+		v4 Script::execute(StaticHash hash) {
 			for (uint32_t i = 0; i < _methods.size(); ++i) {
 				const Method& m = _methods[i];
 				if (m.hash == hash) {
-					execute(m);
+					return execute(m);
 				}
 			}
+			return v4(0.0f);
 		}
 
 		// -------------------------------------------------------
 		// execute method by index
 		// -------------------------------------------------------
-		void Script::execute(uint32_t idx) {
+		v4 Script::execute(uint32_t idx) {
 			const Method& m = _methods[idx];
-			execute(m);
+			return execute(m);
 		}
 
+		void executeOperation(const v4& t1, const v4& t2, Operation op, v4* ret) {
+			switch (op) {
+				case OP_PLUS: *ret = t1 + t2; break;
+				case OP_MINUS: *ret = t1 - t2; break;
+				case OP_DIV:
+					for (int i = 0; i < 4; ++i) {
+						ret->data[i] = t1.data[i] / t2.data[i];
+					}
+					break;
+				case OP_MUL:
+					for (int i = 0; i < 4; ++i) {
+						ret->data[i] = t1.data[i] * t2.data[i];
+					}
+					break;
+			}
+		}
 		// -------------------------------------------------------
 		// execute specific method
 		// -------------------------------------------------------
-		void Script::execute(const Method& m) {			
+		v4 Script::execute(const Method& m) {			
+			v4 ret(0.0f);
 			for (uint32_t i = 0; i < m.lines.size(); ++i) {
 				const Line& l = m.lines[i];
 				int oi = l.register_index;
@@ -638,22 +678,16 @@ namespace ds {
 				else {
 					v4 t1 = get_data(l.var1);
 					v4 t2 = get_data(l.var2);
-					switch (l.operation) {
-					case OP_PLUS: data[oi] = t1 + t2; break;
-					case OP_MINUS: data[oi] = t1 - t2; break;
-					case OP_DIV:
-						for (int i = 0; i < 4; ++i) {
-							data[oi].data[i] = t1.data[i] / t2.data[i];
-						}
-						break;
-					case OP_MUL:
-						for (int i = 0; i < 4; ++i) {
-							data[oi].data[i] = t1.data[i] * t2.data[i];
-						}
-						break;
+					// 10 = OUT
+					if (oi == 10) {
+						executeOperation(t1, t2, l.operation, &ret);
+					}
+					else {
+						executeOperation(t1, t2, l.operation, &data[oi]);
 					}
 				}
 			}
+			return ret;
 		}
 
 		// -------------------------------------------------------

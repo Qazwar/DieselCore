@@ -83,10 +83,10 @@ namespace ds {
 				return numbers.size() - 1;
 			}
 			const Method& getMethod(StaticHash hash) const;
-			void execute();
-			void execute(uint32_t index);
-			void execute(StaticHash name);
-			void execute(const Method& m);
+			v4 execute();
+			v4 execute(uint32_t index);
+			v4 execute(StaticHash name);
+			v4 execute(const Method& m);
 			const v4& getRegister(int idx) const {
 				return data[idx];
 			}
@@ -94,7 +94,9 @@ namespace ds {
 			bool loadData(const char* text);
 			bool reloadData(const char* text);
 			void debugMethod(StaticHash hash);
-		private:					
+		private:	
+			int parseOperand(const char* data, const Tokenizer& t, int index, Variable* var);
+			int parseNumber(const Tokenizer& t, int index, Variable* var);
 			int getMethod(const char* data, const Tokenizer& t, int index, Method* m);
 			v4 get_data(const Variable& var);
 			v4 executeFunction(const Function& f);

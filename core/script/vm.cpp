@@ -94,6 +94,16 @@ namespace ds {
 		}
 
 		// -------------------------------------------------------
+		// vm tweening
+		// -------------------------------------------------------
+		v4 vm_tweening(v4* args, int num) {
+			v4 ret(0.0f);
+			v4 type = args[0];
+			tweening::TweeningType t = tweening::get_by_index(type.x);
+			return tweening::interpolate(t, args[1], args[2], args[3].x, args[4].x);
+		}
+
+		// -------------------------------------------------------
 		// function definition
 		// -------------------------------------------------------
 		struct FunctionDefinition {
@@ -139,10 +149,11 @@ namespace ds {
 			{ FT_LRP, "LRP", 3, &vm_lerp },
 			{ FT_SAT, "SAT", 1, &vm_saturate },
 			{ FT_CLM, "CLM", 3, &vm_clamp },
-			{ FT_D2R, "D2R", 3, &vm_degtorad }
+			{ FT_TWN, "TWN", 5, &vm_tweening },
+			{ FT_D2R, "D2R", 1, &vm_degtorad }
 		};
 
-		const int NUM_FUNCTIONS = 7;
+		const int NUM_FUNCTIONS = 8;
 
 		// -------------------------------------------------------
 		// Script
@@ -452,7 +463,7 @@ namespace ds {
 		// -------------------------------------------------------
 		v4 Script::executeFunction(const Function& f) {
 			v4 ret(0, 0, 0, 0);
-			v4 args[4];
+			v4 args[6];
 			for (int i = 0; i < f.arguments; ++i) {
 				const FunctionArgument& arg = f.args[i];
 				if (arg.type == VT_CONSTANT) {
@@ -658,7 +669,7 @@ namespace ds {
 		// -------------------------------------------------------
 		bool Script::reloadData(const char* text) {
 			_methods.clear();
-			constants.clear();
+			numbers.clear();
 			functions.clear();
 			parse(text);
 			return true;

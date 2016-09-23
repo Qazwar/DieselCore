@@ -187,6 +187,13 @@ namespace tweening {
 	}
 
 	// -------------------------------------------------------
+	// v4 interpolate
+	// -------------------------------------------------------
+	v4 interpolate(TweeningType type, const v4& start, const v4& end, float t, float duration) {
+		return v4(interpolate(type, start.x, end.x, t, duration), interpolate(type, start.y, end.y, t, duration), interpolate(type, start.z, end.z, t, duration), interpolate(type, start.w, end.w, t, duration));
+	}
+
+	// -------------------------------------------------------
 	// Vector2f interpolate
 	// -------------------------------------------------------
 	ds::Color interpolate(TweeningType type, const ds::Color& start, const ds::Color& end, float t, float duration) {

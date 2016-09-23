@@ -43,7 +43,7 @@ namespace ds {
 		};
 
 		enum FunctionType {
-			FT_SIN,FT_COS,FT_LRP,FT_D2R,FT_SAT,FT_CLM
+			FT_SIN,FT_COS,FT_LRP,FT_D2R,FT_SAT,FT_CLM,FT_TWN
 		};
 
 		struct FunctionArgument {
@@ -55,7 +55,7 @@ namespace ds {
 			FunctionType type;
 			int arguments;
 			int function_index;
-			FunctionArgument args[4];
+			FunctionArgument args[6];
 		};
 	
 		struct Method {

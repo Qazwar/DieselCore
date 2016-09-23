@@ -52,6 +52,8 @@ namespace tweening {
 
 	v3 interpolate(TweeningType type, const v3& start, const v3& end, float t, float duration);
 
+	v4 interpolate(TweeningType type, const v4& start, const v4& end, float t, float duration);
+
 	ds::Color interpolate(TweeningType type, const ds::Color& start, const ds::Color& end, float t, float duration);
 
 	//void draw(TweeningType type, const ds::Texture& texture,float step = 0.1f, float delta = 1.0f);

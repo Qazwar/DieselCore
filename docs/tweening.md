@@ -15,8 +15,7 @@ You can also use tweening in scripts.
 Here is an example:
 ```R1 = 1.0;
 R2 = 4.0;
-R3 = TWN(0,R1,R1,TIMER,1.0);
-```
+R3 = TWN(0,R1,R1,TIMER,1.0);```
     
 ## Supported types
 

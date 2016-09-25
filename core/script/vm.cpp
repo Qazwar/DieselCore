@@ -116,6 +116,9 @@ namespace ds {
 
 		};
 
+		// -------------------------------------------------------
+		// translate variable type
+		// -------------------------------------------------------
 		const char* translate(VarType type) {
 			switch (type) {
 				case VT_REG: return "REG"; break;
@@ -128,6 +131,9 @@ namespace ds {
 			}
 		}
 
+		// -------------------------------------------------------
+		// translate operation 
+		// -------------------------------------------------------
 		const char* translate(Operation op) {
 			switch (op) {
 				case OP_PLUS: return "+"; break;
@@ -301,6 +307,9 @@ namespace ds {
 
 		const Token::TokenType V4_DEF[] = { Token::NUMBER, Token::DELIMITER, Token::NUMBER, Token::DELIMITER, Token::NUMBER, Token::DELIMITER, Token::NUMBER, Token::CLOSE_BRACKET };
 
+		// -------------------------------------------------------
+		// parse number
+		// -------------------------------------------------------
 		int Script::parseNumber(const Tokenizer& t, int index, Variable* var) {
 			int idx = index;
 			const Token& tok = t.get(idx);
@@ -325,6 +334,9 @@ namespace ds {
 			return idx;
 		}
 
+		// -------------------------------------------------------
+		// parse operand
+		// -------------------------------------------------------
 		int Script::parseOperand(const char* data, const Tokenizer& t,int index,Variable* var) {
 			int idx = index;
 			char name[128] = { '\0' };
@@ -399,7 +411,6 @@ namespace ds {
 		// is method definition
 		// -------------------------------------------------------
 		bool isMethodDefinition(const char* data, const Tokenizer& t, int index) {
-			// FIXME: check sequence NAME NAME OPEN_BRACKETS CLOSE_BRACKETS OPEN_CURLY
 			Token tok = t.get(index);
 			char name[32] = { '\0' };
 			if (tok.type == Token::NAME) {

@@ -16,7 +16,7 @@ namespace ds {
 		Token() :type(EMPTY) , value(0.0f) , index(0) , size(0) {}
 		Token(TokenType type) : type(type) , value(0.0f) , index(0), size(0) {}
 		Token(TokenType type, float v) : type(type), value(v) , index(0), size(0) {}
-		Token(TokenType type, int i, int s) : type(type), index(i), size(s) {}
+		Token(TokenType type, int i, int s) : type(type), index(i), size(s) , value(0.0f) {}
 
 		TokenType type;
 		float value;

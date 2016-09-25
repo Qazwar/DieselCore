@@ -97,7 +97,6 @@ namespace ds {
 		// vm tweening
 		// -------------------------------------------------------
 		v4 vm_tweening(v4* args, int num) {
-			v4 ret(0.0f);
 			v4 type = args[0];
 			tweening::TweeningType t = tweening::get_by_index(type.x);
 			return tweening::interpolate(t, args[1], args[2], args[3].x, args[4].x);
@@ -395,18 +394,32 @@ namespace ds {
 			return index;
 		}
 
+		const Token::TokenType METHOD_DEFS[] = { Token::NAME,Token::NAME,Token::OPEN_BRACKET,Token::CLOSE_BRACKET,Token::OPEN_BRACES };
+		// -------------------------------------------------------
+		// is method definition
+		// -------------------------------------------------------
 		bool isMethodDefinition(const char* data, const Tokenizer& t, int index) {
+			// FIXME: check sequence NAME NAME OPEN_BRACKETS CLOSE_BRACKETS OPEN_CURLY
 			Token tok = t.get(index);
 			char name[32] = { '\0' };
 			if (tok.type == Token::NAME) {
 				strncpy(name, data + tok.index, tok.size);
 				if (strcmp(name, "function") == 0) {
+					for (int i = 0; i < 5; ++i) {
+						const Token& current = t.get(index + i);
+						if (current.type != METHOD_DEFS[i]) {
+							return false;
+						}
+					}
 					return true;
 				}
 			}
 			return false;
 		}
 
+		// -------------------------------------------------------
+		// is closing
+		// -------------------------------------------------------
 		bool isClosing(const Tokenizer& t, int index) {
 			Token tok = t.get(index);
 			if (tok.type == Token::CLOSE_BRACES) {
@@ -415,6 +428,9 @@ namespace ds {
 			return false;
 		}
 
+		// -------------------------------------------------------
+		// get method
+		// -------------------------------------------------------
 		int Script::getMethod(const char* data, const Tokenizer& t, int index, Method* m) {
 			int idx = index;
 			// function wiggle() {
@@ -592,6 +608,9 @@ namespace ds {
 
 		const Method UNKNOWN;
 
+		// -------------------------------------------------------
+		// get method
+		// -------------------------------------------------------
 		const Method& Script::getMethod(StaticHash hash) const {
 			for (uint32_t i = 0; i < _methods.size(); ++i) {
 				if (_methods[i].hash == hash) {
@@ -601,6 +620,9 @@ namespace ds {
 			return UNKNOWN;
 		}
 
+		// -------------------------------------------------------
+		// debug method
+		// -------------------------------------------------------
 		void Script::debugMethod(StaticHash hash) {
 			const Method& m = getMethod(hash);
 			LOG << "----- Method ------";
@@ -638,6 +660,9 @@ namespace ds {
 			return execute(m);
 		}
 
+		// -------------------------------------------------------
+		// execute operation
+		// -------------------------------------------------------
 		void executeOperation(const v4& t1, const v4& t2, Operation op, v4* ret) {
 			switch (op) {
 				case OP_PLUS: *ret = t1 + t2; break;
@@ -654,6 +679,7 @@ namespace ds {
 					break;
 			}
 		}
+
 		// -------------------------------------------------------
 		// execute specific method
 		// -------------------------------------------------------
@@ -665,14 +691,27 @@ namespace ds {
 				// simple assignment
 				if (l.operation == Operation::OP_NONE) {
 					Variable v = l.var1;
-					if (v.type == VT_CONSTANT) {
-						data[oi] = constants[v.index].value;
+					if (oi == 10) {
+						if (v.type == VT_CONSTANT) {
+							ret = constants[v.index].value;
+						}
+						else if (v.type == VT_NUMBER) {
+							ret = numbers[v.index];
+						}
+						else if (v.type == VT_FUNCTION) {
+							ret = executeFunction(functions[v.index]);
+						}
 					}
-					else if (v.type == VT_NUMBER) {
-						data[oi] = numbers[v.index];
-					}
-					else if (v.type == VT_FUNCTION) {
-						data[oi] = executeFunction(functions[v.index]);
+					else {
+						if (v.type == VT_CONSTANT) {
+							data[oi] = constants[v.index].value;
+						}
+						else if (v.type == VT_NUMBER) {
+							data[oi] = numbers[v.index];
+						}
+						else if (v.type == VT_FUNCTION) {
+							data[oi] = executeFunction(functions[v.index]);
+						}
 					}
 				}
 				else {

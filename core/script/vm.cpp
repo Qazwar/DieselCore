@@ -373,9 +373,7 @@ namespace ds {
 		// parse line
 		// -------------------------------------------------------
 		int Script::parseLine(const char* data, Tokenizer& t, int index, Line* line) {
-			char name[128] = { '\0' };
 			Token& tok = t.get(index);
-			strncpy(name, data + tok.index, tok.size);
 			line->register_index = get_register(data + tok.index);
 			++index;
 			tok = t.get(index);
@@ -415,26 +413,41 @@ namespace ds {
 			return index;
 		}
 
+		bool assertSize(const Tokenizer& t, int index, int required) {
+			int total = t.size();
+			if (index + required >= total) {
+				LOGE << "Parser error : Not enough tokens";
+				return false;
+			}
+			return true;
+		}
+
 		const Token::TokenType METHOD_DEFS[] = { Token::NAME,Token::NAME,Token::OPEN_BRACKET,Token::CLOSE_BRACKET,Token::OPEN_BRACES };
 		// -------------------------------------------------------
 		// is method definition
 		// -------------------------------------------------------
-		bool isMethodDefinition(const char* data, const Tokenizer& t, int index) {
+		ParserStatus isMethodDefinition(const char* data, const Tokenizer& t, int index) {
 			Token tok = t.get(index);
 			char name[32] = { '\0' };
 			if (tok.type == Token::NAME) {
-				strncpy(name, data + tok.index, tok.size);
+				strncpy(name, data + tok.index, tok.size);				
 				if (strcmp(name, "function") == 0) {
-					for (int i = 0; i < 5; ++i) {
-						const Token& current = t.get(index + i);
-						if (current.type != METHOD_DEFS[i]) {
-							return false;
+					if (assertSize(t, index, 5)) {
+						for (int i = 0; i < 5; ++i) {
+							const Token& current = t.get(index + i);
+							if (current.type != METHOD_DEFS[i]) {
+								LOGE << "Parser error : Invalid function definition";
+								return ParserStatus::PS_INVALID_FUNCTION;
+							}
 						}
+						return ParserStatus::PS_OK;
 					}
-					return true;
+					else {
+						return ParserStatus::PS_NOT_ENOUGH_TOKENS;
+					}
 				}
 			}
-			return false;
+			return ParserStatus::PS_NO_METHOD;
 		}
 
 		// -------------------------------------------------------
@@ -476,14 +489,16 @@ namespace ds {
 		// -------------------------------------------------------
 		// parse
 		// -------------------------------------------------------
-		void Script::parse(const char* text) {
+		ParserStatus Script::parse(const char* text) {
 			Tokenizer t;
 			t.parse(text);
 			int n = 0;
 			int idx = -1;
-			if (isMethodDefinition(text, t, 0)) {
+			ParserStatus status = isMethodDefinition(text, t, 0);
+			if (status == PS_OK) {
 				while (n < t.size()) {
-					if (isMethodDefinition(text, t, n)) {
+					status = isMethodDefinition(text, t, n);
+					if (status == PS_OK) {
 						++n;
 						Method m;
 						n = getMethod(text, t, n, &m);
@@ -503,17 +518,23 @@ namespace ds {
 						}
 					}
 				}
+				return ParserStatus::PS_OK;
 			}
-			else {
+			else if ( status == PS_NO_METHOD) {
 				Method m;
 				m.hash = SID("default");
 				while (n < t.size()) {					
 					Line line;
 					n = parseLine(text, t, n, &line);
+					if (n == -1) {
+						return ParserStatus::PS_ERROR;
+					}
 					m.lines.push_back(line);
 				}
 				_methods.push_back(m);
+				return ParserStatus::PS_OK;
 			}
+			return ParserStatus::PS_ERROR;
 		}
 
 		// -------------------------------------------------------

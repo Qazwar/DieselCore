@@ -25,6 +25,14 @@ namespace ds {
 			OP_NONE
 		};
 
+		enum ParserStatus {
+			PS_OK,
+			PS_ERROR,
+			PS_NO_METHOD,
+			PS_INVALID_FUNCTION,
+			PS_NOT_ENOUGH_TOKENS
+		};
+
 		struct Variable {
 			VarType type;
 			int index;
@@ -97,7 +105,7 @@ namespace ds {
 			const v4& getRegister(int idx) const {
 				return data[idx];
 			}
-			void parse(const char* text);
+			ParserStatus parse(const char* text);
 			bool loadData(const char* text);
 			bool reloadData(const char* text);
 			void debugMethod(StaticHash hash);

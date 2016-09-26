@@ -35,8 +35,15 @@ namespace ds {
 			StaticHash hash;
 		};
 
+		struct RegisterIndex {
+			int index;
+			int offset;
+
+			RegisterIndex() : index(-1), offset(-1) {}
+		};
+
 		struct Line {
-			int register_index;
+			RegisterIndex register_index;
 			Operation operation;
 			Variable var1;
 			Variable var2;
@@ -105,7 +112,7 @@ namespace ds {
 			int parseOperand(Variable* var, const char* name, int index);
 			int function_index(const char* name);
 			int constant_index(const char* name);
-			int get_register(const char* t);
+			RegisterIndex get_register(const char* t);
 			v4 data[6];
 			Array<Method> _methods;
 			Array<VMVariable> variables;

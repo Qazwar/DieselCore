@@ -163,19 +163,23 @@ namespace ds {
 		// -------------------------------------------------------
 		// Script
 		// -------------------------------------------------------
-
+		
 		// -------------------------------------------------------
 		// extract register
 		// -------------------------------------------------------
-		int Script::get_register(const char* t) {
+		RegisterIndex Script::get_register(const char* t) {
 			// OUT is special case and it is mapped to 10
+			RegisterIndex ri;
 			if (t[0] == 'O' && t[1] == 'U' && t[2] == 'T') {
-				return 10;
+				ri.index = 10;
 			}
 			if (t[0] == 'R') {
-				return t[1] - '0';
+				ri.index = t[1] - '0';
 			}
-			return -1;
+			if (t[2] == '[') {
+				ri.offset = t[3] - '0';
+			}
+			return ri;
 		}
 
 		// -------------------------------------------------------
@@ -219,10 +223,10 @@ namespace ds {
 				var->index = fi;
 			}
 			else {
-				int ri = get_register(name);
-				if (ri >= 0 && ri < 6) {
+				RegisterIndex ri = get_register(name);
+				if (ri.index >= 0 && ri.index < 6) {
 					var->type = VT_REG;
-					var->index = ri;
+					var->index = ri.index;
 				}
 				else {
 					int oi = constant_index(name);
@@ -266,10 +270,10 @@ namespace ds {
 				FunctionArgument& arg = f.args[i];
 				if (tok.type == Token::NAME) {
 					strncpy(name, data + tok.index, tok.size);
-					int ri = get_register(name);
-					if (ri >= 0 && ri < 6) {
+					RegisterIndex ri = get_register(name);
+					if (ri.index >= 0 && ri.index < 6) {
 						arg.type = VT_REG;
-						arg.index = ri;
+						arg.index = ri.index;
 					}
 					else {
 						int oi = constant_index(name);
@@ -372,8 +376,13 @@ namespace ds {
 			char name[128] = { '\0' };
 			Token& tok = t.get(index);
 			strncpy(name, data + tok.index, tok.size);
-			line->register_index = get_register(name);
+			line->register_index = get_register(data + tok.index);
 			++index;
+			tok = t.get(index);
+			if (line->register_index.offset != -1) {
+				++index;
+			}
+			tok = t.get(index);
 			++index; // ASSIGN
 			tok = t.get(index);
 			index = parseOperand(data, t, index, &line->var1);
@@ -639,7 +648,8 @@ namespace ds {
 			LOG << "----- Method ------";
 			for (uint32_t i = 0; i < m.lines.size(); ++i) {
 				const Line& l = m.lines[i];
-				LOG << i << " => Reg: " << l.register_index << " Op: " << translate(l.operation) << " Var1: " << translate(l.var1.type) << " (" << l.var1.index << ") Var2: " << translate(l.var2.type) << " (" << l.var2.index << ")";
+				const RegisterIndex& ri = l.register_index;
+				LOG << i << " => Reg: " << ri.index << " (" << ri.offset << ") OP: " << translate(l.operation) << " Var1: " << translate(l.var1.type) << " (" << l.var1.index << ") Var2: " << translate(l.var2.type) << " (" << l.var2.index << ")";
 			}
 		}
 		// -------------------------------------------------------
@@ -698,42 +708,69 @@ namespace ds {
 			v4 ret(0.0f);
 			for (uint32_t i = 0; i < m.lines.size(); ++i) {
 				const Line& l = m.lines[i];
-				int oi = l.register_index;
+				RegisterIndex ri = l.register_index;
 				// simple assignment
 				if (l.operation == Operation::OP_NONE) {
 					Variable v = l.var1;
-					if (oi == 10) {
+					if (ri.index == 10) {
+						v4 t(0.0f);
 						if (v.type == VT_CONSTANT) {
-							ret = constants[v.index].value;
+							t = constants[v.index].value;
 						}
 						else if (v.type == VT_NUMBER) {
-							ret = numbers[v.index];
+							t = numbers[v.index];
 						}
 						else if (v.type == VT_FUNCTION) {
 							ret = executeFunction(functions[v.index]);
 						}
+						if (ri.offset == -1) {
+							ret = t;
+						}
+						else {
+							ret.data[ri.offset] = t.data[ri.offset];
+						}
 					}
 					else {
+						v4 t(0.0f);
 						if (v.type == VT_CONSTANT) {
-							data[oi] = constants[v.index].value;
+							t = constants[v.index].value;
 						}
 						else if (v.type == VT_NUMBER) {
-							data[oi] = numbers[v.index];
+							t = numbers[v.index];
 						}
 						else if (v.type == VT_FUNCTION) {
-							data[oi] = executeFunction(functions[v.index]);
+							t = executeFunction(functions[v.index]);
+						}
+						if (ri.offset == -1) {
+							data[ri.index] = t;
+						}
+						else {
+							data[ri.index].data[ri.offset] = t.data[ri.offset];
 						}
 					}
 				}
 				else {
 					v4 t1 = get_data(l.var1);
 					v4 t2 = get_data(l.var2);
+					v4 t(0.0f);
 					// 10 = OUT
-					if (oi == 10) {
-						executeOperation(t1, t2, l.operation, &ret);
+					if (ri.index == 10) {
+						executeOperation(t1, t2, l.operation, &t);
+						if (ri.offset == -1) {
+							ret = t;
+						}
+						else {
+							ret.data[ri.offset] = t.data[ri.offset];
+						}
 					}
 					else {
-						executeOperation(t1, t2, l.operation, &data[oi]);
+						executeOperation(t1, t2, l.operation, &t);
+						if (ri.offset == -1) {
+							data[ri.index] = t;
+						}
+						else {
+							data[ri.index].data[ri.offset] = t.data[ri.offset];
+						}
 					}
 				}
 			}

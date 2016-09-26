@@ -164,6 +164,14 @@ namespace ds {
 		// Script
 		// -------------------------------------------------------
 		
+		bool assertSize(const Tokenizer& t, int index, int required) {
+			int total = t.size();
+			if (index + required >= total) {
+				LOGE << "Parser error : Not enough tokens";
+				return false;
+			}
+			return true;
+		}
 		// -------------------------------------------------------
 		// extract register
 		// -------------------------------------------------------
@@ -318,22 +326,28 @@ namespace ds {
 			int idx = index;
 			const Token& tok = t.get(idx);
 			if (tok.type == Token::OPEN_BRACKET) {
-				++idx;
-				for (int i = 0; i < 8; ++i) {
-					const Token& tc = t.get(idx + i);
-					if (tc.type != V4_DEF[i]) {
-						LOGE << "Syntax error. Wrong v4 number definition";
-						return -1;
+				if (assertSize(t, index, 8)) {
+					++idx;
+					for (int i = 0; i < 8; ++i) {
+						const Token& tc = t.get(idx + i);
+						if (tc.type != V4_DEF[i]) {
+							_status = PS_WRONG_V4_DEFINITION;
+							return -1;
+						}
 					}
+					var->type = VT_NUMBER;
+					v4 r(0.0f);
+					for (int i = 0; i < 4; ++i) {
+						const Token& nn = t.get(idx);
+						r.data[i] = nn.value;
+						idx += 2;
+					}
+					var->index = add(r);
 				}
-				var->type = VT_NUMBER;
-				v4 r(0.0f);
-				for (int i = 0; i < 4; ++i) {
-					const Token& nn = t.get(idx);
-					r.data[i] = nn.value;
-					idx += 2;
+				else {
+					_status = PS_WRONG_V4_DEFINITION;
+					return -1;
 				}
-				var->index = add(r);
 			}
 			return idx;
 		}
@@ -375,15 +389,25 @@ namespace ds {
 		int Script::parseLine(const char* data, Tokenizer& t, int index, Line* line) {
 			Token& tok = t.get(index);
 			line->register_index = get_register(data + tok.index);
-			++index;
-			tok = t.get(index);
+			if (line->register_index.index == -1) {
+				_status = PS_UNKNOWN_REGISTER_TYPE;
+				return -1;
+			}
 			if (line->register_index.offset != -1) {
 				++index;
 			}
-			tok = t.get(index);
-			++index; // ASSIGN
+			++index;
+			tok = t.get(index);		
+			if (tok.type != Token::ASSIGN) {
+				_status = ParserStatus::PS_MISSING_ASSIGNMENT;
+				return -1;
+			}
+			++index; 
 			tok = t.get(index);
 			index = parseOperand(data, t, index, &line->var1);
+			if (index == -1) {
+				return -1;
+			}
 			tok = t.get(index);
 			// simple assignment
 			if (tok.type == Token::SEMICOLON) {
@@ -402,6 +426,9 @@ namespace ds {
 			}
 			++index;
 			index = parseOperand(data, t, index, &line->var2);
+			if (index == -1) {
+				return -1;
+			}
 			tok = t.get(index);
 			if (tok.type == Token::SEMICOLON) {
 				++index;
@@ -411,15 +438,6 @@ namespace ds {
 				++index;
 			}
 			return index;
-		}
-
-		bool assertSize(const Tokenizer& t, int index, int required) {
-			int total = t.size();
-			if (index + required >= total) {
-				LOGE << "Parser error : Not enough tokens";
-				return false;
-			}
-			return true;
 		}
 
 		const Token::TokenType METHOD_DEFS[] = { Token::NAME,Token::NAME,Token::OPEN_BRACKET,Token::CLOSE_BRACKET,Token::OPEN_BRACES };
@@ -477,28 +495,24 @@ namespace ds {
 				if (l.type == Token::OPEN_BRACES) {
 					idx += 2;
 				}
-				else {
-					// report error
-				}
-			}
-			else {
-				// report error
 			}
 			return idx;
 		}
+
 		// -------------------------------------------------------
 		// parse
 		// -------------------------------------------------------
 		ParserStatus Script::parse(const char* text) {
+			_status = ParserStatus::PS_OK;
 			Tokenizer t;
 			t.parse(text);
 			int n = 0;
 			int idx = -1;
-			ParserStatus status = isMethodDefinition(text, t, 0);
-			if (status == PS_OK) {
+			_status = isMethodDefinition(text, t, 0);
+			if (_status == PS_OK) {
 				while (n < t.size()) {
-					status = isMethodDefinition(text, t, n);
-					if (status == PS_OK) {
+					_status = isMethodDefinition(text, t, n);
+					if (_status == PS_OK) {
 						++n;
 						Method m;
 						n = getMethod(text, t, n, &m);
@@ -520,21 +534,21 @@ namespace ds {
 				}
 				return ParserStatus::PS_OK;
 			}
-			else if ( status == PS_NO_METHOD) {
+			else if ( _status == PS_NO_METHOD) {
 				Method m;
 				m.hash = SID("default");
 				while (n < t.size()) {					
 					Line line;
 					n = parseLine(text, t, n, &line);
 					if (n == -1) {
-						return ParserStatus::PS_ERROR;
+						return _status;
 					}
 					m.lines.push_back(line);
 				}
 				_methods.push_back(m);
 				return ParserStatus::PS_OK;
 			}
-			return ParserStatus::PS_ERROR;
+			return _status;
 		}
 
 		// -------------------------------------------------------

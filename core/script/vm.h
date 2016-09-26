@@ -30,7 +30,10 @@ namespace ds {
 			PS_ERROR,
 			PS_NO_METHOD,
 			PS_INVALID_FUNCTION,
-			PS_NOT_ENOUGH_TOKENS
+			PS_NOT_ENOUGH_TOKENS,
+			PS_MISSING_ASSIGNMENT,
+			PS_UNKNOWN_REGISTER_TYPE,
+			PS_WRONG_V4_DEFINITION
 		};
 
 		struct Variable {
@@ -109,6 +112,9 @@ namespace ds {
 			bool loadData(const char* text);
 			bool reloadData(const char* text);
 			void debugMethod(StaticHash hash);
+			const ParserStatus& getStatus() const {
+				return _status;
+			}
 		private:	
 			int parseOperand(const char* data, const Tokenizer& t, int index, Variable* var);
 			int parseNumber(const Tokenizer& t, int index, Variable* var);
@@ -120,6 +126,7 @@ namespace ds {
 			int parseOperand(Variable* var, const char* name, int index);
 			int function_index(const char* name);
 			int constant_index(const char* name);
+			ParserStatus _status;
 			RegisterIndex get_register(const char* t);
 			v4 data[6];
 			Array<Method> _methods;

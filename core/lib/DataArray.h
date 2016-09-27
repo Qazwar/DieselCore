@@ -14,6 +14,9 @@ struct Index {
 	ID id;
 	unsigned short index;
 	unsigned short next;
+
+	Index() : id(0), index(-1), next(-1) {}
+	Index(ID i, unsigned short in, unsigned short n) : id(i), index(in), next(n) {}
 };
 
 template<class U,unsigned short MAX_FLOW_OBJECTS = 4096>

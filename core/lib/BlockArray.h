@@ -1,5 +1,6 @@
 #pragma once
 #include "DataArray.h"
+#include <Vector.h>
 
 const int MAX_BLOCKS = 16;
 
@@ -30,6 +31,36 @@ struct BlockArray {
 };
 
 namespace ds {
+
+	class MultiplexArray {
+
+	public:
+		MultiplexArray(uint32_t channels);
+		~MultiplexArray();
+		ID add();
+		void set(ID id, int channel, float v);
+		void set(ID id, int channel, const v2& v);
+		void set(ID id, int channel, const v3& v);
+		void set(ID id, int channel, const v4& v);
+		const v4& get(ID id, int channel) const;
+		void remove(ID id);
+		bool contains(ID id);
+		v4* getPtr(int channel) const;
+		uint32_t size() const {
+			return _size;
+		}
+	private:
+		int find(int data_index) const;
+		bool resize(int new_size);
+		Index* _indices;
+		v4* _data;
+		uint32_t _channels;
+		uint32_t _size;
+		uint32_t _capacity;
+		uint32_t _total;
+		unsigned short _free_enqueue;
+		unsigned short _free_dequeue;
+	};
 
 	struct ChannelArray {
 

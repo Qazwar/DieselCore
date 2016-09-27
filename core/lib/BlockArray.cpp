@@ -78,6 +78,166 @@ void BlockArray::swap(int newIndex,int oldIndex) {
 
 namespace ds {
 
+	// --------------------------------------------------------
+	// MultiplexArray
+	// --------------------------------------------------------
+
+	MultiplexArray::MultiplexArray(uint32_t channels) {
+		_indices = 0;
+		_data = 0;
+		_channels = channels;
+		_size = 0;
+		_capacity = 0;
+		_total = 0;
+		_free_enqueue = 0;
+		_free_dequeue = 0;
+	}
+
+	MultiplexArray::~MultiplexArray() {
+		if (_indices != 0) {
+			DEALLOC(_indices);
+		}
+		if (_data != 0) {
+			DEALLOC(_data);
+		}
+	}
+
+	ID MultiplexArray::add() {
+		if (_size + 1 > _capacity) {
+			resize(_size * 2 + 8);
+		}
+		Index &in = _indices[_free_dequeue];
+		_free_dequeue = in.next;
+		in.index = _size++;
+		return in.id;
+	}
+
+	void MultiplexArray::set(ID id, int channel, float v) {
+
+	}
+
+	void MultiplexArray::set(ID id, int channel, const v2& v) {
+
+	}
+
+	void MultiplexArray::set(ID id, int channel, const v3& v) {
+
+	}
+
+	void MultiplexArray::set(ID id, int channel, const v4& v) {
+		v4* p = getPtr(channel);
+		assert(id != UINT_MAX);
+		unsigned short index = _indices[id & INDEX_MASK].index;
+		assert(index != USHRT_MAX);
+		p[index] = v;
+	}
+
+	const v4& MultiplexArray::get(ID id, int channel) const {
+		v4* p = getPtr(channel);
+		assert(id != UINT_MAX);
+		unsigned short index = _indices[id & INDEX_MASK].index;
+		return p[index];
+	}
+
+	int MultiplexArray::find(int data_index) const {
+		for (int i = 0; i < _capacity; ++i) {
+			if (_indices[i].index == data_index) {
+				return i;
+			}
+		}
+		return -1;
+	}
+
+	/*
+	void remove(ID id) {
+	Index &in = indices[id & INDEX_MASK];
+	assert(in.index != USHRT_MAX);
+	ID currentID = ids[num - 1];
+	Index& next = indices[currentID & INDEX_MASK];
+	ids[in.index] = ids[next.index];
+	swap(in.index, next.index);
+	--num;
+	indices[currentID & INDEX_MASK].index = in.index;
+	in.index = USHRT_MAX;
+	indices[free_enqueue].next = id & INDEX_MASK;
+	free_enqueue = id & INDEX_MASK;
+	}
+	*/
+	void MultiplexArray::remove(ID id) {
+		Index &in = _indices[id & INDEX_MASK];
+		assert(in.index != USHRT_MAX);
+		int l = find(_size - 1);
+		// FIXME: might be -1!!!!
+		Index& last = _indices[l];
+		int current = in.index;
+		int next = last.index;
+		for (int i = 0; i < _channels; ++i) {
+			_data[current] = _data[next];
+			//memcpy(_data + current, _data + next, _capacity * sizeof(v4));
+			current += _capacity;
+			next += _capacity;
+		}
+		--_size;
+		last.index = in.index;
+		_indices[in.id & INDEX_MASK].index = in.index;
+		in.index = USHRT_MAX;
+		_indices[_free_enqueue].next = id & INDEX_MASK;
+		_free_enqueue = id & INDEX_MASK;
+	}
+
+	bool MultiplexArray::contains(ID id) {
+		Index &in = _indices[id & INDEX_MASK];
+		return (in.index != USHRT_MAX);
+	}
+
+	v4* MultiplexArray::getPtr(int channel) const {
+		return _data + channel * _capacity;
+	}
+
+	bool MultiplexArray::resize(int new_size) {
+		if (new_size > _capacity) {
+			if (_indices == 0) {
+				_indices = (Index*)ALLOC(new_size * sizeof(Index));
+				for (unsigned short i = 0; i < new_size; ++i) {
+					_indices[i].id = i;
+					_indices[i].next = i + 1;
+				}
+				_free_dequeue = 0;
+				_free_enqueue = new_size - 1;
+			}
+			else {
+				Index* tmp = (Index*)ALLOC(new_size * sizeof(Index));
+				memcpy(tmp, _indices, _size * sizeof(Index));
+				for (unsigned short i = _size; i < new_size; ++i) {
+					tmp[i].id = i;
+					tmp[i].next = i + 1;
+				}
+				DEALLOC(_indices);
+				_indices = tmp;
+				_free_enqueue = new_size - 1;
+			}
+			int sz = new_size * _channels * sizeof(v4);
+			v4* t = (v4*)ALLOC(sz);
+			if (_data != 0) {
+				int offset = 0;
+				for (int i = 0; i < _channels; ++i) {
+					memcpy(t + i * new_size, _data + offset, _size * sizeof(v4));
+					offset += _capacity;
+				}
+				DEALLOC(_data);
+			}
+			_capacity = new_size;
+			_data = t;
+			return true;
+		}
+		return false;
+	}
+
+
+	// --------------------------------------------------------
+	// ChannelArray
+	// --------------------------------------------------------
+
 	ChannelArray::ChannelArray() : size(0), capacity(0), data(0), total_capacity(0) , _data_indices(0) , _free_dequeue(0) , _free_enqueue(0) {
 	}
 

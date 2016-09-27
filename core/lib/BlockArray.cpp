@@ -112,6 +112,9 @@ namespace ds {
 		Index &in = _indices[_free_dequeue];
 		_free_dequeue = in.next;
 		in.index = _size++;
+		for (int i = 0; i < _channels; ++i) {
+			_data[in.index] = v4(0.0f);
+		}
 		return in.id;
 	}
 
@@ -119,21 +122,21 @@ namespace ds {
 	// set 
 	// -----------------------------------------------
 	void MultiplexArray::set(ID id, int channel, float v) {
-
+		set(id, channel, v4(v, 0.0f, 0.0f, 0.0f));
 	}
 
 	// -----------------------------------------------
 	// set 
 	// -----------------------------------------------
 	void MultiplexArray::set(ID id, int channel, const v2& v) {
-
+		set(id, channel, v4(v.x, v.y, 0.0f, 0.0f));
 	}
 
 	// -----------------------------------------------
 	// set 
 	// -----------------------------------------------
 	void MultiplexArray::set(ID id, int channel, const v3& v) {
-
+		set(id, channel, v4(v.x, v.y, v.z, 0.0f));
 	}
 
 	// -----------------------------------------------
@@ -188,7 +191,7 @@ namespace ds {
 			last.index = in.index;
 		}
 		--_size;		
-		_indices[in.id & INDEX_MASK].index = in.index;
+		//_indices[in.id & INDEX_MASK].index = in.index;
 		in.index = USHRT_MAX;
 		_indices[_free_enqueue].next = id & INDEX_MASK;
 		_free_enqueue = id & INDEX_MASK;

@@ -102,6 +102,9 @@ namespace ds {
 		}
 	}
 
+	// -----------------------------------------------
+	// add
+	// -----------------------------------------------
 	ID MultiplexArray::add() {
 		if (_size + 1 > _capacity) {
 			resize(_size * 2 + 8);
@@ -112,18 +115,30 @@ namespace ds {
 		return in.id;
 	}
 
+	// -----------------------------------------------
+	// set 
+	// -----------------------------------------------
 	void MultiplexArray::set(ID id, int channel, float v) {
 
 	}
 
+	// -----------------------------------------------
+	// set 
+	// -----------------------------------------------
 	void MultiplexArray::set(ID id, int channel, const v2& v) {
 
 	}
 
+	// -----------------------------------------------
+	// set 
+	// -----------------------------------------------
 	void MultiplexArray::set(ID id, int channel, const v3& v) {
 
 	}
 
+	// -----------------------------------------------
+	// set 
+	// -----------------------------------------------
 	void MultiplexArray::set(ID id, int channel, const v4& v) {
 		v4* p = getPtr(channel);
 		assert(id != UINT_MAX);
@@ -132,6 +147,9 @@ namespace ds {
 		p[index] = v;
 	}
 
+	// -----------------------------------------------
+	// get
+	// -----------------------------------------------
 	const v4& MultiplexArray::get(ID id, int channel) const {
 		v4* p = getPtr(channel);
 		assert(id != UINT_MAX);
@@ -139,6 +157,9 @@ namespace ds {
 		return p[index];
 	}
 
+	// -----------------------------------------------
+	// find indices index by data index
+	// -----------------------------------------------
 	int MultiplexArray::find(int data_index) const {
 		for (int i = 0; i < _capacity; ++i) {
 			if (_indices[i].index == data_index) {
@@ -148,52 +169,49 @@ namespace ds {
 		return -1;
 	}
 
-	/*
-	void remove(ID id) {
-	Index &in = indices[id & INDEX_MASK];
-	assert(in.index != USHRT_MAX);
-	ID currentID = ids[num - 1];
-	Index& next = indices[currentID & INDEX_MASK];
-	ids[in.index] = ids[next.index];
-	swap(in.index, next.index);
-	--num;
-	indices[currentID & INDEX_MASK].index = in.index;
-	in.index = USHRT_MAX;
-	indices[free_enqueue].next = id & INDEX_MASK;
-	free_enqueue = id & INDEX_MASK;
-	}
-	*/
+	// -----------------------------------------------
+	// remove by id
+	// -----------------------------------------------
 	void MultiplexArray::remove(ID id) {
 		Index &in = _indices[id & INDEX_MASK];
 		assert(in.index != USHRT_MAX);
 		int l = find(_size - 1);
-		// FIXME: might be -1!!!!
-		Index& last = _indices[l];
-		int current = in.index;
-		int next = last.index;
-		for (int i = 0; i < _channels; ++i) {
-			_data[current] = _data[next];
-			//memcpy(_data + current, _data + next, _capacity * sizeof(v4));
-			current += _capacity;
-			next += _capacity;
+		if (l != -1) {
+			Index& last = _indices[l];
+			int current = in.index;
+			int next = last.index;
+			for (int i = 0; i < _channels; ++i) {
+				_data[current] = _data[next];
+				current += _capacity;
+				next += _capacity;
+			}
+			last.index = in.index;
 		}
-		--_size;
-		last.index = in.index;
+		--_size;		
 		_indices[in.id & INDEX_MASK].index = in.index;
 		in.index = USHRT_MAX;
 		_indices[_free_enqueue].next = id & INDEX_MASK;
 		_free_enqueue = id & INDEX_MASK;
 	}
 
+	// -----------------------------------------------
+	// contains id
+	// -----------------------------------------------
 	bool MultiplexArray::contains(ID id) {
 		Index &in = _indices[id & INDEX_MASK];
 		return (in.index != USHRT_MAX);
 	}
 
+	// -----------------------------------------------
+	// get pointer to channel
+	// -----------------------------------------------
 	v4* MultiplexArray::getPtr(int channel) const {
 		return _data + channel * _capacity;
 	}
 
+	// -----------------------------------------------
+	// resize
+	// -----------------------------------------------
 	bool MultiplexArray::resize(int new_size) {
 		if (new_size > _capacity) {
 			if (_indices == 0) {

@@ -265,14 +265,10 @@ namespace ds {
 
 	ChannelArray::~ChannelArray() {
 		if (_data_indices != 0) {
-			//gDefaultMemory->deallocate(_data_indices);
 			DEALLOC(_data_indices);
-			//delete _data_indices;
 		}
 		if (data != 0) {
-			//gDefaultMemory->deallocate(data);
 			DEALLOC(data);
-			//delete[] data;
 		}
 	}
 
@@ -301,9 +297,7 @@ namespace ds {
 				total += _sizes[i];
 			}
 			if (_data_indices == 0) {
-				//_data_indices = (Index*)gDefaultMemory->allocate(new_size * sizeof(Index));
 				_data_indices = (Index*)ALLOC(new_size * sizeof(Index));
-				//_data_indices = new Index[new_size];// *sizeof(Index));
 				for (unsigned short i = 0; i < new_size; ++i) {
 					_data_indices[i].id = i;
 					_data_indices[i].next = i + 1;
@@ -312,24 +306,18 @@ namespace ds {
 				_free_enqueue = new_size - 1;
 			}
 			else {
-				//Index* tmp = (Index*)gDefaultMemory->allocate(new_size * sizeof(Index));
 				Index* tmp = (Index*)ALLOC(new_size * sizeof(Index));
-				//Index* tmp = new Index[new_size];// *)gDefaultMemory->allocate(new_size * sizeof(Index));
 				memcpy(tmp, _data_indices, size * sizeof(Index));
 				for (unsigned short i = size; i < new_size; ++i) {
 					tmp[i].id = i;
 					tmp[i].next = i + 1;
 				}
-				//gDefaultMemory->deallocate(_data_indices);
 				DEALLOC(_data_indices);
-				//delete[] _data_indices;
 				_data_indices = tmp;
 				_free_enqueue = new_size - 1;
 			}
 			int sz = new_size * total;
-			//char* t = (char*)gDefaultMemory->allocate(sz);
 			char* t = (char*)ALLOC(sz);
-			//char* t = new char[sz];
 			if (data != 0) {
 				int offset = 0;
 				int old_offset = 0;
@@ -338,9 +326,7 @@ namespace ds {
 					offset += new_size * _sizes[i];
 					old_offset += capacity * _sizes[i];
 				}
-				//gDefaultMemory->deallocate(data);
 				DEALLOC(data);
-				//delete[] data;
 			}
 			capacity = new_size;
 			_indices[0] = 0;
@@ -357,19 +343,36 @@ namespace ds {
 		return data + _indices[index];
 	}
 
+	// -----------------------------------------------
+	// find indices index by data index
+	// -----------------------------------------------
+	int ChannelArray::find(int data_index) const {
+		for (int i = 0; i < capacity; ++i) {
+			if (_data_indices[i].index == data_index) {
+				return i;
+			}
+		}
+		return -1;
+	}
+
 	void ChannelArray::remove(ID id) {
 		Index &in = _data_indices[id & INDEX_MASK];
 		assert(in.index != USHRT_MAX);
-		int current = in.index;
-		int next = (size - 1);
-		for (int i = 0; i < _num_blocks; ++i) {
-
-			memcpy(data + current, data + next, _sizes[i]);
-			current += capacity * _sizes[i];
-			next += capacity * _sizes[i];
+		int current = in.index * _sizes[0];
+		if (size > 0) {
+			int l = find(size - 1);
+			if (l != -1) {
+				Index& last = _data_indices[l];
+				int next = last.index * _sizes[0];
+				for (int i = 0; i < _num_blocks; ++i) {
+					memcpy(data + current, data + next, _sizes[i]);
+					current += capacity * _sizes[i];
+					next += capacity * _sizes[i];
+				}
+				last.index = in.index;
+			}
 		}
 		--size;
-		_data_indices[in.id & INDEX_MASK].index = in.index;
 		in.index = USHRT_MAX;
 		_data_indices[_free_enqueue].next = id & INDEX_MASK;
 		_free_enqueue = id & INDEX_MASK;

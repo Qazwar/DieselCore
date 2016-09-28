@@ -119,6 +119,8 @@ namespace ds {
 
 		bool resize(int new_size);
 
+		int find(int data_index) const;
+
 	};
 
 }

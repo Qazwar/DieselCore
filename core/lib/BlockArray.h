@@ -1,6 +1,9 @@
 #pragma once
 #include "DataArray.h"
 #include <Vector.h>
+#include "..\graphics\Color.h"
+#include "..\graphics\Texture.h"
+#include "..\math\tweening.h"
 
 const int MAX_BLOCKS = 16;
 
@@ -62,6 +65,29 @@ namespace ds {
 		unsigned short _free_dequeue;
 	};
 
+	enum ChannelType {
+		CT_INT,CT_FLOAT,CT_V2,CT_V3,CT_V4,CT_COLOR,CT_RECT,CT_ID,CT_TWN
+	};
+
+	struct ChannelDefinition {
+		ChannelType type;
+		int size;
+
+		ChannelDefinition(ChannelType t, int s) : type(t), size(s) {}
+	};
+
+	static const  ChannelDefinition CHANNEL_DEFINITIONS[] = {
+		{ CT_INT, sizeof(int) },
+		{ CT_FLOAT, sizeof(float) },
+		{ CT_V2, sizeof(v2) },
+		{ CT_V3, sizeof(v3) },
+		{ CT_V4, sizeof(v4) },
+		{ CT_RECT, sizeof(Rect) },
+		{ CT_COLOR, sizeof(Color) },
+		{ CT_ID, sizeof(ID)},
+		{ CT_TWN, sizeof(tweening::TweeningType) }
+	};
+
 	struct ChannelArray {
 
 		char* data;
@@ -70,6 +96,7 @@ namespace ds {
 		int total_capacity;
 		int _sizes[MAX_BLOCKS];
 		int _indices[MAX_BLOCKS];
+		ChannelType _types[MAX_BLOCKS];
 		int _num_blocks;
 		Index* _data_indices;
 		unsigned short _free_enqueue;
@@ -78,6 +105,8 @@ namespace ds {
 		ChannelArray();
 
 		~ChannelArray();
+
+		void init(ChannelType* types, int num);
 
 		void init(int* sizes, int num);
 
@@ -116,6 +145,8 @@ namespace ds {
 		}
 
 		void* get_ptr(int channel);
+
+		void* getPointer(int channel,ChannelType type);
 
 		bool resize(int new_size);
 

@@ -6,8 +6,8 @@ namespace ds {
 	// -------------------------------------------------------
 	// 
 	// -------------------------------------------------------
-	ScalingAction::ScalingAction(MultiplexArray* array) : AbstractAction(array,"scale") {
-		int sizes[] = { sizeof(ID), sizeof(int), sizeof(v4), sizeof(v4), sizeof(float), sizeof(float), sizeof(tweening::TweeningType), sizeof(int) };
+	ScalingAction::ScalingAction(ChannelArray* array) : AbstractAction(array,"scale") {
+		int sizes[] = { sizeof(ID), sizeof(int), sizeof(v3), sizeof(v3), sizeof(float), sizeof(float), sizeof(tweening::TweeningType), sizeof(int) };
 		_buffer.init(sizes, 8);
 	}
 
@@ -20,8 +20,8 @@ namespace ds {
 		if (_buffer.resize(sz)) {
 			_ids = (ID*)_buffer.get_ptr(0);
 			_channels = (int*)_buffer.get_ptr(1);
-			_startScale = (v4*)_buffer.get_ptr(2);
-			_endScale = (v4*)_buffer.get_ptr(3);
+			_startScale = (v3*)_buffer.get_ptr(2);
+			_endScale = (v3*)_buffer.get_ptr(3);
 			_timers = (float*)_buffer.get_ptr(4);
 			_ttl = (float*)_buffer.get_ptr(5);
 			_tweeningTypes = (tweening::TweeningType*)_buffer.get_ptr(6);
@@ -31,7 +31,7 @@ namespace ds {
 	// -------------------------------------------------------
 	// 
 	// -------------------------------------------------------
-	void ScalingAction::attach(ID id, int channel, const v4& startScale,const v4& endScale,float ttl,int mode,const tweening::TweeningType& tweeningType) {
+	void ScalingAction::attach(ID id, int channel, const v3& startScale,const v3& endScale,float ttl,int mode,const tweening::TweeningType& tweeningType) {
 		int idx = create(id);
 		_ids[idx] = id;
 		_channels[idx] = channel;
@@ -56,7 +56,7 @@ namespace ds {
 			// move
 			for (int i = 0; i < _buffer.size; ++i) {
 				_timers[i] += dt;
-				v4 t = tweening::interpolate(_tweeningTypes[i], _startScale[i], _endScale[i], _timers[i], _ttl[i]);
+				v3 t = tweening::interpolate(_tweeningTypes[i], _startScale[i], _endScale[i], _timers[i], _ttl[i]);
 				_array->set(_ids[i], _channels[i], t);				
 				if ( _timers[i] >= _ttl[i] ) {
 					if ( _modes[i] < 0 ) {

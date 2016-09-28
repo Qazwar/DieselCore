@@ -272,6 +272,16 @@ namespace ds {
 		}
 	}
 
+	void ChannelArray::init(ChannelType* types, int num) {
+		assert(num < MAX_BLOCKS);
+		for (int i = 0; i < num; ++i) {
+			const ChannelDefinition& def = CHANNEL_DEFINITIONS[types[i]];
+			_sizes[i] = def.size;
+			_types[i] = def.type;
+		}
+		_num_blocks = num;
+	}
+
 	void ChannelArray::init(int* sizes, int num) {
 		assert(num < MAX_BLOCKS);
 		for (int i = 0; i < num; ++i) {
@@ -340,7 +350,14 @@ namespace ds {
 	}
 
 	void* ChannelArray::get_ptr(int index) {
+		assert(index >= 0 && index < MAX_BLOCKS);
 		return data + _indices[index];
+	}
+
+	void* ChannelArray::getPointer(int channel, ChannelType type) {
+		assert(channel >= 0 && channel < MAX_BLOCKS);
+		assert(_types[channel] == type);
+		return data + _indices[channel];
 	}
 
 	// -----------------------------------------------

@@ -10,7 +10,7 @@ namespace ds {
 	class AbstractAction {
 
 		public:
-			AbstractAction(MultiplexArray* array,const char* name) : _array(array) , _name(name) {
+			AbstractAction(ChannelArray* array, const char* name) : _array(array), _name(name) {
 				_hash = StaticHash(name);
 			}
 			virtual ~AbstractAction() {}
@@ -38,7 +38,7 @@ namespace ds {
 			BlockArray _buffer;
 			ID* _ids;
 			int* _channels;
-			MultiplexArray* _array;
+			ChannelArray* _array;
 		private:
 			const char* _name;
 			StaticHash _hash;

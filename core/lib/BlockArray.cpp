@@ -9,7 +9,6 @@ BlockArray::BlockArray() : size(0), capacity(0), data(0) , total_capacity(0) {
 
 BlockArray::~BlockArray() {
 	if (data != 0) {
-		//ds::gDefaultMemory->deallocate(data);
 		DEALLOC(data);
 	}
 }
@@ -31,7 +30,6 @@ bool BlockArray::resize(int new_size) {
 		}
 		
 		int sz = new_size * total;
-		//char* t = (char*)ds::gDefaultMemory->allocate(sz);
 		char* t = (char*)ALLOC(sz);
 		if (data != 0) {
 			int offset = 0;
@@ -41,7 +39,6 @@ bool BlockArray::resize(int new_size) {
 				offset += new_size * _sizes[i];
 				old_offset += capacity * _sizes[i];
 			}
-			//ds::gDefaultMemory->deallocate(data);
 			DEALLOC(data);
 		}
 		capacity = new_size;
@@ -298,7 +295,6 @@ namespace ds {
 		Index &in = _data_indices[_free_dequeue];
 		_free_dequeue = in.next;
 		in.index = size++;
-		LOG << "add id: " << in.id << " at: " << in.index << " size: " << size;
 		return in.id;
 	}
 

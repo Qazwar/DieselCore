@@ -4,6 +4,8 @@
 #include "..\math\tweening.h"
 #include "..\graphics\Texture.h"
 #include "..\graphics\Color.h"
+#include "ActionEventBuffer.h"
+
 namespace ds {
 
 	struct WorldEntity {
@@ -23,68 +25,31 @@ namespace ds {
 	enum WorldEntityChannel {
 		WEC_POSITION,WEC_SCALE,WEC_ROTATION,WEC_TEXTURE,WEC_COLOR,WEC_TIMER,WEC_TYPE,WEC_PREVIOUS,WEC_EXTENT
 	};
-
-	enum ActionType {
-		AT_SCALE,
-
-		AT_ALPHA_FADE_TO,
-		AT_COLOR_FADE_TO,
-		AT_MOVE_TO,
-		AT_MOVE_BY,
-		AT_FOLLOW_PATH,
-		AT_FOLLOW_CURVE,
-		AT_FOLLOW_TARGET,
-		AT_REMOVE_AFTER,
-		AT_WAIT,
-		AT_MOVE_WITH,
-		AT_ROTATE,
-		AT_ROTATE_BY,
-		AT_FOLLOW_STRAIGHT_PATH,
-		AT_KILL,
-		AT_SCALE_BY_PATH,
-		AT_COLOR_FLASH
-	};
-
-	struct ActionEvent {
-
-		ID id;
-		ActionType type;
-		int spriteType;
-	};
-
-	struct ActionEventBuffer {
-
-		Array<ActionEvent> events;
-
-		void reset() {
-			events.clear();
-		}
-
-		void add(ID id, ActionType type, int spriteType) {
-			ActionEvent e;
-			e.id = id;
-			e.type = type;
-			e.spriteType = spriteType;
-			events.push_back(e);
-		}
-	};
-
+	
 	class AbstractAction;
 
 	class World {
 
 	public:
-		World(int channels);
+		World();
 		~World();
 		ID create();
-		ID create(const v2& pos, const Texture& texture, float rotation, const v2& scale, const Color& color = Color::WHITE);
+		ID create(const v2& pos, const Texture& texture, int type, float rotation = 0.0f, const v2& scale = v2(1,1), const Color& color = Color::WHITE);
 		uint32_t size() const;
+
 		void scale(ID id, const v3& start, const v3& end, float ttl, int mode = 0, const tweening::TweeningType& tweeningType = &tweening::linear);
+
+		void setPosition(ID id, const v2& pos);
+		const v3& getPosition(ID id) const;
+		void setRotation(ID id, const v3& rotation);
+		void setRotation(ID id, float rotation);
+
 		void tick(float dt);
 		void remove(ID id);
 		ChannelArray* getChannelArray() const {
 			return _data;
 		}
+		int find_by_type(int type, ID* ids, int max) const;
 	private:
 		int _numChannels;
 		ChannelArray* _data;

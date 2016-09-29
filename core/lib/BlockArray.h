@@ -121,6 +121,22 @@ namespace ds {
 			p[index] = t;
 		}
 
+		void set(ID id, int channel, const Texture& t) {
+			Texture* p = (Texture*)get_ptr(channel);
+			assert(id != UINT_MAX);
+			unsigned short index = _data_indices[id & INDEX_MASK].index;
+			assert(index != USHRT_MAX);
+			p[index] = t;
+		}
+
+		void set(ID id, int channel, const Rect& t) {
+			Rect* p = (Rect*)get_ptr(channel);
+			assert(id != UINT_MAX);
+			unsigned short index = _data_indices[id & INDEX_MASK].index;
+			assert(index != USHRT_MAX);
+			p[index] = t;
+		}
+
 		const bool contains(ID id) const {
 			const Index& in = _data_indices[id & INDEX_MASK];
 			return in.id == id && in.index != USHRT_MAX;

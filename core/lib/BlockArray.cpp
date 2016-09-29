@@ -1,6 +1,7 @@
 #include "BlockArray.h"
 #include <string.h>
 #include "..\memory\DefaultAllocator.h"
+#include "..\log\Log.h"
 
 BlockArray::BlockArray() : size(0), capacity(0), data(0) , total_capacity(0) {
 }
@@ -297,6 +298,7 @@ namespace ds {
 		Index &in = _data_indices[_free_dequeue];
 		_free_dequeue = in.next;
 		in.index = size++;
+		LOG << "add id: " << in.id << " at: " << in.index << " size: " << size;
 		return in.id;
 	}
 
@@ -341,7 +343,7 @@ namespace ds {
 			capacity = new_size;
 			_indices[0] = 0;
 			for (int i = 1; i < _num_blocks; ++i) {
-				_indices[i] = _indices[i - 1] + _sizes[i] * capacity;
+				_indices[i] = _indices[i - 1] + _sizes[i - 1] * capacity;
 			}
 			data = t;
 			return true;

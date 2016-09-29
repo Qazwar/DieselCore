@@ -42,7 +42,7 @@ const float TWO_PI_INV = 1.0f / TWO_PI;
 #endif
 
 #ifndef DBG_TEX
-#define DBG_TEX(v) "top: " << v.rect.top << " left: " << v.rect.left << " dim.x: " << v.dim.x << " dim.y: " << v.dim.y << " u1: " << v.uv.x << " v1: " << v.uv.y << " u2: " << v.uv.z << " v2: " << v.uv.w
+#define DBG_TEX(v) "top: " << v.rect.top << " left: " << v.rect.left << " dim.x: " << v.dim.x << " dim.y: " << v.dim.y << " uv0: " << v.uv[0].x << " " << v.uv[0].y << " uv1: " << v.uv[1].x << " " << v.uv[1].y << " uv2: " << v.uv[2].x << " " << v.uv[2].y << " uv3: " << v.uv[3].x << " " << v.uv[3].y
 #endif
 
 #ifndef DBG_PNT

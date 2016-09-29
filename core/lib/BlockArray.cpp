@@ -21,7 +21,7 @@ void BlockArray::init(int* sizes, int num) {
 	_num_blocks = num;
 }
 
-bool BlockArray::resize(int new_size) {
+bool BlockArray::resize(uint32_t new_size) {
 	if (new_size > capacity) {
 		new_size = capacity * 2 + new_size;
 		int total = 0;
@@ -110,7 +110,7 @@ namespace ds {
 		Index &in = _indices[_free_dequeue];
 		_free_dequeue = in.next;
 		in.index = _size++;
-		for (int i = 0; i < _channels; ++i) {
+		for (uint32_t i = 0; i < _channels; ++i) {
 			_data[in.index] = v4(0.0f);
 		}
 		return in.id;
@@ -162,7 +162,7 @@ namespace ds {
 	// find indices index by data index
 	// -----------------------------------------------
 	int MultiplexArray::find(int data_index) const {
-		for (int i = 0; i < _capacity; ++i) {
+		for (uint32_t i = 0; i < _capacity; ++i) {
 			if (_indices[i].index == data_index) {
 				return i;
 			}
@@ -181,7 +181,7 @@ namespace ds {
 			Index& last = _indices[l];
 			int current = in.index;
 			int next = last.index;
-			for (int i = 0; i < _channels; ++i) {
+			for (uint32_t i = 0; i < _channels; ++i) {
 				_data[current] = _data[next];
 				current += _capacity;
 				next += _capacity;
@@ -213,7 +213,7 @@ namespace ds {
 	// -----------------------------------------------
 	// resize
 	// -----------------------------------------------
-	bool MultiplexArray::resize(int new_size) {
+	bool MultiplexArray::resize(uint32_t new_size) {
 		if (new_size > _capacity) {
 			if (_indices == 0) {
 				_indices = (Index*)ALLOC(new_size * sizeof(Index));
@@ -239,7 +239,7 @@ namespace ds {
 			v4* t = (v4*)ALLOC(sz);
 			if (_data != 0) {
 				int offset = 0;
-				for (int i = 0; i < _channels; ++i) {
+				for (uint32_t i = 0; i < _channels; ++i) {
 					memcpy(t + i * new_size, _data + offset, _size * sizeof(v4));
 					offset += _capacity;
 				}

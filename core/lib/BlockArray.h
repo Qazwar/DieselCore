@@ -25,7 +25,7 @@ struct BlockArray {
 
 	void* get_ptr(int index);
 
-	bool resize(int new_size);
+	bool resize(uint32_t new_size);
 
 	void remove(int index);
 
@@ -54,7 +54,7 @@ namespace ds {
 		}
 	private:
 		int find(int data_index) const;
-		bool resize(int new_size);
+		bool resize(uint32_t new_size);
 		Index* _indices;
 		v4* _data;
 		uint32_t _channels;

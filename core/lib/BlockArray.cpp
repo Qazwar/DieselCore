@@ -376,7 +376,7 @@ namespace ds {
 		int current = in.index * _sizes[0];
 		if (size > 0) {
 			int l = find(size - 1);
-			if (l != -1) {
+			if (l != -1 && l != in.index) {
 				Index& last = _data_indices[l];
 				int next = last.index * _sizes[0];
 				for (int i = 0; i < _num_blocks; ++i) {

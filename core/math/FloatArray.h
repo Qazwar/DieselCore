@@ -142,5 +142,6 @@ typedef AbstractPath<float> FloatArray;
 typedef AbstractPath<float> FloatPath;
 typedef AbstractPath<Color> ColorPath;
 typedef AbstractPath<v2> Vector2fPath;
+typedef AbstractPath<v3> V3Path;
 
 }

@@ -1092,20 +1092,22 @@ bool FlatJSONReader::get(const char* name, float* ret) const {
 // -------------------------------------------
 // get v2 path
 // -------------------------------------------
-bool FlatJSONReader::get(const char* name, Vector2fPath* path) const {
+bool FlatJSONReader::get(const char* name, V3Path* path) const {
 	int idx = get_index(name);
 	if (idx != -1) {
 		int entries = _data_sizes[idx];
-		int steps = entries / 3;
-		if ((entries % 3) == 0) {
+		int steps = entries / 4;
+		if ((entries % 4) == 0) {
 			int current = 0;
 			for (int i = 0; i < steps; ++i) {
 				float step = get(_data_indices[idx] + current);
 				++current;
-				v2 c;
+				v3 c;
 				c.x = get(_data_indices[idx] + current);
 				++current;
 				c.y = get(_data_indices[idx] + current);
+				++current;
+				c.z = get(_data_indices[idx] + current);
 				++current;
 				path->add(step, c);
 			}

@@ -1,5 +1,7 @@
 #include "World.h"
 #include "actions\ScalingAction.h"
+#include "actions\RemoveAfterAction.h"
+#include "actions\ScaleByPathAction.h"
 #include "..\profiler\Profiler.h"
 
 namespace ds {
@@ -15,6 +17,11 @@ namespace ds {
 
 
 	World::~World()	{
+		for (int i = 0; i < 32; ++i) {
+			if (_actions[i] != 0) {
+				delete _actions[i];
+			}
+		}
 		delete _data;
 	}
 
@@ -53,6 +60,14 @@ namespace ds {
 		return _data->get<v3>(id, WEC_POSITION);
 	}
 
+	void World::scaleByPath(ID id, V3Path* path, float ttl) {
+		if (_actions[AT_SCALE_BY_PATH] == 0) {
+			_actions[AT_SCALE_BY_PATH] = new ScaleByPathAction(_data);
+		}
+		ScaleByPathAction* action = (ScaleByPathAction*)_actions[AT_SCALE_BY_PATH];
+		action->attach(id, path, ttl);
+	}
+
 	void World::scale(ID id, const v3& start, const v3& end, float ttl, int mode, const tweening::TweeningType& tweeningType) {
 		if (_actions[AT_SCALE] == 0) {
 			_actions[AT_SCALE] = new ScalingAction(_data);
@@ -62,7 +77,12 @@ namespace ds {
 	}
 
 	void World::remove(ID id) {
-
+		for (int i = 0; i < 32; ++i) {
+			if (_actions[i] != 0) {
+				_actions[i]->removeByID(id);
+			}
+		}
+		_data->remove(id);
 	}
 
 	int World::find_by_type(int type, ID* ids, int max) const {
@@ -74,6 +94,14 @@ namespace ds {
 			}
 		}
 		return cnt;
+	}
+
+	void World::removeAfter(ID id, float ttl) {
+		if (_actions[AT_REMOVE_AFTER] == 0) {
+			_actions[AT_REMOVE_AFTER] = new RemoveAfterAction(_data);
+		}
+		RemoveAfterAction* action = (RemoveAfterAction*)_actions[AT_REMOVE_AFTER];
+		action->attach(id, ttl);
 	}
 
 	void World::tick(float dt) {
@@ -90,7 +118,7 @@ namespace ds {
 			//ZoneTracker z2("World:tick:kill");
 			for (int i = 0; i < _buffer.events.size(); ++i) {
 				const ActionEvent& e = _buffer.events[i];
-				if (e.type == AT_KILL) {
+				if (e.action == AT_KILL) {
 					remove(e.id);
 				}
 			}

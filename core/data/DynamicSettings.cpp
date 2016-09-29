@@ -44,6 +44,15 @@ namespace ds {
 		items.push_back(item);
 	}
 
+	void DynamicGameSettings::add(const char* name, V3Path* value) {
+		SettingsItem item;
+		item.name = name;
+		item.hash = StaticHash(name);
+		item.type = ST_PATH;
+		item.ptr.pPtr = value;
+		items.push_back(item);
+	}
+
 	// -----------------------------------------------
 	// load JSON
 	// -----------------------------------------------
@@ -66,7 +75,7 @@ namespace ds {
 				else if (item.type == ST_RECT) {
 					loader.get(item.name, item.ptr.rPtr);
 				}
-				else if (item.type == ST_V2_PATH) {
+				else if (item.type == ST_PATH) {
 					loader.get(item.name, item.ptr.pPtr);
 				}
 				else if (item.type == ST_VEC2) {

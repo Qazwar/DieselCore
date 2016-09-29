@@ -167,7 +167,7 @@ namespace ds {
 		bool get(const char* name, Rect* ret) const;
 		bool get(const char* name, Color* ret) const;
 		bool get(const char* name, v2* ret) const;
-		bool get(const char* name, Vector2fPath* ret) const;
+		bool get(const char* name, V3Path* ret) const;
 		bool contains(const char* name) const;
 	private:
 		void add(int pIndex, float value);

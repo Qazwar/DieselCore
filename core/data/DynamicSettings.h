@@ -12,7 +12,7 @@ namespace ds {
 		ST_FLOAT,
 		ST_RECT,
 		ST_INT,
-		ST_V2_PATH,
+		ST_PATH,
 		ST_COLOR,
 		ST_VEC2,
 		ST_VEC3,
@@ -33,7 +33,7 @@ namespace ds {
 			v3* v3Ptr;
 			Color* cPtr;
 			Rect* rPtr;
-			Vector2fPath* pPtr;
+			V3Path* pPtr;
 		} ptr;
 	};
 	
@@ -59,8 +59,8 @@ namespace ds {
 		//void addColor(const char* name, Color* value, const Color& defaultValue);
 		//bool setColor(const char* name, const Color& value);
 
-		//void addPath(const char* name, Vector2fPath* value);
-		//bool setPath(const char* name, const Vector2fPath& value);
+		void add(const char* name, V3Path* value);
+		bool set(const char* name, const V3Path& value);
 		
 		bool reloadData(const FlatJSONReader& loader);
 		bool loadData(const FlatJSONReader& loader);

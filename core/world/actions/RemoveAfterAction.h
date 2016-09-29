@@ -1,0 +1,25 @@
+#pragma once
+#include "..\World.h"
+#include "AbstractAction.h"
+
+namespace ds {
+
+	class RemoveAfterAction : public AbstractAction {
+
+	public:
+		RemoveAfterAction(ChannelArray* array);
+		virtual ~RemoveAfterAction() {}
+		void attach(ID id, float ttl);
+		void update(float dt,ActionEventBuffer& buffer);
+		void debug();
+		void debug(ID sid);
+		ActionType getActionType() const {
+			return AT_REMOVE_AFTER;
+		}
+	private:
+		void allocate(int sz);
+		float* _timers;
+		float* _ttl;
+	};
+
+}

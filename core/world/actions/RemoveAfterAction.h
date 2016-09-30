@@ -16,6 +16,7 @@ namespace ds {
 		ActionType getActionType() const {
 			return AT_REMOVE_AFTER;
 		}
+		void saveReport(const ReportWriter& writer);
 	private:
 		void allocate(int sz);
 		float* _timers;

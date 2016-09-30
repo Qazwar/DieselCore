@@ -19,6 +19,7 @@ namespace ds {
 		ActionType getActionType() const {
 			return AT_SCALE;
 		}
+		void saveReport(const ReportWriter& writer);
 	private:
 		void allocate(int sz);
 		v3* _startScale;

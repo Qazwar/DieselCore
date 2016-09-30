@@ -86,11 +86,15 @@ namespace ds {
 	}
 
 	int World::find_by_type(int type, ID* ids, int max) const {
-		int* types = (int*)_data->get_ptr(WEC_TYPE);
+		Index* indices = _data->_data_indices;
 		int cnt = 0;
-		for (uint32_t i = 0; i < _data->size; ++i) {
-			if (types[i] == type && cnt < max) {
-				ids[cnt++] = _data->find(i);
+		for (uint32_t i = 0; i < _data->capacity; ++i) {
+			const Index& in = indices[i];
+			if (in.index != USHRT_MAX && cnt < max) {
+				int t = _data->get<int>(in.id, WEC_TYPE);
+				if (t == type) {
+					ids[cnt++] = in.id;
+				}
 			}
 		}
 		return cnt;
@@ -121,6 +125,35 @@ namespace ds {
 				if (e.action == AT_KILL) {
 					remove(e.id);
 				}
+			}
+		}
+	}
+
+	void World::saveReport(const ds::ReportWriter& writer) {
+		writer.startBox("World");
+		const char* OVERVIEW_HEADERS[] = { "ID", "Index", "Position", "Texture", "Rotation", "Scale", "Color", "Type" };
+		writer.startTable(OVERVIEW_HEADERS, 8);
+		Index* indices = _data->_data_indices;
+		for (uint32_t i = 0; i < _data->capacity; ++i) {
+			const Index& in = indices[i];
+			if (in.index != USHRT_MAX) {
+				writer.startRow();
+				writer.addCell(in.id);
+				writer.addCell(in.index);
+				writer.addCell(_data->get<v3>(in.id, WEC_POSITION));
+				writer.addCell(_data->get<Texture>(in.id, WEC_TEXTURE));
+				writer.addCell(RADTODEG(_data->get<v3>(in.id, WEC_ROTATION).x));
+				writer.addCell(_data->get<v3>(in.id, WEC_SCALE));
+				writer.addCell(_data->get<Color>(in.id, WEC_COLOR));
+				writer.addCell(_data->get<int>(in.id, WEC_TYPE));
+				writer.endRow();
+			}
+		}
+		writer.endTable();
+		writer.endBox();
+		for (int i = 0; i < 32; ++i) {
+			if (_actions[i] != 0) {
+				_actions[i]->saveReport(writer);
 			}
 		}
 	}

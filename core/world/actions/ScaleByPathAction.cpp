@@ -84,11 +84,10 @@ namespace ds {
 
 	// -------------------------------------------------------
 	// 
-	// -------------------------------------------------------
-	/*
-	void ScaleByPathAction::save(const ReportWriter& writer) {
+	// -------------------------------------------------------	
+	void ScaleByPathAction::saveReport(const ReportWriter& writer) {
 		if (_buffer.size > 0) {
-			writer.addSubHeader("ScalingAction");
+			writer.startBox("ScalingAction");
 			const char* HEADERS[] = { "Index", "ID", "Timer", "TTL" };
 			writer.startTable(HEADERS, 4);
 			for (int i = 0; i < _buffer.size; ++i) {
@@ -100,8 +99,7 @@ namespace ds {
 				writer.endRow();
 			}
 			writer.endTable();
+			writer.endBox();
 		}
 	}
-	*/
-
 }

@@ -96,4 +96,23 @@ namespace ds {
 		*/
 	}
 
+	void ScalingAction::saveReport(const ReportWriter& writer) {
+		if (_buffer.size > 0) {
+			writer.startBox("ScalingAction");
+			const char* OVERVIEW_HEADERS[] = { "ID", "Start", "End", "TTL", "Timer" };
+			writer.startTable(OVERVIEW_HEADERS, 5);
+			for (int i = 0; i < _buffer.size; ++i) {
+				writer.startRow();
+				writer.addCell(_ids[i]);
+				writer.addCell(_startScale[i]);
+				writer.addCell(_endScale[i]);
+				writer.addCell(_ttl[i]);
+				writer.addCell(_timers[i]);
+				writer.endRow();
+			}
+			writer.endTable();
+			writer.endBox();
+		}
+	}
+
 }

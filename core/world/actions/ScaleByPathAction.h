@@ -17,7 +17,7 @@ namespace ds {
 		ActionType getActionType() const {
 			return AT_SCALE_BY_PATH;
 		}
-		//void save(const ReportWriter& writer);
+		void saveReport(const ReportWriter& writer);
 	private:
 		void allocate(int sz);
 		V3Path** _path;

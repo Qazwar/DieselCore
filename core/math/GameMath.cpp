@@ -229,10 +229,10 @@ namespace ds {
 		if (pos.x < rect.left) {
 			return false;
 		}
-		if (pos.y < rect.bottom) {
+		if (pos.y > rect.bottom) {
 			return false;
 		}
-		if (pos.y > rect.top) {
+		if (pos.y < rect.top) {
 			return false;
 		}
 		return true;

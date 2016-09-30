@@ -6,6 +6,7 @@
 #include "..\graphics\Color.h"
 #include "ActionEventBuffer.h"
 #include "..\math\FloatArray.h"
+#include "..\io\ReportWriter.h"
 
 namespace ds {
 
@@ -53,6 +54,8 @@ namespace ds {
 			return _data;
 		}
 		int find_by_type(int type, ID* ids, int max) const;
+
+		void saveReport(const ReportWriter& writer);
 	private:
 		int _numChannels;
 		ChannelArray* _data;

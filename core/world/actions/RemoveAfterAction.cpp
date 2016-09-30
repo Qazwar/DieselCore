@@ -39,7 +39,7 @@ namespace ds {
 				if ( _timers[i] >= _ttl[i] ) {
 					int t = _array->get<int>(_ids[i], WEC_TYPE);
 					buffer.add(_ids[i], AT_KILL, t);
-					removeByIndex(i);
+					//removeByIndex(i);
 				}
 			}
 		}
@@ -62,6 +62,23 @@ namespace ds {
 		}
 		else {
 			LOGE << "Object " << sid << " not found in action";
+		}
+	}
+
+	void RemoveAfterAction::saveReport(const ReportWriter& writer) {
+		if (_buffer.size > 0) {
+			writer.startBox("RemoveAfterAction");
+			const char* OVERVIEW_HEADERS[] = { "ID", "TTL", "Timer" };
+			writer.startTable(OVERVIEW_HEADERS, 3);
+			for (int i = 0; i < _buffer.size; ++i) {
+				writer.startRow();
+				writer.addCell(_ids[i]);
+				writer.addCell(_ttl[i]);
+				writer.addCell(_timers[i]);
+				writer.endRow();
+			}
+			writer.endTable();
+			writer.endBox();
 		}
 	}
 

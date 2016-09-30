@@ -4,6 +4,7 @@
 #include "..\World.h"
 #include "..\..\math\tweening.h"
 #include "..\..\lib\BlockArray.h"
+#include "..\..\io\ReportWriter.h"
 
 namespace ds {
 
@@ -30,6 +31,7 @@ namespace ds {
 			StaticHash getHash() const {
 				return _hash;
 			}
+			virtual void saveReport(const ReportWriter& writer) = 0;
 		protected:
 			int create(ID id);
 			int find(ID id);

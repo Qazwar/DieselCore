@@ -270,6 +270,9 @@ namespace ds {
 		}
 	}
 
+	// -----------------------------------------------
+	// init by channel types
+	// -----------------------------------------------
 	void ChannelArray::init(ChannelType* types, int num) {
 		assert(num < MAX_BLOCKS);
 		for (int i = 0; i < num; ++i) {
@@ -280,6 +283,9 @@ namespace ds {
 		_num_blocks = num;
 	}
 
+	// -----------------------------------------------
+	// init
+	// -----------------------------------------------
 	void ChannelArray::init(int* sizes, int num) {
 		assert(num < MAX_BLOCKS);
 		for (int i = 0; i < num; ++i) {
@@ -288,6 +294,9 @@ namespace ds {
 		_num_blocks = num;
 	}
 
+	// -----------------------------------------------
+	// add
+	// -----------------------------------------------
 	ID ChannelArray::add() {
 		if (size + 1 > capacity) {
 			resize(size * 2 + 8);
@@ -298,6 +307,9 @@ namespace ds {
 		return in.id;
 	}
 
+	// -----------------------------------------------
+	// resize
+	// -----------------------------------------------
 	bool ChannelArray::resize(int new_size) {
 		if (new_size > capacity) {
 			int total = 0;
@@ -309,6 +321,7 @@ namespace ds {
 				for (unsigned short i = 0; i < new_size; ++i) {
 					_data_indices[i].id = i;
 					_data_indices[i].next = i + 1;
+					_data_indices[i].index = USHRT_MAX;
 				}
 				_free_dequeue = 0;
 				_free_enqueue = new_size - 1;
@@ -319,6 +332,7 @@ namespace ds {
 				for (unsigned short i = size; i < new_size; ++i) {
 					tmp[i].id = i;
 					tmp[i].next = i + 1;
+					tmp[i].index = USHRT_MAX;
 				}
 				DEALLOC(_data_indices);
 				_data_indices = tmp;
@@ -347,11 +361,17 @@ namespace ds {
 		return false;
 	}
 
+	// -----------------------------------------------
+	// get pointer to channel
+	// -----------------------------------------------
 	void* ChannelArray::get_ptr(int index) {
 		assert(index >= 0 && index < MAX_BLOCKS);
 		return data + _indices[index];
 	}
 
+	// -----------------------------------------------
+	// get pointer to channel
+	// -----------------------------------------------
 	void* ChannelArray::getPointer(int channel, ChannelType type) {
 		assert(channel >= 0 && channel < MAX_BLOCKS);
 		assert(_types[channel] == type);
@@ -370,19 +390,20 @@ namespace ds {
 		return -1;
 	}
 
+	// -----------------------------------------------
+	// remove
+	// -----------------------------------------------
 	void ChannelArray::remove(ID id) {
 		Index &in = _data_indices[id & INDEX_MASK];
 		assert(in.index != USHRT_MAX);
-		int current = in.index * _sizes[0];
 		if (size > 0) {
 			int l = find(size - 1);
-			if (l != -1 && l != in.index) {
+			if (l != -1 && l != in.id) {
 				Index& last = _data_indices[l];
-				int next = last.index * _sizes[0];
 				for (int i = 0; i < _num_blocks; ++i) {
-					memcpy(data + current, data + next, _sizes[i]);
-					current += capacity * _sizes[i];
-					next += capacity * _sizes[i];
+					int current = _indices[i] + in.index * _sizes[i];
+					int next = _indices[i] + last.index * _sizes[i];
+					memcpy(data + current, data + next, _sizes[i]);					
 				}
 				last.index = in.index;
 			}

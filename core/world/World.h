@@ -10,6 +10,13 @@
 
 namespace ds {
 
+	enum BounceDirection {
+		BD_X,
+		BD_Y,
+		BD_BOTH,
+		BD_EOL
+	};
+
 	struct WorldEntity {
 
 		v3 position;
@@ -38,6 +45,9 @@ namespace ds {
 		ID create();
 		ID create(const v2& pos, const Texture& texture, int type, float rotation = 0.0f, const v2& scale = v2(1,1), const Color& color = Color::WHITE);
 		uint32_t size() const;
+
+		void moveBy(ID id, const v2& velocity, bool bounce = true);
+		void moveBy(ID id, const v3& velocity, bool bounce = true);
 
 		void scaleByPath(ID id, V3Path* path, float ttl);
 		void scale(ID id, const v3& start, const v3& end, float ttl, int mode = 0, const tweening::TweeningType& tweeningType = &tweening::linear);

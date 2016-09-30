@@ -2,6 +2,7 @@
 #include "actions\ScalingAction.h"
 #include "actions\RemoveAfterAction.h"
 #include "actions\ScaleByPathAction.h"
+#include "actions\MoveByAction.h"
 #include "..\profiler\Profiler.h"
 
 namespace ds {
@@ -98,6 +99,18 @@ namespace ds {
 			}
 		}
 		return cnt;
+	}
+
+	void World::moveBy(ID id, const v2& velocity, bool bounce) {
+		moveBy(id, v3(velocity), bounce);
+	}
+
+	void World::moveBy(ID id, const v3& velocity, bool bounce) {
+		if (_actions[AT_MOVE_BY] == 0) {
+			_actions[AT_MOVE_BY] = new MoveByAction(_data);
+		}
+		MoveByAction* action = (MoveByAction*)_actions[AT_MOVE_BY];
+		action->attach(id, velocity, bounce);
 	}
 
 	void World::removeAfter(ID id, float ttl) {

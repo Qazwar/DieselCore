@@ -22,7 +22,9 @@ namespace ds {
 		AT_SCALE_BY_PATH,
 		AT_SCALE,
 		AT_COLOR_FLASH,
-		AT_ROTATE_TO
+		AT_ROTATE_TO,
+		AT_COLLISION,
+		AT_BOUNCE
 	};
 
 	struct ActionEvent {
@@ -30,22 +32,42 @@ namespace ds {
 		ID id;
 		ActionType action;
 		int type;
+		int dataIndex;
 	};
 
 	struct ActionEventBuffer {
 
 		Array<ActionEvent> events;
+		CharBuffer data;
 
 		void reset() {
 			events.clear();
+			data.size = 0;
 		}
+
 
 		void add(ID id, ActionType action, int type) {
 			ActionEvent e;
 			e.id = id;
 			e.type = type;
 			e.action = action;
+			e.dataIndex = -1;
 			events.push_back(e);
+		}
+
+		void add(ID id, ActionType action, int type,void *d,int size) {
+			ActionEvent e;
+			e.id = id;
+			e.type = type;
+			e.action = action;
+			e.dataIndex = data.size;
+			void* dest = data.alloc(size);
+			memcpy(dest, d, size);
+			events.push_back(e);
+		}
+
+		void* get(int dataIndex) const {
+			return (void*)(data.data + dataIndex);
 		}
 	};
 

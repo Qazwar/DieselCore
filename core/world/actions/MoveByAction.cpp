@@ -26,6 +26,7 @@ namespace ds {
 		_ids[idx] = id;
 		_velocities[idx] = velocity;
 		_bounce[idx] = bounce;
+		rotateTo(idx);
 	}
 
 	void MoveByAction::rotateTo(int index) {
@@ -40,10 +41,10 @@ namespace ds {
 		if (v.x < 0.0f && pos.x < m_BoundingRect.left) {
 			return true;
 		}
-		if (v.y > 0.0f && pos.y > m_BoundingRect.top) {
+		if (v.y > 0.0f && pos.y > m_BoundingRect.bottom) {
 			return true;
 		}
-		if (v.y < 0.0f && pos.y < m_BoundingRect.bottom) {
+		if (v.y < 0.0f && pos.y < m_BoundingRect.top) {
 			return true;
 		}
 		return false;
@@ -83,6 +84,7 @@ namespace ds {
 						if (p.x < m_BoundingRect.left || p.x > m_BoundingRect.right ) {
 							_velocities[i].x *= -1.0f;
 						}
+						buffer.add(_ids[i], AT_BOUNCE, -1, &_velocities[i], sizeof(v3));
 						rotateTo(i);
 						p += _velocities[i] * dt * 1.5f;
 					}

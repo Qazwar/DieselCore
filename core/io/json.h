@@ -52,7 +52,7 @@ namespace ds {
 		}
 
 		const char* name(int index) const;
-
+		void debug();
 	private:
 		Array<Token> _tokens;
 		Token UNKNOWN_TOKEN;

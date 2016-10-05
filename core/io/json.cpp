@@ -96,6 +96,21 @@ namespace ds {
 		}
 	}
 
+	void Tokenizer::debug() {
+		for (uint32_t i = 0; i < _tokens.size(); ++i) {
+			const Token& t = _tokens[i];
+			if (t.type == Token::NAME) {
+				LOG << i << " = " << name(i) << " (" << t.index << " / " << t.size << ")";
+			}
+			else if (t.type == Token::NUMBER) {
+				LOG << i << " = " << name(i) << " (" << t.value << ")";
+			}
+			else {
+				LOG << i << " = " << name(i);
+			}
+		}
+	}
+
 // -------------------------------------------
 //
 // -------------------------------------------

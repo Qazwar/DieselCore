@@ -4,6 +4,7 @@
 #include "actions\ScaleByPathAction.h"
 #include "actions\MoveByAction.h"
 #include "..\profiler\Profiler.h"
+#include "actions\CollisionAction.h"
 
 namespace ds {
 
@@ -11,9 +12,10 @@ namespace ds {
 		for (int i = 0; i < 32; ++i) {
 			_actions[i] = 0;
 		}
+		_collisionAction = 0;
 		_data = new ChannelArray;
-		int sizes[] = { sizeof(v3), sizeof(v3), sizeof(v3) ,sizeof(Texture) , sizeof(Color), sizeof(float), sizeof(int), sizeof(v3), sizeof(v3)};
-		_data->init(sizes, 9);
+		int sizes[] = { sizeof(v3), sizeof(v3), sizeof(v3) ,sizeof(Texture) , sizeof(Color), sizeof(float), sizeof(int)};
+		_data->init(sizes, 7);
 	}
 
 
@@ -22,6 +24,9 @@ namespace ds {
 			if (_actions[i] != 0) {
 				delete _actions[i];
 			}
+		}
+		if (_collisionAction != 0) {
+			delete _collisionAction;
 		}
 		delete _data;
 	}
@@ -77,28 +82,51 @@ namespace ds {
 		action->attach(id, WEC_SCALE, start, end, ttl, mode, tweeningType);
 	}
 
+	// -----------------------------------------------
+	// remove
+	// -----------------------------------------------
 	void World::remove(ID id) {
 		for (int i = 0; i < 32; ++i) {
 			if (_actions[i] != 0) {
 				_actions[i]->removeByID(id);
 			}
 		}
+		_collisionAction->removeByID(id);
+		_additionalData.remove(id);
 		_data->remove(id);
 	}
 
 	int World::find_by_type(int type, ID* ids, int max) const {
-		Index* indices = _data->_data_indices;
+		int* indices = _data->_sparse;
 		int cnt = 0;
 		for (uint32_t i = 0; i < _data->capacity; ++i) {
-			const Index& in = indices[i];
-			if (in.index != USHRT_MAX && cnt < max) {
-				int t = _data->get<int>(in.id, WEC_TYPE);
+			if (indices[i] != -1 && cnt < max) {
+				int t = _data->get<int>(i, WEC_TYPE);
 				if (t == type) {
-					ids[cnt++] = in.id;
+					ids[cnt++] = i;
 				}
 			}
 		}
 		return cnt;
+	}
+
+	void World::attachCollider(ID id, ShapeType type, const v2& extent) {
+		if (_collisionAction == 0) {
+			_collisionAction = new CollisionAction(_data);
+		}
+		_collisionAction->attach(id, type, v3(extent));
+	}
+
+	bool World::hasCollisions() const {
+		return _collisionAction->hasCollisions();
+	}
+
+	const Collision& World::getCollision(int idx) const {
+		return _collisionAction->getCollision(idx);
+	}
+
+	uint32_t World::numCollisions() const {
+		return _collisionAction->numCollisions();
 	}
 
 	void World::moveBy(ID id, const v2& velocity, bool bounce) {
@@ -130,10 +158,13 @@ namespace ds {
 					_actions[i]->update(dt, _buffer);
 				}
 			}
+			if (_collisionAction != 0) {
+				_collisionAction->update(dt, _buffer);
+			}
 		}
 		{
 			//ZoneTracker z2("World:tick:kill");
-			for (int i = 0; i < _buffer.events.size(); ++i) {
+			for (uint32_t i = 0; i < _buffer.events.size(); ++i) {
 				const ActionEvent& e = _buffer.events[i];
 				if (e.action == AT_KILL) {
 					remove(e.id);
@@ -146,19 +177,19 @@ namespace ds {
 		writer.startBox("World");
 		const char* OVERVIEW_HEADERS[] = { "ID", "Index", "Position", "Texture", "Rotation", "Scale", "Color", "Type" };
 		writer.startTable(OVERVIEW_HEADERS, 8);
-		Index* indices = _data->_data_indices;
+		int* indices = _data->_sparse;
 		for (uint32_t i = 0; i < _data->capacity; ++i) {
-			const Index& in = indices[i];
-			if (in.index != USHRT_MAX) {
+			//const Index& in = indices[i];
+			if (indices[i] != -1) {
 				writer.startRow();
-				writer.addCell(in.id);
-				writer.addCell(in.index);
-				writer.addCell(_data->get<v3>(in.id, WEC_POSITION));
-				writer.addCell(_data->get<Texture>(in.id, WEC_TEXTURE));
-				writer.addCell(RADTODEG(_data->get<v3>(in.id, WEC_ROTATION).x));
-				writer.addCell(_data->get<v3>(in.id, WEC_SCALE));
-				writer.addCell(_data->get<Color>(in.id, WEC_COLOR));
-				writer.addCell(_data->get<int>(in.id, WEC_TYPE));
+				writer.addCell(i);
+				writer.addCell(indices[i]);
+				writer.addCell(_data->get<v3>(indices[i], WEC_POSITION));
+				writer.addCell(_data->get<Texture>(indices[i], WEC_TEXTURE));
+				writer.addCell(RADTODEG(_data->get<v3>(indices[i], WEC_ROTATION).x));
+				writer.addCell(_data->get<v3>(indices[i], WEC_SCALE));
+				writer.addCell(_data->get<Color>(indices[i], WEC_COLOR));
+				writer.addCell(_data->get<int>(indices[i], WEC_TYPE));
 				writer.endRow();
 			}
 		}

@@ -98,9 +98,7 @@ namespace ds {
 		int _indices[MAX_BLOCKS];
 		ChannelType _types[MAX_BLOCKS];
 		int _num_blocks;
-		Index* _data_indices;
-		unsigned short _free_enqueue;
-		unsigned short _free_dequeue;
+		int* _sparse;
 
 		ChannelArray();
 
@@ -115,31 +113,27 @@ namespace ds {
 		template<class T>
 		void set(ID id, int channel, const T& t) {
 			T* p = (T*)get_ptr(channel);
-			assert(id != UINT_MAX);
-			unsigned short index = _data_indices[id & INDEX_MASK].index;
-			assert(index != USHRT_MAX);
+			assert(_sparse[id] != -1);
+			unsigned short index = _sparse[id & INDEX_MASK];
 			p[index] = t;
 		}
 
 		void set(ID id, int channel, const Texture& t) {
 			Texture* p = (Texture*)get_ptr(channel);
-			assert(id != UINT_MAX);
-			unsigned short index = _data_indices[id & INDEX_MASK].index;
-			assert(index != USHRT_MAX);
+			assert(_sparse[id] != -1);
+			unsigned short index = _sparse[id & INDEX_MASK];
 			p[index] = t;
 		}
 
 		void set(ID id, int channel, const Rect& t) {
 			Rect* p = (Rect*)get_ptr(channel);
-			assert(id != UINT_MAX);
-			unsigned short index = _data_indices[id & INDEX_MASK].index;
-			assert(index != USHRT_MAX);
+			assert(_sparse[id] != -1);
+			unsigned short index = _sparse[id & INDEX_MASK];
 			p[index] = t;
 		}
 
 		const bool contains(ID id) const {
-			const Index& in = _data_indices[id & INDEX_MASK];
-			return in.id == id && in.index != USHRT_MAX;
+			return _sparse[id] != -1;
 		}
 
 		void remove(ID id);
@@ -147,16 +141,16 @@ namespace ds {
 		template<class T>
 		const T& get(ID id, int channel) const {
 			const T* p = get_ptr(channel);
-			assert(id != UINT_MAX);
-			unsigned short index = _data_indices[id & INDEX_MASK].index;
+			assert(_sparse[id] != -1);
+			unsigned short index = _sparse[id & INDEX_MASK];
 			return p[index];
 		}
 
 		template<class T>
 		T& get(ID id, int channel) {
 			T* p = (T*)get_ptr(channel);
-			assert(id != UINT_MAX);
-			unsigned short index = _data_indices[id & INDEX_MASK].index;
+			assert(_sparse[id] != -1);
+			unsigned short index = _sparse[id & INDEX_MASK];
 			return p[index];
 		}
 
@@ -167,6 +161,8 @@ namespace ds {
 		bool resize(int new_size);
 
 		int find(int data_index) const;
+
+		int find_free() const;
 
 	};
 

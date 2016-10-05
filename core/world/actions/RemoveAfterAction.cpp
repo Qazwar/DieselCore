@@ -23,6 +23,7 @@ namespace ds {
 	// -------------------------------------------------------
 	void RemoveAfterAction::attach(ID id, float ttl) {
 		int idx = create(id);
+		LOG << "attaching id: " << id << " at " << idx;
 		_ids[idx] = id;
 		_timers[idx] = 0.0f;
 		_ttl[idx] = ttl;
@@ -38,6 +39,7 @@ namespace ds {
 				_timers[i] += dt;
 				if ( _timers[i] >= _ttl[i] ) {
 					int t = _array->get<int>(_ids[i], WEC_TYPE);
+					LOG << "sending kill to " << _ids[i];
 					buffer.add(_ids[i], AT_KILL, t);
 					//removeByIndex(i);
 				}

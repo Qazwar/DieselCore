@@ -7,6 +7,8 @@
 #include "ActionEventBuffer.h"
 #include "..\math\FloatArray.h"
 #include "..\io\ReportWriter.h"
+#include "..\physics\ColliderArray.h"
+#include "AdditionalData.h"
 
 namespace ds {
 
@@ -15,6 +17,14 @@ namespace ds {
 		BD_Y,
 		BD_BOTH,
 		BD_EOL
+	};
+
+	enum ShapeType {
+		PST_BOX,
+		PST_CIRCLE,
+		PST_QUAD,
+		PST_SPHERE,
+		PST_NONE
 	};
 
 	struct WorldEntity {
@@ -26,16 +36,14 @@ namespace ds {
 		Color color;
 		float timer;
 		int type;
-		v3 previous;
-		v3 extent;
-		// Shapetype
 	};
 
 	enum WorldEntityChannel {
-		WEC_POSITION,WEC_SCALE,WEC_ROTATION,WEC_TEXTURE,WEC_COLOR,WEC_TIMER,WEC_TYPE,WEC_PREVIOUS,WEC_EXTENT
+		WEC_POSITION,WEC_SCALE,WEC_ROTATION,WEC_TEXTURE,WEC_COLOR,WEC_TIMER,WEC_TYPE
 	};
 	
 	class AbstractAction;
+	class CollisionAction;
 
 	class World {
 
@@ -45,6 +53,11 @@ namespace ds {
 		ID create();
 		ID create(const v2& pos, const Texture& texture, int type, float rotation = 0.0f, const v2& scale = v2(1,1), const Color& color = Color::WHITE);
 		uint32_t size() const;
+
+		void attachCollider(ID id, ShapeType type, const v2& extent);
+		bool hasCollisions() const;
+		const Collision& getCollision(int idx) const;
+		uint32_t numCollisions() const;
 
 		void moveBy(ID id, const v2& velocity, bool bounce = true);
 		void moveBy(ID id, const v3& velocity, bool bounce = true);
@@ -66,8 +79,35 @@ namespace ds {
 		int find_by_type(int type, ID* ids, int max) const;
 
 		void saveReport(const ReportWriter& writer);
+
+		void* attach_data(ID sid, int size, int identifier) {
+			return _additionalData.attach(sid, size, identifier);
+		}
+
+		void* get_data(ID sid) {
+			return _additionalData.get(sid);
+		}
+
+		bool hasEvents() const {
+			return !_buffer.events.empty();
+		}
+		const ActionEvent& getEvent(int idx) const {
+			return _buffer.events[idx];
+		}
+		void* getEventData(int idx) const {
+			const ActionEvent& event = _buffer.events[idx];
+			if (event.dataIndex != -1) {
+				return _buffer.get(event.dataIndex);
+			}
+			return 0;
+		}
+		uint32_t numEvents() const {
+			return _buffer.events.size();
+		}
 	private:
 		int _numChannels;
+		AdditionalData _additionalData;
+		CollisionAction* _collisionAction;
 		ChannelArray* _data;
 		AbstractAction* _actions[32];
 		ActionEventBuffer _buffer;

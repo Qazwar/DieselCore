@@ -33,7 +33,9 @@ namespace ds {
 			PS_NOT_ENOUGH_TOKENS,
 			PS_MISSING_ASSIGNMENT,
 			PS_UNKNOWN_REGISTER_TYPE,
-			PS_WRONG_V4_DEFINITION
+			PS_WRONG_V4_DEFINITION,
+			PS_NO_VAR_DEFINITION,
+			PS_VAR_DEFINITION
 		};
 
 		struct Variable {
@@ -61,7 +63,7 @@ namespace ds {
 		};
 
 		enum FunctionType {
-			FT_SIN,FT_COS,FT_LRP,FT_D2R,FT_SAT,FT_CLM,FT_TWN
+			FT_SIN,FT_COS,FT_LRP,FT_D2R,FT_SAT,FT_CLM,FT_TWN,FT_CLR
 		};
 
 		struct FunctionArgument {
@@ -118,6 +120,8 @@ namespace ds {
 		private:	
 			int parseOperand(const char* data, const Tokenizer& t, int index, Variable* var);
 			int parseNumber(const Tokenizer& t, int index, Variable* var);
+			int parseNumber(const Tokenizer& t, int index, v4* var);
+			int parseVariableDefinition(const char* data, Tokenizer& t, int index);
 			int getMethod(const char* data, const Tokenizer& t, int index, Method* m);
 			v4 get_data(const Variable& var);
 			v4 executeFunction(const Function& f);

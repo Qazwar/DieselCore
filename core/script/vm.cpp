@@ -94,6 +94,22 @@ namespace ds {
 		}
 
 		// -------------------------------------------------------
+		// vm color
+		// -------------------------------------------------------
+		v4 vm_color(v4* args, int num) {
+			v4 ret(0.0f);
+			for (int i = 0; i < 4; ++i) {
+				if (args[i].x == 255.0f) {
+					ret.data[i] = 1.0f;
+				}
+				else {
+					ret.data[i] = args[i].x / 256.0f;
+				}
+			}
+			return ret;
+		}
+
+		// -------------------------------------------------------
 		// vm tweening
 		// -------------------------------------------------------
 		v4 vm_tweening(v4* args, int num) {
@@ -155,10 +171,11 @@ namespace ds {
 			{ FT_SAT, "SAT", 1, &vm_saturate },
 			{ FT_CLM, "CLM", 3, &vm_clamp },
 			{ FT_TWN, "TWN", 5, &vm_tweening },
-			{ FT_D2R, "D2R", 1, &vm_degtorad }
+			{ FT_D2R, "D2R", 1, &vm_degtorad },
+			{ FT_CLR, "CLR", 4, &vm_color }
 		};
 
-		const int NUM_FUNCTIONS = 8;
+		const int NUM_FUNCTIONS = 9;
 
 		// -------------------------------------------------------
 		// Script
@@ -353,6 +370,36 @@ namespace ds {
 		}
 
 		// -------------------------------------------------------
+		// parse number
+		// -------------------------------------------------------
+		int Script::parseNumber(const Tokenizer& t, int index, v4* var) {
+			int idx = index;
+			const Token& tok = t.get(idx);
+			if (tok.type == Token::OPEN_BRACKET) {
+				if (assertSize(t, index, 8)) {
+					++idx;
+					for (int i = 0; i < 8; ++i) {
+						const Token& tc = t.get(idx + i);
+						if (tc.type != V4_DEF[i]) {
+							_status = PS_WRONG_V4_DEFINITION;
+							return -1;
+						}
+					}
+					for (int i = 0; i < 4; ++i) {
+						const Token& nn = t.get(idx);
+						var->data[i] = nn.value;
+						idx += 2;
+					}
+				}
+				else {
+					_status = PS_WRONG_V4_DEFINITION;
+					return -1;
+				}
+			}
+			return idx;
+		}
+
+		// -------------------------------------------------------
 		// parse operand
 		// -------------------------------------------------------
 		int Script::parseOperand(const char* data, const Tokenizer& t,int index,Variable* var) {
@@ -381,6 +428,52 @@ namespace ds {
 			else {
 				++idx;
 			}
+			return idx;
+		}
+
+		int Script::parseVariableDefinition(const char* data, Tokenizer& t, int index) {
+			int idx = index;
+			const Token& tok = t.get(idx);
+			if (tok.type == Token::NAME) {
+				const Token& next = t.get(idx + 1);
+				if (next.type == Token::ASSIGN) {
+					// get name
+					char name[128] = { '\0' };
+					strncpy(name, data + tok.index, tok.size);
+					StaticHash s(name);
+					const Token& c = t.get(idx + 2);
+					if (c.type == Token::NUMBER) {
+						set(s, v4(c.value));
+						idx += 5;
+					}
+					else if (c.type == Token::NAME) {
+						// get function
+						Variable var;
+						char fname[128] = { '\0' };
+						strncpy(fname, data + c.index, c.size);
+						var.index = function_index(fname);	
+						idx += 3;
+						idx = parseFunction(data, t, idx, &var);
+						idx += 2;
+						const Function& func = functions[var.index];
+						v4 val = executeFunction(func);
+						set(s, val);							
+					}
+					else if (c.type == Token::OPEN_BRACKET) {
+						v4 var;
+						idx = parseNumber(t, idx + 2, &var);
+						if (idx == -1) {
+							return -1;
+						}
+						set(s, var);
+						idx += 2;
+					}
+				}
+			}
+			else {
+				return -1;
+			}
+			const Token& tt = t.get(idx);
 			return idx;
 		}
 		// -------------------------------------------------------
@@ -469,6 +562,24 @@ namespace ds {
 		}
 
 		// -------------------------------------------------------
+		// is variable definition
+		// -------------------------------------------------------
+		ParserStatus isVariableDefinitions(const char* data, const Tokenizer& t, int index) {
+			Token tok = t.get(index);
+			char name[32] = { '\0' };
+			if (tok.type == Token::NAME) {
+				strncpy(name, data + tok.index, tok.size);
+				if (strcmp(name, "vars") == 0) {
+					const Token& next = t.get(index + 1);
+					if (next.type == Token::OPEN_BRACES) {
+						return PS_VAR_DEFINITION;
+					}
+				}
+			}
+			return ParserStatus::PS_OK;
+		}
+
+		// -------------------------------------------------------
 		// is closing
 		// -------------------------------------------------------
 		bool isClosing(const Tokenizer& t, int index) {
@@ -484,7 +595,6 @@ namespace ds {
 		// -------------------------------------------------------
 		int Script::getMethod(const char* data, const Tokenizer& t, int index, Method* m) {
 			int idx = index;
-			// function wiggle() {
 			char name[32] = { '\0' };
 			const Token& tok = t.get(idx);
 			if (tok.type == Token::NAME) {
@@ -508,7 +618,21 @@ namespace ds {
 			t.parse(text);
 			int n = 0;
 			int idx = -1;
-			_status = isMethodDefinition(text, t, 0);
+			int c = 0;
+			_status = isVariableDefinitions(text, t, 0);
+			if (_status == PS_VAR_DEFINITION) {
+				n += 3;
+				while (c != -1) {
+					c = parseVariableDefinition(text, t, n);
+					if (c == -1) {
+						n += 2;
+					}
+					else {
+						n = c;
+					}
+				}
+			}
+			_status = isMethodDefinition(text, t, n);
 			if (_status == PS_OK) {
 				while (n < t.size()) {
 					_status = isMethodDefinition(text, t, n);
@@ -756,7 +880,10 @@ namespace ds {
 							t = numbers[v.index];
 						}
 						else if (v.type == VT_FUNCTION) {
-							ret = executeFunction(functions[v.index]);
+							t = executeFunction(functions[v.index]);
+						}
+						else if (v.type == VT_VARIABLE) {
+							t = variables[v.index].value;
 						}
 						if (ri.offset == -1) {
 							ret = t;
@@ -775,6 +902,9 @@ namespace ds {
 						}
 						else if (v.type == VT_FUNCTION) {
 							t = executeFunction(functions[v.index]);
+						}
+						else if (v.type == VT_VARIABLE) {
+							t = variables[v.index].value;
 						}
 						if (ri.offset == -1) {
 							data[ri.index] = t;

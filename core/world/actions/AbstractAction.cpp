@@ -12,7 +12,7 @@ namespace ds {
 	}
 
 	int AbstractAction::find(ID id) {
-		for (int i = 0; i < _buffer.size; ++i) {
+		for (uint32_t i = 0; i < _buffer.size; ++i) {
 			if (_ids[i] == id) {
 				return i;
 			}

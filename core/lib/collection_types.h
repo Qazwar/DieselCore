@@ -73,11 +73,9 @@ namespace ds {
 
 		void resize(int newCap) {
 			if (newCap > capacity) {
-				//char* tmp = (char*)_allocator->allocate(newCap);
 				char* tmp = (char*)ALLOC(newCap);
 				if (data != 0) {
 					memcpy(tmp, data, capacity);
-					//_allocator->deallocate(data);
 					DEALLOC(data);
 				}
 				capacity = newCap;

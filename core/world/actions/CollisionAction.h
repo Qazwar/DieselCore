@@ -1,0 +1,43 @@
+#pragma once
+#include "..\..\math\tweening.h"
+#include <map>
+#include "..\World.h"
+#include "..\..\math\tweening.h"
+#include "AbstractAction.h"
+#include "..\..\physics\ColliderArray.h"
+
+namespace ds {
+
+	class CollisionAction : public AbstractAction {
+		
+	public:
+		CollisionAction(ChannelArray* array);
+		virtual ~CollisionAction();
+		void attach(ID id, ShapeType type, const v3& extent);
+		void update(float dt,ActionEventBuffer& buffer);
+		void debug();
+		void debug(ID sid) {}
+		ActionType getActionType() const {
+			return AT_COLLISION;
+		}
+		void saveReport(const ReportWriter& writer);
+		bool hasCollisions() const {
+			return !_collisions.empty();
+		}
+		const Collision& getCollision(int idx) const {
+			return _collisions[idx];
+		}
+		uint32_t numCollisions() const {
+			return _collisions.size();
+		}
+	private:
+		bool containsCollision(const Collision& c) const;
+		bool intersects(int firstIndex, int secondIndex);
+		void allocate(int sz);
+		v3* _previous;
+		ShapeType* _types;
+		v3* _extents;
+		Array<Collision> _collisions;
+	};
+
+}

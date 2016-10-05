@@ -257,16 +257,16 @@ namespace ds {
 	// ChannelArray
 	// --------------------------------------------------------
 
-	ChannelArray::ChannelArray() : size(0), capacity(0), data(0), total_capacity(0) , _data_indices(0) , _free_dequeue(0) , _free_enqueue(0) {
+	ChannelArray::ChannelArray() : size(0), capacity(0), data(0), total_capacity(0), _sparse(0) {
 	}
 
 
 	ChannelArray::~ChannelArray() {
-		if (_data_indices != 0) {
-			DEALLOC(_data_indices);
-		}
 		if (data != 0) {
 			DEALLOC(data);
+		}
+		if (_sparse != 0) {
+			DEALLOC(_sparse);
 		}
 	}
 
@@ -294,6 +294,14 @@ namespace ds {
 		_num_blocks = num;
 	}
 
+	int ChannelArray::find_free() const {
+		for (int i = 0; i < capacity; ++i) {
+			if (_sparse[i] == -1) {
+				return i;
+			}
+		}
+		return -1;
+	}
 	// -----------------------------------------------
 	// add
 	// -----------------------------------------------
@@ -301,10 +309,9 @@ namespace ds {
 		if (size + 1 > capacity) {
 			resize(size * 2 + 8);
 		}
-		Index &in = _data_indices[_free_dequeue];
-		_free_dequeue = in.next;
-		in.index = size++;
-		return in.id;
+		int idx = find_free();
+		_sparse[idx] = size++;
+		return idx;
 	}
 
 	// -----------------------------------------------
@@ -315,28 +322,6 @@ namespace ds {
 			int total = 0;
 			for (int i = 0; i < _num_blocks; ++i) {
 				total += _sizes[i];
-			}
-			if (_data_indices == 0) {
-				_data_indices = (Index*)ALLOC(new_size * sizeof(Index));
-				for (unsigned short i = 0; i < new_size; ++i) {
-					_data_indices[i].id = i;
-					_data_indices[i].next = i + 1;
-					_data_indices[i].index = USHRT_MAX;
-				}
-				_free_dequeue = 0;
-				_free_enqueue = new_size - 1;
-			}
-			else {
-				Index* tmp = (Index*)ALLOC(new_size * sizeof(Index));
-				memcpy(tmp, _data_indices, size * sizeof(Index));
-				for (unsigned short i = size; i < new_size; ++i) {
-					tmp[i].id = i;
-					tmp[i].next = i + 1;
-					tmp[i].index = USHRT_MAX;
-				}
-				DEALLOC(_data_indices);
-				_data_indices = tmp;
-				_free_enqueue = new_size - 1;
 			}
 			int sz = new_size * total;
 			char* t = (char*)ALLOC(sz);
@@ -356,6 +341,21 @@ namespace ds {
 				_indices[i] = _indices[i - 1] + _sizes[i - 1] * capacity;
 			}
 			data = t;
+			if (_sparse == 0) {
+				_sparse = (int*)ALLOC(new_size * sizeof(int));
+				for (int i = 0; i < new_size; ++i) {
+					_sparse[i] = -1;
+				}
+			}
+			else {
+				int* tmp = (int*)ALLOC(new_size * sizeof(int));
+				memcpy(tmp, _sparse, size * sizeof(int));
+				for (int i = size; i < new_size; ++i) {
+					tmp[i] = -1;
+				}
+				DEALLOC(_sparse);
+				_sparse = tmp;
+			}
 			return true;
 		}
 		return false;
@@ -383,7 +383,7 @@ namespace ds {
 	// -----------------------------------------------
 	int ChannelArray::find(int data_index) const {
 		for (int i = 0; i < capacity; ++i) {
-			if (_data_indices[i].index == data_index) {
+			if (_sparse[i] == data_index) {
 				return i;
 			}
 		}
@@ -394,24 +394,22 @@ namespace ds {
 	// remove
 	// -----------------------------------------------
 	void ChannelArray::remove(ID id) {
-		Index &in = _data_indices[id & INDEX_MASK];
-		assert(in.index != USHRT_MAX);
-		if (size > 0) {
-			int l = find(size - 1);
-			if (l != -1 && l != in.id) {
-				Index& last = _data_indices[l];
-				for (int i = 0; i < _num_blocks; ++i) {
-					int current = _indices[i] + in.index * _sizes[i];
-					int next = _indices[i] + last.index * _sizes[i];
-					memcpy(data + current, data + next, _sizes[i]);					
+		if (contains(id)) {
+			int tmp = _sparse[id];
+			if (size > 0) {
+				int l = find(size - 1);
+				if (l != -1 && l != id) {
+					for (int i = 0; i < _num_blocks; ++i) {
+						int current = _indices[i] + _sparse[id] * _sizes[i];
+						int next = _indices[i] + (size - 1) * _sizes[i];
+						memcpy(data + current, data + next, _sizes[i]);
+					}
+					_sparse[l] = tmp;
 				}
-				last.index = in.index;
 			}
+			_sparse[id] = -1;
+			--size;
 		}
-		--size;
-		in.index = USHRT_MAX;
-		_data_indices[_free_enqueue].next = id & INDEX_MASK;
-		_free_enqueue = id & INDEX_MASK;
 	}
 
 }

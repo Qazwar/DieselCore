@@ -88,6 +88,7 @@ namespace ds {
 		}
 
 		// http://www.scratchapixel.com/lessons/3d-basic-rendering/minimal-ray-tracer-rendering-simple-shapes/ray-box-intersection
+		/*
 		bool intersects(const Ray& ray, float* t0, float* t1) const {
 
 			float tmin = (bounds[ray.sign[0]].x - ray.origin.x) * ray.invDir.x;
@@ -115,6 +116,7 @@ namespace ds {
 			*t1 = tmax;
 			return true;
 		}
+		*/
 	};
 
 }

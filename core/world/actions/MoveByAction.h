@@ -12,8 +12,6 @@ namespace ds {
 		void attach(ID id,const v3& velocity,bool bounce = false);
 		void update(float dt,ActionEventBuffer& buffer);
 		void bounce(ID sid, BounceDirection direction,float dt);
-		void debug();
-		void debug(ID sid);
 		ActionType getActionType() const {
 			return AT_MOVE_BY;
 		}

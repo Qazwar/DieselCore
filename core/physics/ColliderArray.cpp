@@ -130,7 +130,7 @@ namespace ds {
 			return true;
 		}
 
-		bool testBoxIntersection(const Vector2f& p1,const Vector2f& e1,const Vector2f& p2,const Vector2f& e2) {
+		bool testBoxIntersection(const v2& p1, const v2& e1, const v2& p2, const v2& e2, Collision* collision) {
 			float top = p1.y - e1.y * 0.5f;
 			float left = p1.x - e1.x * 0.5f;
 			float right = p1.x + e1.x * 0.5f;
@@ -143,6 +143,14 @@ namespace ds {
 		
 			if( right < otherLeft || left > otherRight ) return false;
 			if( bottom < otherTop || top > otherBottom ) return false;
+			if (collision != 0) {
+				collision->firstPos = p1;
+				collision->secondPos = p2;
+				v3 d = p2 - p1;
+				collision->norm = normalize(d);
+				// ???????
+				collision->distance = 0.0f;
+			}
 			return true;
 		}
 
@@ -352,13 +360,22 @@ namespace ds {
 
 
 
-		bool testCircleIntersection(const Vector2f& p1, float r1, const Vector2f& p2, float r2) {
+		bool testCircleIntersection(const v2& p1, float r1, const v2& p2, float r2, Collision* collision) {
 			/*
 			collisionPointX = ((p1.x * r2) + (p2.x * r1)) / (r1 + r2);
 			collisionPointY = ((p1.y * r2) + (p2.y * r1)) / (r1 + r2);
 			*/
-			Vector2f d = p2 - p1;
-			if (sqr_length(d) < r1 * r2) {
+			float dr = r1 + r2;
+			v2 d = p2 - p1;
+			if (sqr_length(d) < dr * dr) {
+				if (collision != 0) {
+					collision->firstPos = p1;
+					collision->secondPos = p2;
+					v3 d = p2 - p1;
+					float l = length(d);
+					collision->distance = l / (r1 + r2);
+					collision->norm = normalize(v3(d));
+				}
 				return true;
 			}
 			return false;

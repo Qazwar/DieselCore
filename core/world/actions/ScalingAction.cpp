@@ -54,7 +54,7 @@ namespace ds {
 	void ScalingAction::update(float dt,ActionEventBuffer& buffer) {
 		if (_buffer.size > 0) {
 			// move
-			for (int i = 0; i < _buffer.size; ++i) {
+			for (uint32_t i = 0; i < _buffer.size; ++i) {
 				_timers[i] += dt;
 				v3 t = tweening::interpolate(_tweeningTypes[i], _startScale[i], _endScale[i], _timers[i], _ttl[i]);
 				_array->set(_ids[i], _channels[i], t);				
@@ -64,7 +64,7 @@ namespace ds {
 					}
 					else if ( _modes[i] == 0 ) {
 						_array->set(_ids[i], _channels[i], _endScale[i]);
-						//buffer.add(_ids[i], AT_SCALE, array.getType(_ids[i]));
+						buffer.add(_ids[i], AT_SCALE, _array->get<int>(_ids[i],WEC_TYPE));
 						removeByIndex(i);
 					}
 					else {
@@ -77,31 +77,12 @@ namespace ds {
 		}
 	}
 
-	// -------------------------------------------------------
-	// 
-	// -------------------------------------------------------
-	void ScalingAction::debug() {
-		if ( _buffer.size > 0 ) {
-			LOG << "---------- ScalingAction ---------- ";
-		}
-		for ( int i = 0; i < _buffer.size; ++i ) {
-			LOG << i << " : id: " << _ids[i] << " timer: " << _timers[i];
-		}
-		/*
-		std::map<SID,int>::iterator it = m_Mapping.begin();
-		while ( it != m_Mapping.end()) {
-			LOG << it->first << " = " << it->second;
-			++it;
-		}
-		*/
-	}
-
 	void ScalingAction::saveReport(const ReportWriter& writer) {
 		if (_buffer.size > 0) {
 			writer.startBox("ScalingAction");
 			const char* OVERVIEW_HEADERS[] = { "ID", "Start", "End", "TTL", "Timer" };
 			writer.startTable(OVERVIEW_HEADERS, 5);
-			for (int i = 0; i < _buffer.size; ++i) {
+			for (uint32_t i = 0; i < _buffer.size; ++i) {
 				writer.startRow();
 				writer.addCell(_ids[i]);
 				writer.addCell(_startScale[i]);

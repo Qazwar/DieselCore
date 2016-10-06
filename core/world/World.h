@@ -53,6 +53,7 @@ namespace ds {
 		ID create();
 		ID create(const v2& pos, const Texture& texture, int type, float rotation = 0.0f, const v2& scale = v2(1,1), const Color& color = Color::WHITE);
 		uint32_t size() const;
+		bool contains(ID id) const;
 
 		void attachCollider(ID id, ShapeType type, const v2& extent);
 		bool hasCollisions() const;
@@ -66,10 +67,13 @@ namespace ds {
 		void scale(ID id, const v3& start, const v3& end, float ttl, int mode = 0, const tweening::TweeningType& tweeningType = &tweening::linear);
 		void removeAfter(ID sid, float ttl);
 
+		void stopAction(ID id, ActionType type);
+
 		void setPosition(ID id, const v2& pos);
 		const v3& getPosition(ID id) const;
 		void setRotation(ID id, const v3& rotation);
 		void setRotation(ID id, float rotation);
+		void setColor(ID id, const Color& color);
 
 		void tick(float dt);
 		void remove(ID id);

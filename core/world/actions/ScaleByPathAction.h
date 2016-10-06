@@ -12,8 +12,6 @@ namespace ds {
 		virtual ~ScaleByPathAction();
 		void attach(ID id, V3Path* path, float ttl);
 		void update(float dt,ActionEventBuffer& buffer);
-		void debug();
-		void debug(ID sid) {}
 		ActionType getActionType() const {
 			return AT_SCALE_BY_PATH;
 		}

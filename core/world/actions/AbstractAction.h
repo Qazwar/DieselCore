@@ -18,8 +18,6 @@ namespace ds {
 			virtual ~AbstractAction() {}
 			virtual void update(float dt,ActionEventBuffer& buffer) = 0;
 			void removeByIndex(int i);
-			virtual void debug() = 0;
-			virtual void debug(ID sid) = 0;
 			void setBoundingRect(const Rect& r);
 			virtual void allocate(int sz) = 0;
 			virtual ActionType getActionType() const = 0;

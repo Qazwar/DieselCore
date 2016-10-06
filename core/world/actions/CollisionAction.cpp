@@ -37,7 +37,7 @@ namespace ds {
 	}
 
 	bool CollisionAction::containsCollision(const Collision& c) const {
-		for (int i = 0; i < _collisions.size(); ++i) {
+		for (uint32_t i = 0; i < _collisions.size(); ++i) {
 			const Collision& other = _collisions[i];
 			if (other.firstID == c.firstID && other.secondID == c.secondID) {
 				return true;
@@ -55,17 +55,16 @@ namespace ds {
 	// -------------------------------------------------------
 	void CollisionAction::update(float dt,ActionEventBuffer& buffer) {
 		_collisions.clear();
+		float dist = 0.0f;
 		if (_buffer.size > 0) {
 			for (uint32_t i = 0; i < _buffer.size; ++i) {
 				for (uint32_t j = i + 1; j < _buffer.size; ++j) {
-					if (i != j) {
-						if (intersects(i, j)) {
-							//LOG << "intersection between " << i << " (" << _ids[i] << ") and " << j << " (" << _ids[j] << ")";
-							Collision c;
-							c.firstPos = _array->get<v3>(_ids[i], WEC_POSITION);
+					if (_ids[i] != _ids[j]) {
+						Collision c;
+						if (intersects(i, j, &c)) {
+							LOG << "intersection between " << i << " (" << _ids[i] << ") and " << j << " (" << _ids[j] << ")";							
 							c.firstID = _ids[i];
 							c.firstType = _array->get<int>(_ids[i], WEC_TYPE);
-							c.secondPos = _array->get<v3>(_ids[j], WEC_POSITION);
 							c.secondID = _ids[j];
 							c.secondType = _array->get<int>(_ids[j], WEC_TYPE);
 							if (!containsCollision(c)) {
@@ -84,22 +83,30 @@ namespace ds {
 	// --------------------------------------------------------------------------
 	// intersects
 	// --------------------------------------------------------------------------
-	bool CollisionAction::intersects(int firstIndex, int secondIndex) {
+	bool CollisionAction::intersects(int firstIndex, int secondIndex, Collision* c) {
 		ShapeType firstShape = _types[firstIndex];
 		ShapeType secondShape = _types[secondIndex];
 		const v3& fp = _array->get<v3>(_ids[firstIndex], WEC_POSITION);
-		const v3& fpp = _previous[firstIndex];
 		const v3& fe = _extents[firstIndex];
 		const v3& sp = _array->get<v3>(_ids[secondIndex],WEC_POSITION);
-		const v3& spp = _previous[secondIndex];
 		const v3& se = _extents[secondIndex];
 		if (firstShape == PST_CIRCLE && secondShape == PST_CIRCLE) {
-			// FIXME: calculate radius based on scale of sprite
 			float r1 = fe.x * 0.5f;
 			float r2 = se.x * 0.5f;
-			float u0, u1;
+			//float u0, u1;			
+			if (physics::testCircleIntersection(fp.xy(), r1, sp.xy(), r2)) {
+				v3 d = sp - fp;
+				float l = length(d);
+				c->distance = l / (r1 + r2);
+				c->norm = normalize(d);
+				c->firstPos = fp;
+				c->secondPos = sp;
+				return true;
+			}
+
+			/*
 			if (physics::testCircleSweepIntersection(r1, fpp.xy(), fp.xy(), r2, spp.xy(), sp.xy(), &u0, &u1)) {
-				//LOG << "u0 : " << u0 << " u1: " << u1;
+				LOG << "u0 : " << u0 << " u1: " << u1;
 				if (u0 <= 0.0f && u1 <= 0.0f) {
 					return false;
 				}
@@ -109,6 +116,7 @@ namespace ds {
 				//if (physics::testCircleIntersection(fp, r1, sp, r2)) {
 				return true;
 			}
+			*/
 		}
 		else if (firstShape == PST_QUAD && secondShape == PST_QUAD) {
 			if (physics::testBoxIntersection(fp, fe, sp, se)) {
@@ -118,31 +126,16 @@ namespace ds {
 		return false;
 	}
 
-	// -------------------------------------------------------
-	// 
-	// -------------------------------------------------------
-	void CollisionAction::debug() {
-		if ( _buffer.size > 0 ) {
-			LOG << "---------- ScalingAction ---------- ";
-		}
-		/*
-		std::map<SID,int>::iterator it = m_Mapping.begin();
-		while ( it != m_Mapping.end()) {
-			LOG << it->first << " = " << it->second;
-			++it;
-		}
-		*/
-	}
-
 	void CollisionAction::saveReport(const ReportWriter& writer) {
 		if (_buffer.size > 0) {
-			writer.startBox("ScalingAction");
-			const char* OVERVIEW_HEADERS[] = { "ID", "ShapeType", "Extent"};
-			writer.startTable(OVERVIEW_HEADERS, 3);
-			for (int i = 0; i < _buffer.size; ++i) {
+			writer.startBox("CollisionAction");
+			const char* OVERVIEW_HEADERS[] = { "ID", "ShapeType", "Type", "Extent"};
+			writer.startTable(OVERVIEW_HEADERS, 4);
+			for (uint32_t i = 0; i < _buffer.size; ++i) {
 				writer.startRow();
 				writer.addCell(_ids[i]);
 				writer.addCell(_types[i]);
+				writer.addCell(_array->get<int>(_ids[i], WEC_TYPE));
 				writer.addCell(_extents[i]);
 				writer.endRow();
 			}

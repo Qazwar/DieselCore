@@ -35,6 +35,10 @@ namespace ds {
 		return _data->add();
 	}
 
+	bool World::contains(ID id) const {
+		return _data->contains(id);
+	}
+
 	ID World::create(const v2& pos, const Texture& texture, int type, float rotation, const v2& scale, const Color& color) {
 		ID id = _data->add();
 		_data->set<v3>(id, WEC_POSITION, v3(pos));
@@ -56,6 +60,10 @@ namespace ds {
 
 	void World::setRotation(ID id, float rotation) {
 		_data->set<v3>(id, WEC_ROTATION, v3(rotation));
+	}
+
+	void World::setColor(ID id, const Color& color) {
+		_data->set<Color>(id, WEC_COLOR, color);
 	}
 
 	void World::setPosition(ID id, const v2& pos) {
@@ -99,7 +107,7 @@ namespace ds {
 	int World::find_by_type(int type, ID* ids, int max) const {
 		int* indices = _data->_sparse;
 		int cnt = 0;
-		for (uint32_t i = 0; i < _data->capacity; ++i) {
+		for (int i = 0; i < _data->capacity; ++i) {
 			if (indices[i] != -1 && cnt < max) {
 				int t = _data->get<int>(i, WEC_TYPE);
 				if (t == type) {
@@ -149,6 +157,12 @@ namespace ds {
 		action->attach(id, ttl);
 	}
 
+	void World::stopAction(ID id, ActionType type) {
+		if (_actions[type] != 0) {
+			_actions[type]->removeByID(id);
+		}
+	}
+
 	void World::tick(float dt) {
 		_buffer.reset();
 		{
@@ -178,8 +192,7 @@ namespace ds {
 		const char* OVERVIEW_HEADERS[] = { "ID", "Index", "Position", "Texture", "Rotation", "Scale", "Color", "Type" };
 		writer.startTable(OVERVIEW_HEADERS, 8);
 		int* indices = _data->_sparse;
-		for (uint32_t i = 0; i < _data->capacity; ++i) {
-			//const Index& in = indices[i];
+		for (int i = 0; i < _data->capacity; ++i) {
 			if (indices[i] != -1) {
 				writer.startRow();
 				writer.addCell(i);
@@ -200,6 +213,7 @@ namespace ds {
 				_actions[i]->saveReport(writer);
 			}
 		}
+		_collisionAction->saveReport(writer);
 	}
 
 }

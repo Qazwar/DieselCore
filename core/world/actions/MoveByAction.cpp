@@ -101,32 +101,12 @@ namespace ds {
 	// -------------------------------------------------------
 	// 
 	// -------------------------------------------------------
-	void MoveByAction::debug() {
-		LOG << "------- MoveByAction -------";
-		for (int i = 0; i < _buffer.size; ++i) {
-			LOG << i << " id: " << _ids[i] << " velocity: " << DBG_V2(_velocities[i]);
-		}		
-	}
-
-	// -------------------------------------------------------
-	// 
-	// -------------------------------------------------------
-	void MoveByAction::debug(ID sid) {
-		int i = find(sid);
-		if (i != -1) {
-			LOG << "MoveByAction - id: " << _ids[i] << " velocity: " << DBG_V2(_velocities[i]);
-		}
-	}
-
-	// -------------------------------------------------------
-	// 
-	// -------------------------------------------------------
 	void MoveByAction::saveReport(const ReportWriter& writer) {
 		if (_buffer.size > 0) {
 			writer.addSubHeader("MoveByAction");
 			const char* HEADERS[] = { "Index", "ID", "Velocity", "Bounce"};
 			writer.startTable(HEADERS, 4);
-			for (int i = 0; i < _buffer.size; ++i) {
+			for (uint32_t i = 0; i < _buffer.size; ++i) {
 				writer.startRow();
 				writer.addCell(i);
 				writer.addCell(_ids[i]);

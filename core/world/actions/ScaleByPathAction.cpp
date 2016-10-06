@@ -47,7 +47,7 @@ namespace ds {
 		if ( _buffer.size > 0 ) {				
 			// move
 			v3 scale;
-			for (int i = 0; i < _buffer.size; ++i) {
+			for (uint32_t i = 0; i < _buffer.size; ++i) {
 				float norm = math::norm(_timers[i], _ttl[i]);
 				_path[i]->get(norm, &scale);
 				_array->set<v3>(_ids[i], WEC_SCALE, scale);
@@ -62,26 +62,7 @@ namespace ds {
 			}
 		}
 	}
-
-	// -------------------------------------------------------
-	// 
-	// -------------------------------------------------------
-	void ScaleByPathAction::debug() {
-		if ( _buffer.size > 0 ) {
-			LOG << "---------- ScalingAction ---------- ";
-		}
-		for ( int i = 0; i < _buffer.size; ++i ) {
-			LOG << i << " : id: " << _ids[i] << " timer: " << _timers[i];
-		}
-		/*
-		std::map<SID,int>::iterator it = m_Mapping.begin();
-		while ( it != m_Mapping.end()) {
-			LOG << it->first << " = " << it->second;
-			++it;
-		}
-		*/
-	}
-
+	
 	// -------------------------------------------------------
 	// 
 	// -------------------------------------------------------	
@@ -90,7 +71,7 @@ namespace ds {
 			writer.startBox("ScalingAction");
 			const char* HEADERS[] = { "Index", "ID", "Timer", "TTL" };
 			writer.startTable(HEADERS, 4);
-			for (int i = 0; i < _buffer.size; ++i) {
+			for (uint32_t i = 0; i < _buffer.size; ++i) {
 				writer.startRow();
 				writer.addCell(i);
 				writer.addCell(_ids[i]);

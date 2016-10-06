@@ -15,6 +15,8 @@ namespace ds {
 		int secondType;
 		v3 norm;
 		float distance;
+		v3 firstContact;
+		v3 secondContact;
 
 		const bool containsType(int type) const {
 			if ( firstType == type ) {
@@ -67,9 +69,9 @@ namespace ds {
 
 		bool testCircleSweepIntersection(float ra, const Vector2f& A0, const Vector2f& A1, float rb, const Vector2f& B0, const Vector2f&	B1, float* u0, float* u1);
 
-		bool testCircleIntersection(const Vector2f& p1, float r1, const Vector2f& p2, float r2);
+		bool testCircleIntersection(const v2& p1, float r1, const v2& p2, float r2, Collision* collision = 0);
 
-		bool testBoxIntersection(const Vector2f& p1,const Vector2f& e1,const Vector2f& p2,const Vector2f& e2);
+		bool testBoxIntersection(const v2& p1,const v2& e1,const v2& p2,const v2& e2, Collision* collision = 0);
 
 		bool testBoxIntersection(const Vector3f& p1, const Vector3f& e1, const Vector3f& p2, const Vector3f& e2);
 

@@ -11,8 +11,6 @@ namespace ds {
 		virtual ~RemoveAfterAction() {}
 		void attach(ID id, float ttl);
 		void update(float dt,ActionEventBuffer& buffer);
-		void debug();
-		void debug(ID sid);
 		ActionType getActionType() const {
 			return AT_REMOVE_AFTER;
 		}

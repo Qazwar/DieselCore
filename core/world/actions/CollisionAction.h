@@ -15,8 +15,6 @@ namespace ds {
 		virtual ~CollisionAction();
 		void attach(ID id, ShapeType type, const v3& extent);
 		void update(float dt,ActionEventBuffer& buffer);
-		void debug();
-		void debug(ID sid) {}
 		ActionType getActionType() const {
 			return AT_COLLISION;
 		}
@@ -32,7 +30,7 @@ namespace ds {
 		}
 	private:
 		bool containsCollision(const Collision& c) const;
-		bool intersects(int firstIndex, int secondIndex);
+		bool intersects(int firstIndex, int secondIndex, Collision* c);
 		void allocate(int sz);
 		v3* _previous;
 		ShapeType* _types;

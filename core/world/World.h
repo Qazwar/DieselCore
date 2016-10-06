@@ -66,14 +66,16 @@ namespace ds {
 		void scaleByPath(ID id, V3Path* path, float ttl);
 		void scale(ID id, const v3& start, const v3& end, float ttl, int mode = 0, const tweening::TweeningType& tweeningType = &tweening::linear);
 		void removeAfter(ID sid, float ttl);
-
+		void rotateBy(ID id, float angle, float ttl);
 		void stopAction(ID id, ActionType type);
 
 		void setPosition(ID id, const v2& pos);
 		const v3& getPosition(ID id) const;
 		void setRotation(ID id, const v3& rotation);
 		void setRotation(ID id, float rotation);
+		const v3& getRotation(ID id) const;
 		void setColor(ID id, const Color& color);
+		int getType(ID id) const;
 
 		void tick(float dt);
 		void remove(ID id);

@@ -3,6 +3,7 @@
 #include "actions\RemoveAfterAction.h"
 #include "actions\ScaleByPathAction.h"
 #include "actions\MoveByAction.h"
+#include "actions\RotateByAction.h"
 #include "..\profiler\Profiler.h"
 #include "actions\CollisionAction.h"
 
@@ -72,6 +73,14 @@ namespace ds {
 
 	const v3& World::getPosition(ID id) const {
 		return _data->get<v3>(id, WEC_POSITION);
+	}
+
+	int World::getType(ID id) const {
+		return _data->get<int>(id, WEC_TYPE);
+	}
+
+	const v3& World::getRotation(ID id) const {
+		return _data->get<v3>(id, WEC_ROTATION);
 	}
 
 	void World::scaleByPath(ID id, V3Path* path, float ttl) {
@@ -155,6 +164,14 @@ namespace ds {
 		}
 		RemoveAfterAction* action = (RemoveAfterAction*)_actions[AT_REMOVE_AFTER];
 		action->attach(id, ttl);
+	}
+
+	void World::rotateBy(ID id, float angle, float ttl) {
+		if (_actions[AT_ROTATE_BY] == 0) {
+			_actions[AT_ROTATE_BY] = new RotateByAction(_data);
+		}
+		RotateByAction* action = (RotateByAction*)_actions[AT_ROTATE_BY];
+		action->attach(id, angle, ttl);
 	}
 
 	void World::stopAction(ID id, ActionType type) {

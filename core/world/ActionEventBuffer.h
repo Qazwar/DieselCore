@@ -24,7 +24,9 @@ namespace ds {
 		AT_COLOR_FLASH,
 		AT_ROTATE_TO,
 		AT_COLLISION,
-		AT_BOUNCE
+		AT_BOUNCE,
+		AT_MOVE_BY_FINITE,
+		AT_ROTATE_TO_TARGET
 	};
 
 	struct ActionEvent {

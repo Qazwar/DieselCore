@@ -62,11 +62,13 @@ namespace ds {
 
 		void moveBy(ID id, const v2& velocity, bool bounce = true);
 		void moveBy(ID id, const v3& velocity, bool bounce = true);
+		void moveByFinite(ID id, const v3& velocity, float ttl, bool bounce = true);
 
 		void scaleByPath(ID id, V3Path* path, float ttl);
 		void scale(ID id, const v3& start, const v3& end, float ttl, int mode = 0, const tweening::TweeningType& tweeningType = &tweening::linear);
 		void removeAfter(ID sid, float ttl);
 		void rotateBy(ID id, float angle, float ttl);
+		void rotateTo(ID id, ID target, float angleVelocity);
 		void stopAction(ID id, ActionType type);
 
 		void setPosition(ID id, const v2& pos);

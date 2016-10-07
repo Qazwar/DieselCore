@@ -3,7 +3,9 @@
 #include "actions\RemoveAfterAction.h"
 #include "actions\ScaleByPathAction.h"
 #include "actions\MoveByAction.h"
+#include "actions\MoveByFiniteAction.h"
 #include "actions\RotateByAction.h"
+#include "actions\RotateToTargetAction.h"
 #include "..\profiler\Profiler.h"
 #include "actions\CollisionAction.h"
 
@@ -150,6 +152,14 @@ namespace ds {
 		moveBy(id, v3(velocity), bounce);
 	}
 
+	void World::moveByFinite(ID id, const v3& velocity, float ttl, bool bounce) {
+		if (_actions[AT_MOVE_BY_FINITE] == 0) {
+			_actions[AT_MOVE_BY_FINITE] = new MoveByFiniteAction(_data);
+		}
+		MoveByFiniteAction* action = (MoveByFiniteAction*)_actions[AT_MOVE_BY_FINITE];
+		action->attach(id, velocity, ttl, bounce);
+	}
+
 	void World::moveBy(ID id, const v3& velocity, bool bounce) {
 		if (_actions[AT_MOVE_BY] == 0) {
 			_actions[AT_MOVE_BY] = new MoveByAction(_data);
@@ -164,6 +174,14 @@ namespace ds {
 		}
 		RemoveAfterAction* action = (RemoveAfterAction*)_actions[AT_REMOVE_AFTER];
 		action->attach(id, ttl);
+	}
+
+	void World::rotateTo(ID id, ID target, float angleVelocity) {
+		if (_actions[AT_ROTATE_TO_TARGET] == 0) {
+			_actions[AT_ROTATE_TO_TARGET] = new RotateToTargetAction(_data);
+		}
+		RotateToTargetAction* action = (RotateToTargetAction*)_actions[AT_ROTATE_TO_TARGET];
+		action->attach(id, target, angleVelocity);
 	}
 
 	void World::rotateBy(ID id, float angle, float ttl) {

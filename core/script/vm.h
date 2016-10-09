@@ -63,7 +63,7 @@ namespace ds {
 		};
 
 		enum FunctionType {
-			FT_SIN,FT_COS,FT_LRP,FT_D2R,FT_SAT,FT_CLM,FT_TWN,FT_CLR
+			FT_SIN,FT_COS,FT_LRP,FT_D2R,FT_SAT,FT_CLM,FT_TWN,FT_CLR,FT_PTH
 		};
 
 		struct FunctionArgument {
@@ -81,6 +81,11 @@ namespace ds {
 		struct Method {
 			StaticHash hash;
 			Array<Line> lines;
+		};
+
+
+		struct ScriptContext {
+			Array<V3Path*> pathList;
 		};
 		// ------------------------------------------------------
 		// Script
@@ -117,6 +122,9 @@ namespace ds {
 			const ParserStatus& getStatus() const {
 				return _status;
 			}
+			void addPath(V3Path* path) {
+				_context.pathList.push_back(path);
+			}
 		private:	
 			int parseOperand(const char* data, const Tokenizer& t, int index, Variable* var);
 			int parseNumber(const Tokenizer& t, int index, Variable* var);
@@ -138,6 +146,7 @@ namespace ds {
 			Array<VMVariable> constants;
 			Array<v4> numbers;
 			Array<Function> functions;
+			ScriptContext _context;
 
 		};
 	}

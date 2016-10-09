@@ -11,12 +11,12 @@ namespace ds {
 		// -------------------------------------------------------
 		// function pointer
 		// -------------------------------------------------------
-		typedef v4(*VMFunc)(v4*, int);
+		typedef v4(*VMFunc)(ScriptContext*,v4*, int);
 
 		// -------------------------------------------------------
 		// vm SIN
 		// -------------------------------------------------------
-		v4 vm_sin(v4* args, int num) {
+		v4 vm_sin(ScriptContext* ctx, v4* args, int num) {
 			v4 ret(0.0f);
 			for (int i = 0; i < 4; ++i) {
 				ret.data[i] = sin(args[0].data[i]);
@@ -27,7 +27,7 @@ namespace ds {
 		// -------------------------------------------------------
 		// vm COS
 		// -------------------------------------------------------
-		v4 vm_cos(v4* args, int num) {
+		v4 vm_cos(ScriptContext* ctx, v4* args, int num) {
 			v4 ret(0.0f);
 			for (int i = 0; i < 4; ++i) {
 				ret.data[i] = cos(args[0].data[i]);
@@ -38,7 +38,7 @@ namespace ds {
 		// -------------------------------------------------------
 		// vm LERP
 		// -------------------------------------------------------
-		v4 vm_lerp(v4* args, int num) {
+		v4 vm_lerp(ScriptContext* ctx, v4* args, int num) {
 			v4 ret(0.0f);
 			for (int i = 0; i < 4; ++i) {
 				ret.data[i] = (1.0f - args[2].data[i]) * args[0].data[i] + args[2].data[i] * args[1].data[i];
@@ -49,7 +49,7 @@ namespace ds {
 		// -------------------------------------------------------
 		// vm DEG2RAD
 		// -------------------------------------------------------
-		v4 vm_degtorad(v4* args, int num) {
+		v4 vm_degtorad(ScriptContext* ctx, v4* args, int num) {
 			v4 ret(0.0f);
 			for (int i = 0; i < 4; ++i) {
 				ret.data[i] = DEGTORAD(args[0].data[i]);
@@ -60,7 +60,7 @@ namespace ds {
 		// -------------------------------------------------------
 		// vm clamp
 		// -------------------------------------------------------
-		v4 vm_clamp(v4* args, int num) {
+		v4 vm_clamp(ScriptContext* ctx, v4* args, int num) {
 			v4 ret(0.0f);
 			v4 mn = args[1];
 			v4 mx = args[2];
@@ -79,7 +79,7 @@ namespace ds {
 		// -------------------------------------------------------
 		// vm saturate
 		// -------------------------------------------------------
-		v4 vm_saturate(v4* args, int num) {
+		v4 vm_saturate(ScriptContext* ctx, v4* args, int num) {
 			v4 ret(0.0f);
 			for (int i = 0; i < 4; ++i) {
 				ret.data[i] = args[0].data[i];
@@ -96,7 +96,7 @@ namespace ds {
 		// -------------------------------------------------------
 		// vm color
 		// -------------------------------------------------------
-		v4 vm_color(v4* args, int num) {
+		v4 vm_color(ScriptContext* ctx, v4* args, int num) {
 			v4 ret(0.0f);
 			for (int i = 0; i < 4; ++i) {
 				if (args[i].x == 255.0f) {
@@ -112,10 +112,21 @@ namespace ds {
 		// -------------------------------------------------------
 		// vm tweening
 		// -------------------------------------------------------
-		v4 vm_tweening(v4* args, int num) {
+		v4 vm_tweening(ScriptContext* ctx, v4* args, int num) {
 			v4 type = args[0];
 			tweening::TweeningType t = tweening::get_by_index(type.x);
 			return tweening::interpolate(t, args[1], args[2], args[3].x, args[4].x);
+		}
+
+		// -------------------------------------------------------
+		// vm path
+		// -------------------------------------------------------
+		v4 vm_path(ScriptContext* ctx, v4* args, int num) {
+			v4 type = args[0];
+			V3Path* path = ctx->pathList[type.x];
+			v3 val;
+			path->get(args[1].x,&val);
+			return v4(val.x, val.y, val.z, 0.0f);
 		}
 
 		// -------------------------------------------------------
@@ -172,10 +183,11 @@ namespace ds {
 			{ FT_CLM, "CLM", 3, &vm_clamp },
 			{ FT_TWN, "TWN", 5, &vm_tweening },
 			{ FT_D2R, "D2R", 1, &vm_degtorad },
-			{ FT_CLR, "CLR", 4, &vm_color }
+			{ FT_CLR, "CLR", 4, &vm_color },
+			{ FT_PTH, "PTH", 2, &vm_path }
 		};
 
-		const int NUM_FUNCTIONS = 9;
+		const int NUM_FUNCTIONS = 10;
 
 		// -------------------------------------------------------
 		// Script
@@ -697,7 +709,7 @@ namespace ds {
 				}
 			}
 			const FunctionDefinition& def = FUNCTIONS[f.function_index];
-			ret = (*def.function)(args, f.arguments);
+			ret = (*def.function)(&_context, args, f.arguments);
 			return ret;
 		}
 

@@ -60,8 +60,8 @@ namespace ds {
 		const Collision& getCollision(int idx) const;
 		uint32_t numCollisions() const;
 
-		void moveBy(ID id, const v2& velocity, bool bounce = true);
-		void moveBy(ID id, const v3& velocity, bool bounce = true);
+		void moveBy(ID id, const v2& velocity, float ttl = -1.0f, bool bounce = true);
+		void moveBy(ID id, const v3& velocity, float ttl = -1.0f, bool bounce = true);
 		void moveByFinite(ID id, const v3& velocity, float ttl, bool bounce = true);
 
 		void scaleByPath(ID id, V3Path* path, float ttl);
@@ -69,6 +69,7 @@ namespace ds {
 		void removeAfter(ID sid, float ttl);
 		void rotateBy(ID id, float angle, float ttl);
 		void rotateTo(ID id, ID target, float angleVelocity);
+		void lookAt(ID id, ID target, float ttl = -1.0f);
 		void stopAction(ID id, ActionType type);
 
 		void setPosition(ID id, const v2& pos);

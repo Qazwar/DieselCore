@@ -7,25 +7,29 @@ namespace ds {
 	// 
 	// -------------------------------------------------------
 	MoveByAction::MoveByAction(ChannelArray* array) : AbstractAction(array, "move_by") {
-		int sizes[] = { sizeof(ID), sizeof(v3), sizeof(bool) };
-		_buffer.init(sizes, 3);
+		int sizes[] = { sizeof(ID), sizeof(v3), sizeof(float), sizeof(float), sizeof(bool) };
+		_buffer.init(sizes, 5);
 	}
 
 	void MoveByAction::allocate(int sz) {
 		if (_buffer.resize(sz)) {
 			_ids = (ID*)_buffer.get_ptr(0);
 			_velocities = (v3*)_buffer.get_ptr(1);
-			_bounce = (bool*)_buffer.get_ptr(2);
+			_timers = (float*)_buffer.get_ptr(2);
+			_ttl = (float*)_buffer.get_ptr(3);
+			_bounce = (bool*)_buffer.get_ptr(4);
 		}
 	}
 	// -------------------------------------------------------
 	// 
 	// -------------------------------------------------------
-	void MoveByAction::attach(ID id,const v3& velocity,bool bounce) {		
+	void MoveByAction::attach(ID id,const v3& velocity,float ttl, bool bounce) {		
 		int idx = create(id);
 		_ids[idx] = id;
 		_velocities[idx] = velocity;
 		_bounce[idx] = bounce;
+		_timers[idx] = 0.0f;
+		_ttl[idx] = ttl;
 		rotateTo(idx);
 	}
 
@@ -91,6 +95,14 @@ namespace ds {
 					else {
 						int t = _array->get<int>(_ids[i], WEC_TYPE);
 						buffer.add(_ids[i], AT_MOVE_BY, t);
+					}
+				}
+				if (_ttl[i] > 0.0f) {
+					_timers[i] += dt;
+					if (_timers[i] >= _ttl[i]) {
+						int t = _array->get<int>(_ids[i], WEC_TYPE);
+						buffer.add(_ids[i], AT_MOVE_BY, t);
+						removeByIndex(i);
 					}
 				}
 				_array->set<v3>(_ids[i],WEC_POSITION, p);

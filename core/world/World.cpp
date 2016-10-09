@@ -6,6 +6,7 @@
 #include "actions\MoveByFiniteAction.h"
 #include "actions\RotateByAction.h"
 #include "actions\RotateToTargetAction.h"
+#include "actions\LookAtAction.h"
 #include "..\profiler\Profiler.h"
 #include "actions\CollisionAction.h"
 
@@ -148,8 +149,8 @@ namespace ds {
 		return _collisionAction->numCollisions();
 	}
 
-	void World::moveBy(ID id, const v2& velocity, bool bounce) {
-		moveBy(id, v3(velocity), bounce);
+	void World::moveBy(ID id, const v2& velocity, float ttl, bool bounce) {
+		moveBy(id, v3(velocity), ttl, bounce);
 	}
 
 	void World::moveByFinite(ID id, const v3& velocity, float ttl, bool bounce) {
@@ -160,12 +161,12 @@ namespace ds {
 		action->attach(id, velocity, ttl, bounce);
 	}
 
-	void World::moveBy(ID id, const v3& velocity, bool bounce) {
+	void World::moveBy(ID id, const v3& velocity, float ttl, bool bounce) {
 		if (_actions[AT_MOVE_BY] == 0) {
 			_actions[AT_MOVE_BY] = new MoveByAction(_data);
 		}
 		MoveByAction* action = (MoveByAction*)_actions[AT_MOVE_BY];
-		action->attach(id, velocity, bounce);
+		action->attach(id, velocity, ttl, bounce);
 	}
 
 	void World::removeAfter(ID id, float ttl) {
@@ -174,6 +175,14 @@ namespace ds {
 		}
 		RemoveAfterAction* action = (RemoveAfterAction*)_actions[AT_REMOVE_AFTER];
 		action->attach(id, ttl);
+	}
+
+	void World::lookAt(ID id, ID target, float ttl) {
+		if (_actions[AT_LOOK_AT] == 0) {
+			_actions[AT_LOOK_AT] = new LookAtAction(_data);
+		}
+		LookAtAction* action = (LookAtAction*)_actions[AT_LOOK_AT];
+		action->attach(id, target, ttl);
 	}
 
 	void World::rotateTo(ID id, ID target, float angleVelocity) {

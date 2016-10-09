@@ -26,7 +26,8 @@ namespace ds {
 		AT_COLLISION,
 		AT_BOUNCE,
 		AT_MOVE_BY_FINITE,
-		AT_ROTATE_TO_TARGET
+		AT_ROTATE_TO_TARGET,
+		AT_LOOK_AT
 	};
 
 	struct ActionEvent {

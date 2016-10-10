@@ -65,9 +65,9 @@ namespace ds {
 				}
 				float angle = math::calculateRotation(_velocities[i].xy());
 				_array->set<v3>(sid,WEC_ROTATION,v3(angle));
-				v3 p = _array->get<v3>(sid,WEC_POSITION);
+				v3 p = _array->get<v3>(sid,WEC_FORCE);
 				p += _velocities[i] * dt;
-				_array->set<v3>(sid, WEC_POSITION, p);
+				_array->set<v3>(sid, WEC_FORCE, p);
 			}
 		}
 	}
@@ -78,7 +78,7 @@ namespace ds {
 	void MoveByAction::update(float dt,ActionEventBuffer& buffer) {	
 		if (_buffer.size > 0) {
 			for (int i = 0; i < _buffer.size; ++i) {
-				v3 p = _array->get<v3>(_ids[i],WEC_POSITION);
+				v3 p = _array->get<v3>(_ids[i],WEC_FORCE);
 				p += _velocities[i] * dt;
 				if (isOutOfBounds(p, _velocities[i])) {
 					if (_bounce[i]) {
@@ -105,7 +105,7 @@ namespace ds {
 						removeByIndex(i);
 					}
 				}
-				_array->set<v3>(_ids[i],WEC_POSITION, p);
+				_array->set<v3>(_ids[i],WEC_FORCE, p);
 			}
 		}
 	}

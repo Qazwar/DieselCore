@@ -36,10 +36,11 @@ namespace ds {
 		Color color;
 		float timer;
 		int type;
+		v3 force;
 	};
 
 	enum WorldEntityChannel {
-		WEC_POSITION,WEC_SCALE,WEC_ROTATION,WEC_TEXTURE,WEC_COLOR,WEC_TIMER,WEC_TYPE
+		WEC_POSITION,WEC_SCALE,WEC_ROTATION,WEC_TEXTURE,WEC_COLOR,WEC_TIMER,WEC_TYPE,WEC_FORCE
 	};
 	
 	class AbstractAction;
@@ -62,14 +63,14 @@ namespace ds {
 
 		void moveBy(ID id, const v2& velocity, float ttl = -1.0f, bool bounce = true);
 		void moveBy(ID id, const v3& velocity, float ttl = -1.0f, bool bounce = true);
-		void moveByFinite(ID id, const v3& velocity, float ttl, bool bounce = true);
-
 		void scaleByPath(ID id, V3Path* path, float ttl);
 		void scale(ID id, const v3& start, const v3& end, float ttl, int mode = 0, const tweening::TweeningType& tweeningType = &tweening::linear);
 		void removeAfter(ID sid, float ttl);
 		void rotateBy(ID id, float angle, float ttl);
 		void rotateTo(ID id, ID target, float angleVelocity);
 		void lookAt(ID id, ID target, float ttl = -1.0f);
+		void seek(ID id, ID target, float velocity);
+		void separate(ID id, int type, float minDistance, float relaxation);
 		void stopAction(ID id, ActionType type);
 
 		void setPosition(ID id, const v2& pos);

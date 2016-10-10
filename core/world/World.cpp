@@ -3,10 +3,11 @@
 #include "actions\RemoveAfterAction.h"
 #include "actions\ScaleByPathAction.h"
 #include "actions\MoveByAction.h"
-#include "actions\MoveByFiniteAction.h"
 #include "actions\RotateByAction.h"
 #include "actions\RotateToTargetAction.h"
 #include "actions\LookAtAction.h"
+#include "actions\SeekAction.h"
+#include "actions\SeparateAction.h"
 #include "..\profiler\Profiler.h"
 #include "actions\CollisionAction.h"
 
@@ -18,8 +19,8 @@ namespace ds {
 		}
 		_collisionAction = 0;
 		_data = new ChannelArray;
-		int sizes[] = { sizeof(v3), sizeof(v3), sizeof(v3) ,sizeof(Texture) , sizeof(Color), sizeof(float), sizeof(int)};
-		_data->init(sizes, 7);
+		int sizes[] = { sizeof(v3), sizeof(v3), sizeof(v3) ,sizeof(Texture) , sizeof(Color), sizeof(float), sizeof(int), sizeof(v3)};
+		_data->init(sizes, 8);
 	}
 
 
@@ -51,6 +52,7 @@ namespace ds {
 		_data->set<v3>(id, WEC_SCALE, v3(scale.x, scale.y, 1.0f));
 		_data->set<Color>(id, WEC_COLOR, color);
 		_data->set<int>(id, WEC_TYPE, type);
+		_data->set<v3>(id, WEC_FORCE, v3(0.0f));
 		return id;
 	}
 
@@ -153,14 +155,6 @@ namespace ds {
 		moveBy(id, v3(velocity), ttl, bounce);
 	}
 
-	void World::moveByFinite(ID id, const v3& velocity, float ttl, bool bounce) {
-		if (_actions[AT_MOVE_BY_FINITE] == 0) {
-			_actions[AT_MOVE_BY_FINITE] = new MoveByFiniteAction(_data);
-		}
-		MoveByFiniteAction* action = (MoveByFiniteAction*)_actions[AT_MOVE_BY_FINITE];
-		action->attach(id, velocity, ttl, bounce);
-	}
-
 	void World::moveBy(ID id, const v3& velocity, float ttl, bool bounce) {
 		if (_actions[AT_MOVE_BY] == 0) {
 			_actions[AT_MOVE_BY] = new MoveByAction(_data);
@@ -175,6 +169,22 @@ namespace ds {
 		}
 		RemoveAfterAction* action = (RemoveAfterAction*)_actions[AT_REMOVE_AFTER];
 		action->attach(id, ttl);
+	}
+
+	void World::separate(ID id, int type, float minDistance, float relaxation) {
+		if (_actions[AT_SEPARATE] == 0) {
+			_actions[AT_SEPARATE] = new SeparateAction(_data);
+		}
+		SeparateAction* action = (SeparateAction*)_actions[AT_SEPARATE];
+		action->attach(id, type, minDistance, relaxation);
+	}
+
+	void World::seek(ID id, ID target, float velocity) {
+		if (_actions[AT_SEEK] == 0) {
+			_actions[AT_SEEK] = new SeekAction(_data);
+		}
+		SeekAction* action = (SeekAction*)_actions[AT_SEEK];
+		action->attach(id, target, velocity);
 	}
 
 	void World::lookAt(ID id, ID target, float ttl) {
@@ -209,32 +219,43 @@ namespace ds {
 
 	void World::tick(float dt) {
 		_buffer.reset();
-		{
-			//ZoneTracker z2("World:tick:update");
-			for (int i = 0; i < 32; ++i) {
-				if (_actions[i] != 0) {
-					_actions[i]->update(dt, _buffer);
-				}
-			}
-			if (_collisionAction != 0) {
-				_collisionAction->update(dt, _buffer);
+		// reset forces
+		v3* forces = (v3*)_data->get_ptr(WEC_FORCE);
+		for (uint32_t i = 0; i < _data->size; ++i) {
+			*forces = v3(0.0f);
+			++forces;
+		}
+		// update all actions
+		for (int i = 0; i < 32; ++i) {
+			if (_actions[i] != 0) {
+				_actions[i]->update(dt, _buffer);
 			}
 		}
-		{
-			//ZoneTracker z2("World:tick:kill");
-			for (uint32_t i = 0; i < _buffer.events.size(); ++i) {
-				const ActionEvent& e = _buffer.events[i];
-				if (e.action == AT_KILL) {
-					remove(e.id);
-				}
+		// apply forces
+		forces = (v3*)_data->get_ptr(WEC_FORCE);
+		v3* positions = (v3*)_data->get_ptr(WEC_POSITION);
+		for (uint32_t i = 0; i < _data->size; ++i) {
+			*positions += *forces;
+			++forces;
+			++positions;
+		}
+		// handle collisions
+		if (_collisionAction != 0) {
+			_collisionAction->update(dt, _buffer);
+		}
+		// process events
+		for (uint32_t i = 0; i < _buffer.events.size(); ++i) {
+			const ActionEvent& e = _buffer.events[i];
+			if (e.action == AT_KILL) {
+				remove(e.id);
 			}
 		}
 	}
 
 	void World::saveReport(const ds::ReportWriter& writer) {
 		writer.startBox("World");
-		const char* OVERVIEW_HEADERS[] = { "ID", "Index", "Position", "Texture", "Rotation", "Scale", "Color", "Type" };
-		writer.startTable(OVERVIEW_HEADERS, 8);
+		const char* OVERVIEW_HEADERS[] = { "ID", "Index", "Position", "Texture", "Rotation", "Scale", "Color", "Type", "Force" };
+		writer.startTable(OVERVIEW_HEADERS, 9);
 		int* indices = _data->_sparse;
 		for (int i = 0; i < _data->capacity; ++i) {
 			if (indices[i] != -1) {
@@ -247,6 +268,7 @@ namespace ds {
 				writer.addCell(_data->get<v3>(indices[i], WEC_SCALE));
 				writer.addCell(_data->get<Color>(indices[i], WEC_COLOR));
 				writer.addCell(_data->get<int>(indices[i], WEC_TYPE));
+				writer.addCell(_data->get<v3>(indices[i], WEC_FORCE));
 				writer.endRow();
 			}
 		}

@@ -1,6 +1,7 @@
 #pragma once
 #include "memory_types.h"
 #include <vector>
+#include "..\io\ReportWriter.h"
 //#include "CallStackTracer.h"
 
 #ifdef DEBUG
@@ -70,6 +71,7 @@ public:
 	MemoryInfo get_info();
 	void debug();
 	void printOpenAllocations();
+	void save(const ReportWriter& writer);
 private:
 	Header* _headers;
 	int _num;

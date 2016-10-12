@@ -56,6 +56,7 @@ namespace ds {
 		uint32_t size() const;
 		bool contains(ID id) const;
 
+		void ignoreCollisions(int firstType, int secondType);
 		void attachCollider(ID id, ShapeType type, const v2& extent);
 		bool hasCollisions() const;
 		const Collision& getCollision(int idx) const;

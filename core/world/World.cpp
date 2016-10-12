@@ -36,14 +36,23 @@ namespace ds {
 		delete _data;
 	}
 
+	// -----------------------------------------------
+	// create
+	// -----------------------------------------------
 	ID World::create() {
 		return _data->add();
 	}
 
+	// -----------------------------------------------
+	// contains
+	// -----------------------------------------------
 	bool World::contains(ID id) const {
 		return _data->contains(id);
 	}
 
+	// -----------------------------------------------
+	// create
+	// -----------------------------------------------
 	ID World::create(const v2& pos, const Texture& texture, int type, float rotation, const v2& scale, const Color& color) {
 		ID id = _data->add();
 		_data->set<v3>(id, WEC_POSITION, v3(pos));
@@ -88,6 +97,9 @@ namespace ds {
 		return _data->get<v3>(id, WEC_ROTATION);
 	}
 
+	// -----------------------------------------------
+	// scale by path
+	// -----------------------------------------------
 	void World::scaleByPath(ID id, V3Path* path, float ttl) {
 		if (_actions[AT_SCALE_BY_PATH] == 0) {
 			_actions[AT_SCALE_BY_PATH] = new ScaleByPathAction(_data);
@@ -96,6 +108,9 @@ namespace ds {
 		action->attach(id, path, ttl);
 	}
 
+	// -----------------------------------------------
+	// scale
+	// -----------------------------------------------
 	void World::scale(ID id, const v3& start, const v3& end, float ttl, int mode, const tweening::TweeningType& tweeningType) {
 		if (_actions[AT_SCALE] == 0) {
 			_actions[AT_SCALE] = new ScalingAction(_data);
@@ -118,6 +133,9 @@ namespace ds {
 		_data->remove(id);
 	}
 
+	// -----------------------------------------------
+	// find by type
+	// -----------------------------------------------
 	int World::find_by_type(int type, ID* ids, int max) const {
 		int* indices = _data->_sparse;
 		int cnt = 0;
@@ -132,6 +150,9 @@ namespace ds {
 		return cnt;
 	}
 
+	// -----------------------------------------------
+	// attach collider
+	// -----------------------------------------------
 	void World::attachCollider(ID id, ShapeType type, const v2& extent) {
 		if (_collisionAction == 0) {
 			_collisionAction = new CollisionAction(_data);
@@ -139,22 +160,41 @@ namespace ds {
 		_collisionAction->attach(id, type, v3(extent));
 	}
 
+	void World::ignoreCollisions(int firstType, int secondType) {
+		_collisionAction->ignore(firstType, secondType);
+	}
+
+	// -----------------------------------------------
+	// has collisions
+	// -----------------------------------------------
 	bool World::hasCollisions() const {
 		return _collisionAction->hasCollisions();
 	}
 
+	// -----------------------------------------------
+	// get collision
+	// -----------------------------------------------
 	const Collision& World::getCollision(int idx) const {
 		return _collisionAction->getCollision(idx);
 	}
 
+	// -----------------------------------------------
+	// num collisions
+	// -----------------------------------------------
 	uint32_t World::numCollisions() const {
 		return _collisionAction->numCollisions();
 	}
 
+	// -----------------------------------------------
+	// move by (2D)
+	// -----------------------------------------------
 	void World::moveBy(ID id, const v2& velocity, float ttl, bool bounce) {
 		moveBy(id, v3(velocity), ttl, bounce);
 	}
 
+	// -----------------------------------------------
+	// move by
+	// -----------------------------------------------
 	void World::moveBy(ID id, const v3& velocity, float ttl, bool bounce) {
 		if (_actions[AT_MOVE_BY] == 0) {
 			_actions[AT_MOVE_BY] = new MoveByAction(_data);
@@ -163,6 +203,9 @@ namespace ds {
 		action->attach(id, velocity, ttl, bounce);
 	}
 
+	// -----------------------------------------------
+	// remove after
+	// -----------------------------------------------
 	void World::removeAfter(ID id, float ttl) {
 		if (_actions[AT_REMOVE_AFTER] == 0) {
 			_actions[AT_REMOVE_AFTER] = new RemoveAfterAction(_data);
@@ -171,6 +214,9 @@ namespace ds {
 		action->attach(id, ttl);
 	}
 
+	// -----------------------------------------------
+	// separate
+	// -----------------------------------------------
 	void World::separate(ID id, int type, float minDistance, float relaxation) {
 		if (_actions[AT_SEPARATE] == 0) {
 			_actions[AT_SEPARATE] = new SeparateAction(_data);
@@ -179,6 +225,9 @@ namespace ds {
 		action->attach(id, type, minDistance, relaxation);
 	}
 
+	// -----------------------------------------------
+	// seek
+	// -----------------------------------------------
 	void World::seek(ID id, ID target, float velocity) {
 		if (_actions[AT_SEEK] == 0) {
 			_actions[AT_SEEK] = new SeekAction(_data);
@@ -187,6 +236,9 @@ namespace ds {
 		action->attach(id, target, velocity);
 	}
 
+	// -----------------------------------------------
+	// look at
+	// -----------------------------------------------
 	void World::lookAt(ID id, ID target, float ttl) {
 		if (_actions[AT_LOOK_AT] == 0) {
 			_actions[AT_LOOK_AT] = new LookAtAction(_data);
@@ -195,6 +247,9 @@ namespace ds {
 		action->attach(id, target, ttl);
 	}
 
+	// -----------------------------------------------
+	// rotate to
+	// -----------------------------------------------
 	void World::rotateTo(ID id, ID target, float angleVelocity) {
 		if (_actions[AT_ROTATE_TO_TARGET] == 0) {
 			_actions[AT_ROTATE_TO_TARGET] = new RotateToTargetAction(_data);
@@ -203,6 +258,9 @@ namespace ds {
 		action->attach(id, target, angleVelocity);
 	}
 
+	// -----------------------------------------------
+	// rotate by
+	// -----------------------------------------------
 	void World::rotateBy(ID id, float angle, float ttl) {
 		if (_actions[AT_ROTATE_BY] == 0) {
 			_actions[AT_ROTATE_BY] = new RotateByAction(_data);
@@ -211,47 +269,69 @@ namespace ds {
 		action->attach(id, angle, ttl);
 	}
 
+	// -----------------------------------------------
+	// stop action
+	// -----------------------------------------------
 	void World::stopAction(ID id, ActionType type) {
 		if (_actions[type] != 0) {
 			_actions[type]->removeByID(id);
 		}
 	}
 
+	// -----------------------------------------------
+	// tick
+	// -----------------------------------------------
 	void World::tick(float dt) {
+		ZoneTracker("World::tick");
 		_buffer.reset();
 		// reset forces
-		v3* forces = (v3*)_data->get_ptr(WEC_FORCE);
+		v3* forces = (v3*)_data->get_ptr(WEC_FORCE);		
 		for (uint32_t i = 0; i < _data->size; ++i) {
 			*forces = v3(0.0f);
 			++forces;
 		}
 		// update all actions
-		for (int i = 0; i < 32; ++i) {
-			if (_actions[i] != 0) {
-				_actions[i]->update(dt, _buffer);
+		{
+			ZoneTracker("World::tick::update");
+			for (int i = 0; i < 32; ++i) {
+				if (_actions[i] != 0) {
+					_actions[i]->update(dt, _buffer);
+				}
 			}
 		}
 		// apply forces
-		forces = (v3*)_data->get_ptr(WEC_FORCE);
-		v3* positions = (v3*)_data->get_ptr(WEC_POSITION);
-		for (uint32_t i = 0; i < _data->size; ++i) {
-			*positions += *forces;
-			++forces;
-			++positions;
+		{
+			ZoneTracker("World::tick::applyForces");
+			forces = (v3*)_data->get_ptr(WEC_FORCE);
+			v3* positions = (v3*)_data->get_ptr(WEC_POSITION);
+			for (uint32_t i = 0; i < _data->size; ++i) {
+				*positions += *forces;
+				++forces;
+				++positions;
+			}
 		}
 		// handle collisions
-		if (_collisionAction != 0) {
-			_collisionAction->update(dt, _buffer);
+		{
+			ZoneTracker("World::tick::collisions");
+			if (_collisionAction != 0) {
+				_collisionAction->update(dt, _buffer);
+			}
 		}
 		// process events
-		for (uint32_t i = 0; i < _buffer.events.size(); ++i) {
-			const ActionEvent& e = _buffer.events[i];
-			if (e.action == AT_KILL) {
-				remove(e.id);
+		{
+			ZoneTracker("World::tick::events");
+			for (uint32_t i = 0; i < _buffer.events.size(); ++i) {
+				const ActionEvent& e = _buffer.events[i];
+				if (e.action == AT_KILL) {
+					remove(e.id);
+				}
 			}
 		}
 	}
 
+	// -----------------------------------------------
+	// save report
+	// -----------------------------------------------
 	void World::saveReport(const ds::ReportWriter& writer) {
 		writer.startBox("World");
 		const char* OVERVIEW_HEADERS[] = { "ID", "Index", "Position", "Texture", "Rotation", "Scale", "Color", "Type", "Force" };
@@ -262,13 +342,13 @@ namespace ds {
 				writer.startRow();
 				writer.addCell(i);
 				writer.addCell(indices[i]);
-				writer.addCell(_data->get<v3>(indices[i], WEC_POSITION));
-				writer.addCell(_data->get<Texture>(indices[i], WEC_TEXTURE));
-				writer.addCell(RADTODEG(_data->get<v3>(indices[i], WEC_ROTATION).x));
-				writer.addCell(_data->get<v3>(indices[i], WEC_SCALE));
-				writer.addCell(_data->get<Color>(indices[i], WEC_COLOR));
-				writer.addCell(_data->get<int>(indices[i], WEC_TYPE));
-				writer.addCell(_data->get<v3>(indices[i], WEC_FORCE));
+				writer.addCell(_data->get<v3>(i, WEC_POSITION));
+				writer.addCell(_data->get<Texture>(i, WEC_TEXTURE));
+				writer.addCell(RADTODEG(_data->get<v3>(i, WEC_ROTATION).x));
+				writer.addCell(_data->get<v3>(i, WEC_SCALE));
+				writer.addCell(_data->get<Color>(i, WEC_COLOR));
+				writer.addCell(_data->get<int>(i, WEC_TYPE));
+				writer.addCell(_data->get<v3>(i, WEC_FORCE));
 				writer.endRow();
 			}
 		}

@@ -80,12 +80,14 @@ namespace ds {
 			for (int i = 0; i < _buffer.size; ++i) {
 				v3 p = _array->get<v3>(_ids[i],WEC_FORCE);
 				p += _velocities[i] * dt;
-				if (isOutOfBounds(p, _velocities[i])) {
+				v3 pos = _array->get<v3>(_ids[i], WEC_POSITION);
+				pos += p;
+				if (isOutOfBounds(pos, _velocities[i])) {
 					if (_bounce[i]) {
-						if (p.y > m_BoundingRect.bottom || p.y < m_BoundingRect.top) {
+						if (pos.y > m_BoundingRect.bottom || pos.y < m_BoundingRect.top) {
 							_velocities[i].y *= -1.0f;
 						}
-						if (p.x < m_BoundingRect.left || p.x > m_BoundingRect.right ) {
+						if (pos.x < m_BoundingRect.left || pos.x > m_BoundingRect.right) {
 							_velocities[i].x *= -1.0f;
 						}
 						buffer.add(_ids[i], AT_BOUNCE, -1, &_velocities[i], sizeof(v3));

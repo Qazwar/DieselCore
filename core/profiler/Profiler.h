@@ -4,13 +4,15 @@
 #include <windows.h>
 #include <chrono>
 #include "..\log\Log.h"
+#include "..\io\ReportWriter.h"
 
+/*
 namespace ds {
 
 	class ReportWriter;
 
 }
-
+*/
 class StopWatch {
 
 public:	
@@ -57,7 +59,7 @@ namespace perf {
 
 	void debug();
 
-	//void save(const ds::ReportWriter& writer);
+	void save(const ds::ReportWriter& writer);
 
 	void tickFPS(float dt);
 

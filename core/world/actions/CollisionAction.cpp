@@ -49,6 +49,25 @@ namespace ds {
 		return false;
 	}
 
+	bool CollisionAction::isSupported(int firstType, int secondType) {
+		for (uint32_t i = 0; i < _ignores.size(); ++i) {
+			const IgnoredCollision& ic = _ignores[i];
+			if (ic.firstType == firstType && ic.secondType == secondType) {
+				return false;
+			}
+			if (ic.firstType == secondType && ic.secondType == firstType) {
+				return false;
+			}
+		}
+		return true;
+	}
+
+	void CollisionAction::ignore(int firstType, int secondType) {
+		IgnoredCollision ignored;
+		ignored.firstType = firstType;
+		ignored.secondType = secondType;
+		_ignores.push_back(ignored);
+	}
 
 	// -------------------------------------------------------
 	// 
@@ -61,14 +80,16 @@ namespace ds {
 				for (uint32_t j = i + 1; j < _buffer.size; ++j) {
 					if (_ids[i] != _ids[j]) {
 						Collision c;
-						if (intersects(i, j, &c)) {
-							LOG << "intersection between " << i << " (" << _ids[i] << ") and " << j << " (" << _ids[j] << ")";							
-							c.firstID = _ids[i];
-							c.firstType = _array->get<int>(_ids[i], WEC_TYPE);
-							c.secondID = _ids[j];
-							c.secondType = _array->get<int>(_ids[j], WEC_TYPE);
-							if (!containsCollision(c)) {
-								_collisions.push_back(c);
+						c.firstType = _array->get<int>(_ids[i], WEC_TYPE);
+						c.secondType = _array->get<int>(_ids[j], WEC_TYPE);
+						if (isSupported(c.firstType, c.secondType)) {
+							if (intersects(i, j, &c)) {
+								LOG << "intersection between " << i << " ( id: " << _ids[i] << " type: " << c.firstType << ") and " << j << " ( id: " << _ids[j] << " type: " << c.secondType << ")";
+								c.firstID = _ids[i];
+								c.secondID = _ids[j];
+								if (!containsCollision(c)) {
+									_collisions.push_back(c);
+								}
 							}
 						}
 					}

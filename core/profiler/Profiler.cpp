@@ -204,7 +204,7 @@ namespace perf {
 			return (total > other.total);
 		}
 	};
-	/*
+	
 	void save(const ds::ReportWriter& writer) {
 		char buffer[256];
 		sprintf_s(buffer, 256, "Perf - Profiling (%d FPS)", zoneTrackerCtx->fps);
@@ -269,7 +269,7 @@ namespace perf {
 		writer.endBox();
 
 	}
-	*/
+	
 	float get_current_total_time() {
 		if (zoneTrackerCtx->events.size() > 0) {
 			return zoneTrackerCtx->events[0].duration;

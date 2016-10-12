@@ -9,10 +9,16 @@
 namespace ds {
 
 	class CollisionAction : public AbstractAction {
+
+		struct IgnoredCollision {
+			int firstType;
+			int secondType;
+		};
 		
 	public:
 		CollisionAction(ChannelArray* array);
 		virtual ~CollisionAction();
+		void ignore(int firstType, int secondType);
 		void attach(ID id, ShapeType type, const v3& extent);
 		void update(float dt,ActionEventBuffer& buffer);
 		ActionType getActionType() const {
@@ -31,11 +37,13 @@ namespace ds {
 	private:
 		bool containsCollision(const Collision& c) const;
 		bool intersects(int firstIndex, int secondIndex, Collision* c);
+		bool isSupported(int firstType, int secondType);
 		void allocate(int sz);
 		v3* _previous;
 		ShapeType* _types;
 		v3* _extents;
 		Array<Collision> _collisions;
+		Array<IgnoredCollision> _ignores;
 	};
 
 }

@@ -197,7 +197,7 @@ void DefaultAllocator::debug() {
 }
 
 
-/*
+
 void DefaultAllocator::save(const ReportWriter& writer) {
 	writer.startBox("Memory Dump");
 	MemoryInfo info = get_info();
@@ -242,6 +242,7 @@ void DefaultAllocator::save(const ReportWriter& writer) {
 		writer.endRow();
 	}
 	writer.endTable();
+	/*
 	const char* INFO_HEADERS[] = { "Stack", "Size", "Reuse","Open" };
 	writer.startTable(INFO_HEADERS, 4);
 	char line[2048];
@@ -257,9 +258,10 @@ void DefaultAllocator::save(const ReportWriter& writer) {
 		writer.endRow();
 	}
 	writer.endTable();
+	*/
 	writer.endBox();
 }
-*/
+
 void DefaultAllocator::printOpenAllocations() {
 	for (uint32_t i = 0; i < _infos.size(); ++i) {
 		const AllocInfo& h = _infos[i];

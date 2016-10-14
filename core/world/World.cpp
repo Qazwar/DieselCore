@@ -123,14 +123,20 @@ namespace ds {
 	// remove
 	// -----------------------------------------------
 	void World::remove(ID id) {
-		for (int i = 0; i < 32; ++i) {
-			if (_actions[i] != 0) {
-				_actions[i]->removeByID(id);
+		LOG << "removing: " << id;
+		if (_data->contains(id)) {
+			for (int i = 0; i < 32; ++i) {
+				if (_actions[i] != 0) {
+					_actions[i]->removeByID(id);
+				}
 			}
+			_collisionAction->removeByID(id);
+			_additionalData.remove(id);
+			_data->remove(id);
 		}
-		_collisionAction->removeByID(id);
-		_additionalData.remove(id);
-		_data->remove(id);
+		else {
+			LOGE << "requesting to remove " << id << " but it is not part of the world";
+		}
 	}
 
 	// -----------------------------------------------

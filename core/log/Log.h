@@ -10,6 +10,7 @@
 
 #include <sstream>
 #include <stdio.h>
+#include "..\lib\collection_types.h"
 
 enum LogTypes {
 	LT_NONE,
@@ -29,6 +30,8 @@ void MyAssert_fmt(char* expr_str, bool expr, char* file, int line, char* fomat, 
 void MyAssert_fmt(char* file, int line, char* format, ...);
 
 void init_logger(int logTypes,int width, int height);
+
+void init_logger();
 
 void shutdown_logger();
 
@@ -50,6 +53,38 @@ public:
    static FILE*& Stream();
    void write(const char* msg);
 
+};
+
+enum LogLevel {
+	LL_TRACE,
+	LL_DEBUG,
+	LL_INFO,
+	LL_WARN,
+	LL_ERROR
+};
+
+struct LogCategoryDefinition {
+	const char* category;
+	LogLevel level;
+};
+
+struct LogConfiguration {
+	bool useConsole;
+	int consoleHeight;
+	int consoleWidth;
+	bool useFile;
+	const char* fileName;
+	ds::Array<LogCategoryDefinition> definitions;
+
+	LogConfiguration() : useConsole(true), useFile(true), fileName("log.txt"), consoleHeight(80), consoleWidth(400) {
+	}
+
+	void addCategory(const char* name, LogLevel lvl) {
+		LogCategoryDefinition def;
+		def.category = name;
+		def.level = lvl;
+		definitions.push_back(def);
+	}
 };
 
 class Log {

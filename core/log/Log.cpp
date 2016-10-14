@@ -9,8 +9,17 @@
 #include <windows.h>
 #include <stdio.h>
 #include "..\base\EventStream.h"
+#include "..\string\StaticHash.h"
+#include "..\io\json.h"
 
 #pragma warning(disable: 4996)
+
+struct LogCategory {
+	StaticHash hash;
+	LogLevel level;
+	int nameIndex;
+};
+
 
 struct LogContext {
 
@@ -19,6 +28,36 @@ struct LogContext {
 	HANDLE console;
 	FILE* file;
 	int logTypes;
+	ds::Array<LogCategory> categories;
+
+	bool load() {
+		ds::JSONReader reader;
+		if (reader.parseFile("content\\log.json")) {
+			int settings = reader.find_category("settings");
+			if (settings != -1) {
+				/*
+					console: true
+					console_height : 80
+					console_width : 400
+					file : true
+					file_name : "log.txt"
+					root_level : INFO
+				*/
+				reader.get(settings, "console", &useConsole);
+				reader.get(settings, "file", &useFile);
+			}
+			int mainCategory = reader.find_category("categories");
+			if (mainCategory != -1) {
+				int categories[64];
+				int num = reader.get_categories(categories, 64, mainCategory);
+				for (int i = 0; i < num; ++i) {
+
+				}
+			}
+			return true;
+		}
+		return false;
+	}
 
 };
 
@@ -62,10 +101,12 @@ void MyAssert_fmt(char* file, int line, char* format, ...) {
 	abort();
 }
 
+
 static LogContext* _logContext;
 
 void init_logger(int logTypes, int width, int height) {
 	_logContext = new LogContext;
+	_logContext->load();
 	_logContext->logTypes = logTypes;
 	if ((logTypes & LogTypes::LT_CONSOLE) == LogTypes::LT_CONSOLE) {
 		_logContext->useConsole = true;
@@ -76,15 +117,24 @@ void init_logger(int logTypes, int width, int height) {
 		GetConsoleScreenBufferInfo(_logContext->console, &coninfo);
 		coninfo.dwSize.Y = height;
 		coninfo.dwSize.X = width;
-		SetConsoleScreenBufferSize(_logContext->console, coninfo.dwSize);
+		COORD coord;
+		coord.X = width;
+		coord.Y = height;
 
 		SMALL_RECT srctWindow;
-		srctWindow = coninfo.srWindow;
+		//srctWindow = coninfo.srWindow;
 		srctWindow.Top = 0;
 		srctWindow.Left = 0;
 		srctWindow.Right = width - 1;
 		srctWindow.Bottom = height - 1;
 		SetConsoleWindowInfo(_logContext->console, TRUE, &srctWindow);
+
+		SetConsoleScreenBufferSize(_logContext->console,coord);
+
+		GetConsoleScreenBufferInfo(_logContext->console, &coninfo);
+
+		HWND consoleWindow = GetConsoleWindow();
+		SetWindowPos(consoleWindow, 0, 0, 0, width, height, SWP_NOSIZE | SWP_NOZORDER);
 		SetConsoleTextAttribute(_logContext->console, FOREGROUND_RED);
 		const char* text = "Hello world\n";
 		unsigned long res;
@@ -103,6 +153,11 @@ void init_logger(int logTypes, int width, int height) {
 	}
 	
 	
+}
+
+void init_logger() {
+	_logContext = new LogContext;
+	_logContext->load();
 }
 
 void shutdown_logger() {

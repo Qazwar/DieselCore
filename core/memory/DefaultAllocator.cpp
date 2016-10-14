@@ -9,7 +9,6 @@ DefaultAllocator* gDefaultMemory;
 	
 DefaultAllocator::DefaultAllocator(uint32_t size) : _capacity(size) , _tracer(0) {
 	_buffer = (char*)malloc(sizeof(char) * size);
-	LOG << "allocated: " << _capacity;
 	_headers = (Header*)malloc(sizeof(Header) * 32);
 	_num = 0;
 	_header_capacity = 32;

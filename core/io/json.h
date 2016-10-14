@@ -64,6 +64,7 @@ namespace ds {
 		JSONReader();
 		~JSONReader();
 		bool parse(const StaticHash& fileName);
+		bool parseFile(const char* name);
 		int get_categories(int* result, int max, int parent = -1) const;
 		int find_category(const char* name, int parent = -1) const;
 		bool matches(int category_id, const char* name) const;

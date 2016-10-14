@@ -36,20 +36,22 @@ namespace file {
 		return false;
 	}
 
-	char* loadTextFile(const char* name) {
+	char* loadTextFile(const char* name,int* size) {
+		if (size != 0) {
+			*size = -1;
+		}
 		FILE *fp = fopen(name, "r");
 		if (fp) {
-			//LOG << "Loading '" << name << "'";
 			fseek(fp, 0, SEEK_END);
 			int sz = ftell(fp);
 			fseek(fp, 0, SEEK_SET);
-			//LOG << "size: " << sz;
 			char* data = new char[sz + 1];
 			for (int i = 0; i < sz + 1; ++i) {
 				data[i] = '\0';
 			}
 			fread(data, 1, sz, fp);
 			fclose(fp);
+			*size = sz;
 			return data;
 		}
 		return 0;

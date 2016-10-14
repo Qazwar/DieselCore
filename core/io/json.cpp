@@ -2,8 +2,9 @@
 #include <stdio.h>
 #include <string.h>
 #include <stack>
-#include "..\io\FileRepository.h"
+#include "FileRepository.h"
 #include "..\log\Log.h"
+#include "FileUtils.h"
 
 namespace ds {
 
@@ -273,6 +274,99 @@ bool JSONReader::parse(const StaticHash& fileName) {
 		t = tokenizer.get(n);
 	}
 	return true;
+}
+
+// -------------------------------------------
+// parse
+// -------------------------------------------
+bool JSONReader::parseFile(const char* fileName) {
+	int size = -1;
+	char* data = ds::file::loadTextFile(fileName, &size);
+	if (size != -1) {
+		Tokenizer tokenizer;
+		tokenizer.parse(data);
+		char name[128];
+		int n = 0;
+		int category_index = 0;
+		int cat = -1;
+		Stack<int> cat_stack;
+		while (n < tokenizer.size()) {
+			Token& t = tokenizer.get(n);
+			if (t.type == Token::NAME) {
+				if (tokenizer.get(n + 1).type == Token::OPEN_BRACES) {
+					++n;
+					strncpy(name, data + t.index, t.size);
+					name[t.size] = '\0';
+					++category_index;
+					int parent = -1;
+					if (!cat_stack.empty()) {
+						parent = cat_stack.top();
+					}
+					cat = add_category(name, parent);
+					cat_stack.push(cat);
+					++n;
+				}
+				else if (tokenizer.get(n + 1).type == Token::SEPARATOR) {
+					++n;
+					strncpy(name, data + t.index, t.size);
+					name[t.size] = '\0';
+					int parent = -1;
+					if (!cat_stack.empty()) {
+						parent = cat_stack.top();
+					}
+					int p = create_property(name, parent);
+					++n;
+					Token& v = tokenizer.get(n);
+					if (v.type == Token::STRING) {
+						int start = v.index;
+						int end = v.index + v.size;
+						add(p, data + start, v.size);
+						++n;
+					}
+					else if (v.type == Token::NAME) {
+						strncpy(name, data + v.index, v.size);
+						name[v.size] = '\0';
+						if (strcmp(name, "true") == 0) {
+							add(p, 1.0f);
+						}
+						else {
+							add(p, 0.0f);
+						}
+						++n;
+					}
+					else {
+						bool parsing = true;
+						while (parsing) {
+							if (v.type == Token::NUMBER) {
+								add(p, v.value);
+								if (tokenizer.get(n + 1).type != Token::DELIMITER) {
+									parsing = false;
+								}
+							}
+							++n;
+							v = tokenizer.get(n);
+
+						}
+					}
+				}
+			}
+
+			else if (t.type == Token::CLOSE_BRACES) {
+				if (!cat_stack.empty()) {
+					cat_stack.pop();
+				}
+				--category_index;
+				++n;
+			}
+			else {
+				++n;
+			}
+			t = tokenizer.get(n);
+		}
+		delete[] data;
+		return true;
+	}
+	return false;
 }
 
 // -------------------------------------------

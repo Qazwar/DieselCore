@@ -7,7 +7,7 @@ namespace ds {
 	class SeekAction : public AbstractAction {
 
 	public:
-		SeekAction(ChannelArray* array);
+		SeekAction(ChannelArray* array, const Rect& boundingRect);
 		virtual ~SeekAction() {}
 		void attach(ID id, ID target, float velocity);
 		void update(float dt,ActionEventBuffer& buffer);

@@ -6,7 +6,7 @@ namespace ds {
 	// -------------------------------------------------------
 	// 
 	// -------------------------------------------------------
-	LookAtAction::LookAtAction(ChannelArray* array) : AbstractAction(array, "look_at") {
+	LookAtAction::LookAtAction(ChannelArray* array, const Rect& boundingRect) : AbstractAction(array, boundingRect, "look_at") {
 		int sizes[] = { sizeof(ID), sizeof(ID), sizeof(float), sizeof(float) };
 		_buffer.init(sizes, 4);
 	}
@@ -35,7 +35,7 @@ namespace ds {
 	// -------------------------------------------------------
 	void LookAtAction::update(float dt,ActionEventBuffer& buffer) {
 		if (_buffer.size > 0) {
-			for (int i = 0; i < _buffer.size; ++i) {
+			for (uint32_t i = 0; i < _buffer.size; ++i) {
 				v3 p = _array->get<v3>(_ids[i], WEC_POSITION);
 				v3 t = _array->get<v3>(_targets[i],WEC_POSITION);
 				v3 r = _array->get<v3>(_ids[i], WEC_ROTATION);

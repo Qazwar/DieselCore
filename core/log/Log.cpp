@@ -11,52 +11,116 @@
 #include "..\base\EventStream.h"
 #include "..\string\StaticHash.h"
 #include "..\io\json.h"
+#include <vector>
 
 #pragma warning(disable: 4996)
 
 struct LogCategory {
 	StaticHash hash;
 	LogLevel level;
-	int nameIndex;
+	//int nameIndex;
 };
 
+struct LogLevelDefinition {
+	const char* name;
+	LogLevel level;
+	StaticHash hash;
+
+	LogLevelDefinition(const char* n, LogLevel l) : name(n), level(l) {
+		hash = StaticHash(n);
+	}
+};
+
+static const LogLevelDefinition LOGLEVELS[] = {
+	{"TRACE" , LL_TRACE },
+	{"DEBUG" , LL_DEBUG },
+	{"INFO"  , LL_INFO},
+	{"WARN"  , LL_WARN},
+	{"ERROR" , LL_ERROR}
+};
+
+int find_log_level(const char* string) {
+	StaticHash hash = StaticHash(string);
+	for (int i = 0; i < 5; ++i) {
+		if (LOGLEVELS[i].hash == hash) {
+			return i;
+		}
+	}
+	return -1;
+}
 
 struct LogContext {
 
+	bool available;
 	bool useConsole;
 	bool useFile;
+	uint32_t consoleWidth;
+	uint32_t consoleHeight;
 	HANDLE console;
 	FILE* file;
-	int logTypes;
-	ds::Array<LogCategory> categories;
+	LogLevel rootLevel;
+	std::vector<LogCategory> categories; // we cannot use ds::Array here
+
+	LogContext() {
+		available = false;
+		useConsole = false;
+		useFile = false;
+		file = 0;
+	}
 
 	bool load() {
+		available = false;
 		ds::JSONReader reader;
 		if (reader.parseFile("content\\log.json")) {
 			int settings = reader.find_category("settings");
 			if (settings != -1) {
-				/*
-					console: true
-					console_height : 80
-					console_width : 400
-					file : true
-					file_name : "log.txt"
-					root_level : INFO
-				*/
 				reader.get(settings, "console", &useConsole);
 				reader.get(settings, "file", &useFile);
+				reader.get(settings, "console_width", &consoleWidth);
+				reader.get(settings, "console_height", &consoleHeight);
+				if (useConsole || useFile) {
+					available = true;
+				}
+				const char* str = reader.get_string(settings, "root_level");
+				int lvl = find_log_level(str);
+				if (lvl != -1) {
+					rootLevel = LOGLEVELS[lvl].level;
+				}
+				else {
+					rootLevel = LL_INFO;
+				}
 			}
 			int mainCategory = reader.find_category("categories");
 			if (mainCategory != -1) {
-				int categories[64];
-				int num = reader.get_categories(categories, 64, mainCategory);
+				int cats[64];
+				int num = reader.get_categories(cats, 64, mainCategory);
 				for (int i = 0; i < num; ++i) {
-
+					const char* name = reader.get_string(cats[i], "name");
+					const char* lvlName = reader.get_string(cats[i], "level");
+					LogCategory cat;
+					int lvl = find_log_level(lvlName);
+					if (lvl != -1) {
+						cat.level = LOGLEVELS[lvl].level;
+					}
+					else {
+						cat.level = LL_ERROR;
+					}
+					cat.hash = StaticHash(name);
+					categories.push_back(cat);
 				}
 			}
 			return true;
 		}
 		return false;
+	}
+
+	LogLevel find(StaticHash category) {
+		for (uint32_t i = 0; i < categories.size(); ++i) {
+			if (categories[i].hash == category) {
+				return categories[i].level;
+			}
+		}
+		return rootLevel;
 	}
 
 };
@@ -104,60 +168,46 @@ void MyAssert_fmt(char* file, int line, char* format, ...) {
 
 static LogContext* _logContext;
 
-void init_logger(int logTypes, int width, int height) {
-	_logContext = new LogContext;
-	_logContext->load();
-	_logContext->logTypes = logTypes;
-	if ((logTypes & LogTypes::LT_CONSOLE) == LogTypes::LT_CONSOLE) {
-		_logContext->useConsole = true;
-		CONSOLE_SCREEN_BUFFER_INFO coninfo;
-		AllocConsole();
-		AttachConsole(GetCurrentProcessId());
-		_logContext->console = GetStdHandle(STD_OUTPUT_HANDLE);
-		GetConsoleScreenBufferInfo(_logContext->console, &coninfo);
-		coninfo.dwSize.Y = height;
-		coninfo.dwSize.X = width;
-		COORD coord;
-		coord.X = width;
-		coord.Y = height;
-
-		SMALL_RECT srctWindow;
-		//srctWindow = coninfo.srWindow;
-		srctWindow.Top = 0;
-		srctWindow.Left = 0;
-		srctWindow.Right = width - 1;
-		srctWindow.Bottom = height - 1;
-		SetConsoleWindowInfo(_logContext->console, TRUE, &srctWindow);
-
-		SetConsoleScreenBufferSize(_logContext->console,coord);
-
-		GetConsoleScreenBufferInfo(_logContext->console, &coninfo);
-
-		HWND consoleWindow = GetConsoleWindow();
-		SetWindowPos(consoleWindow, 0, 0, 0, width, height, SWP_NOSIZE | SWP_NOZORDER);
-		SetConsoleTextAttribute(_logContext->console, FOREGROUND_RED);
-		const char* text = "Hello world\n";
-		unsigned long res;
-		WriteConsole(_logContext->console, text, strlen(text), &res, 0);
-		SetConsoleTextAttribute(_logContext->console, FOREGROUND_RED | FOREGROUND_BLUE | FOREGROUND_GREEN);
-	}
-	else {
-		_logContext->useConsole = false;
-	}
-	if ((logTypes & LogTypes::LT_FILE) == LogTypes::LT_FILE) {
-		_logContext->file = fopen("log.txt", "w");
-		_logContext->useFile = true;
-	}
-	else {
-		_logContext->useFile = false;
-	}
-	
-	
-}
-
 void init_logger() {
 	_logContext = new LogContext;
-	_logContext->load();
+	if (_logContext->load()) {
+		if (_logContext->useConsole) {
+			_logContext->useConsole = true;
+			CONSOLE_SCREEN_BUFFER_INFO coninfo;
+			AllocConsole();
+			AttachConsole(GetCurrentProcessId());
+			_logContext->console = GetStdHandle(STD_OUTPUT_HANDLE);
+			GetConsoleScreenBufferInfo(_logContext->console, &coninfo);
+			coninfo.dwSize.Y = _logContext->consoleHeight;
+			coninfo.dwSize.X = _logContext->consoleWidth;
+			COORD coord;
+			coord.X = _logContext->consoleWidth;
+			coord.Y = _logContext->consoleHeight;
+
+			SMALL_RECT srctWindow;
+			//srctWindow = coninfo.srWindow;
+			srctWindow.Top = 0;
+			srctWindow.Left = 0;
+			srctWindow.Right = _logContext->consoleWidth - 1;
+			srctWindow.Bottom = _logContext->consoleHeight - 1;
+			SetConsoleWindowInfo(_logContext->console, TRUE, &srctWindow);
+
+			SetConsoleScreenBufferSize(_logContext->console, coord);
+
+			GetConsoleScreenBufferInfo(_logContext->console, &coninfo);
+
+			HWND consoleWindow = GetConsoleWindow();
+			SetWindowPos(consoleWindow, 0, 0, 0, _logContext->consoleWidth, _logContext->consoleHeight, SWP_NOSIZE | SWP_NOZORDER);
+			SetConsoleTextAttribute(_logContext->console, FOREGROUND_RED);
+			//const char* text = "Hello world\n";
+			//unsigned long res;
+			//WriteConsole(_logContext->console, text, strlen(text), &res, 0);
+			//SetConsoleTextAttribute(_logContext->console, FOREGROUND_RED | FOREGROUND_BLUE | FOREGROUND_GREEN);
+		}
+		if (_logContext->useFile) {
+			_logContext->file = fopen("log.txt", "w");
+		}
+	}
 }
 
 void shutdown_logger() {
@@ -195,94 +245,126 @@ void FileOutputHandler::write(const char* message) {
 
 Log::Log() {
 	_errorFlag = false;
+	_level = LL_ERROR;
+	_categoryLevel = LL_ERROR;
+}
+
+Log::Log(StaticHash category,LogLevel level) {
+	_errorFlag = false;
+	_level = level;
+	_categoryLevel = _logContext->find(category);
 }
 
 Log::Log(const Log& orig) {}
 
+bool Log::matches() {
+	return (_logContext->available && _level >= _categoryLevel);
+}
+
 std::ostringstream& Log::get() {
-    os << NowTime();
-    os << " : ";
+	if (matches()) {
+		os << NowTime();
+		os << " : ";
+	}
     return os;
 }
 
 void Log::log_file_line(const char *file, const unsigned long line, bool isError) {
-	char buffer[128];
-	NowTime(buffer, 128);
-	os << buffer;
-	os << " ";
-	if (isError) {
-		os << " -- ERROR -- ";
-		_errorFlag = true;
+	if (matches()) {
+		char buffer[128];
+		NowTime(buffer, 128);
+		os << buffer;
+		os << " ";
+		if (isError) {
+			os << " -- ERROR -- ";
+			_errorFlag = true;
+		}
+		file_name(file, buffer);
+		os << " [";
+		os << buffer;
+		os << ":";
+		os << line;
+		os << "] : ";
 	}
-	file_name(file, buffer);
-	os << " [";
-	os << buffer;
-	os << ":";
-	os << line;
-	os << "] : ";
 }
 
 std::ostringstream& Log::get(const char *file, const unsigned long line) {
-	log_file_line(file, line, false);
+	if (matches()) {
+		log_file_line(file, line, false);
+	}
 	return os;
 }
 
 std::ostringstream& Log::error(const char *file, const unsigned long line) {
-	log_file_line(file, line, true);
+	if (matches()) {
+		log_file_line(file, line, true);
+	}
 	_errorFlag = true;
 	return os;
 }
 
 std::ostringstream& Log::error(const char *file, const unsigned long line,const char* message) {
-	log_file_line(file, line,true);
-	os << message;
+	if (matches()) {
+		log_file_line(file, line, true);
+		os << message;
+	}
 	_errorFlag = true;
 	return os;
 }
 
 std::ostringstream& Log::error(const char *file, const unsigned long line, char* format, va_list args) {
-	log_file_line(file, line, true);
-	char buffer[1024];
-	memset(buffer, 0, sizeof(buffer));
-	int written = vsnprintf_s(buffer, sizeof(buffer), _TRUNCATE, format, args);
-	os << buffer;
+	_level = LL_ERROR;
+	if (matches()) {
+		log_file_line(file, line, true);
+		char buffer[1024];
+		memset(buffer, 0, sizeof(buffer));
+		int written = vsnprintf_s(buffer, sizeof(buffer), _TRUNCATE, format, args);
+		os << buffer;
+	}
 	_errorFlag = true;
 	return os;
 }
 
 std::ostringstream& Log::error(const char *file, const unsigned long line, char* format, ...) {
-	va_list args;
-	va_start(args, format);
-	error(file, line, format, args);
-	va_end(args);
+	_level = LL_ERROR;
+	if (matches()) {
+		va_list args;
+		va_start(args, format);
+		error(file, line, format, args);
+		va_end(args);
+	}
 	_errorFlag = true;
 	return os;
 }
 
 std::ostringstream& Log::error() {
-	os << NowTime();
-	os << " [ERROR] : ";
+	_level = LL_ERROR;
+	if (matches()) {
+		os << NowTime();
+		os << " [ERROR] : ";
+	}
 	_errorFlag = true;
 	return os;
 }
 
 Log::~Log() {
-    os << std::endl;
-	//OutputDebugStringA(os.str().c_str());
-	unsigned long res;
-	if (_logContext->useConsole) {
-		if (_errorFlag) {
-			SetConsoleTextAttribute(_logContext->console, FOREGROUND_RED);
+	if (matches()) {
+		os << std::endl;
+		//OutputDebugStringA(os.str().c_str());
+		unsigned long res;
+		if (_logContext->useConsole) {
+			if (_errorFlag) {
+				SetConsoleTextAttribute(_logContext->console, FOREGROUND_RED);
+			}
+			else {
+				SetConsoleTextAttribute(_logContext->console, FOREGROUND_RED | FOREGROUND_BLUE | FOREGROUND_GREEN);
+			}
+			WriteConsole(_logContext->console, os.str().c_str(), strlen(os.str().c_str()), &res, 0);
 		}
-		else {
-			SetConsoleTextAttribute(_logContext->console, FOREGROUND_RED | FOREGROUND_BLUE | FOREGROUND_GREEN);
+		if (_logContext->useFile) {
+			fprintf(_logContext->file, "%s", os.str().c_str());
 		}
-		WriteConsole(_logContext->console, os.str().c_str(), strlen(os.str().c_str()), &res, 0);
 	}
-	if (_logContext->useFile) {
-		fprintf(_logContext->file, "%s", os.str().c_str());
-	}
-	//handler().write(os.str());
 }
 
 LogOutputHandler& Log::handler() {

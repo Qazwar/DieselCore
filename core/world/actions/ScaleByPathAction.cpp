@@ -6,7 +6,7 @@ namespace ds {
 	// -------------------------------------------------------
 	// 
 	// -------------------------------------------------------
-	ScaleByPathAction::ScaleByPathAction(ChannelArray* array) : AbstractAction(array, "scale_by_path") {
+	ScaleByPathAction::ScaleByPathAction(ChannelArray* array, const Rect& boundingRect) : AbstractAction(array, boundingRect, "scale_by_path") {
 		int sizes[] = { sizeof(ID), sizeof(V3Path*), sizeof(float), sizeof(float) };
 		_buffer.init(sizes, 4);
 	}

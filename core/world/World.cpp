@@ -37,6 +37,16 @@ namespace ds {
 	}
 
 	// -----------------------------------------------
+	// set world dimension
+	// -----------------------------------------------
+	void World::setWorldDimension(const v2& dim) {
+		_boundingRect = Rect(0.0f, 0.0f, dim.x, dim.y);
+	}
+
+	void World::setBoundingRect(const Rect& r) {
+		_boundingRect = r;
+	}
+	// -----------------------------------------------
 	// create
 	// -----------------------------------------------
 	ID World::create() {
@@ -55,6 +65,7 @@ namespace ds {
 	// -----------------------------------------------
 	ID World::create(const v2& pos, const Texture& texture, int type, float rotation, const v2& scale, const Color& color) {
 		ID id = _data->add();
+		LOGC("world") << "create - id: " << id;
 		_data->set<v3>(id, WEC_POSITION, v3(pos));
 		_data->set<Texture>(id, WEC_TEXTURE, texture);
 		_data->set<v3>(id, WEC_ROTATION, v3(rotation,0.0f,0.0f));
@@ -102,7 +113,7 @@ namespace ds {
 	// -----------------------------------------------
 	void World::scaleByPath(ID id, V3Path* path, float ttl) {
 		if (_actions[AT_SCALE_BY_PATH] == 0) {
-			_actions[AT_SCALE_BY_PATH] = new ScaleByPathAction(_data);
+			_actions[AT_SCALE_BY_PATH] = new ScaleByPathAction(_data, _boundingRect);
 		}
 		ScaleByPathAction* action = (ScaleByPathAction*)_actions[AT_SCALE_BY_PATH];
 		action->attach(id, path, ttl);
@@ -113,7 +124,7 @@ namespace ds {
 	// -----------------------------------------------
 	void World::scale(ID id, const v3& start, const v3& end, float ttl, int mode, const tweening::TweeningType& tweeningType) {
 		if (_actions[AT_SCALE] == 0) {
-			_actions[AT_SCALE] = new ScalingAction(_data);
+			_actions[AT_SCALE] = new ScalingAction(_data, _boundingRect);
 		}
 		ScalingAction* action = (ScalingAction*)_actions[AT_SCALE];
 		action->attach(id, WEC_SCALE, start, end, ttl, mode, tweeningType);
@@ -123,7 +134,7 @@ namespace ds {
 	// remove
 	// -----------------------------------------------
 	void World::remove(ID id) {
-		LOG << "removing: " << id;
+		LOGC("world") << "removing: " << id;
 		if (_data->contains(id)) {
 			for (int i = 0; i < 32; ++i) {
 				if (_actions[i] != 0) {
@@ -161,7 +172,7 @@ namespace ds {
 	// -----------------------------------------------
 	void World::attachCollider(ID id, ShapeType type, const v2& extent) {
 		if (_collisionAction == 0) {
-			_collisionAction = new CollisionAction(_data);
+			_collisionAction = new CollisionAction(_data, _boundingRect);
 		}
 		_collisionAction->attach(id, type, v3(extent));
 	}
@@ -203,7 +214,7 @@ namespace ds {
 	// -----------------------------------------------
 	void World::moveBy(ID id, const v3& velocity, float ttl, bool bounce) {
 		if (_actions[AT_MOVE_BY] == 0) {
-			_actions[AT_MOVE_BY] = new MoveByAction(_data);
+			_actions[AT_MOVE_BY] = new MoveByAction(_data, _boundingRect);
 		}
 		MoveByAction* action = (MoveByAction*)_actions[AT_MOVE_BY];
 		action->attach(id, velocity, ttl, bounce);
@@ -214,7 +225,7 @@ namespace ds {
 	// -----------------------------------------------
 	void World::removeAfter(ID id, float ttl) {
 		if (_actions[AT_REMOVE_AFTER] == 0) {
-			_actions[AT_REMOVE_AFTER] = new RemoveAfterAction(_data);
+			_actions[AT_REMOVE_AFTER] = new RemoveAfterAction(_data, _boundingRect);
 		}
 		RemoveAfterAction* action = (RemoveAfterAction*)_actions[AT_REMOVE_AFTER];
 		action->attach(id, ttl);
@@ -225,7 +236,7 @@ namespace ds {
 	// -----------------------------------------------
 	void World::separate(ID id, int type, float minDistance, float relaxation) {
 		if (_actions[AT_SEPARATE] == 0) {
-			_actions[AT_SEPARATE] = new SeparateAction(_data);
+			_actions[AT_SEPARATE] = new SeparateAction(_data, _boundingRect);
 		}
 		SeparateAction* action = (SeparateAction*)_actions[AT_SEPARATE];
 		action->attach(id, type, minDistance, relaxation);
@@ -236,7 +247,7 @@ namespace ds {
 	// -----------------------------------------------
 	void World::seek(ID id, ID target, float velocity) {
 		if (_actions[AT_SEEK] == 0) {
-			_actions[AT_SEEK] = new SeekAction(_data);
+			_actions[AT_SEEK] = new SeekAction(_data, _boundingRect);
 		}
 		SeekAction* action = (SeekAction*)_actions[AT_SEEK];
 		action->attach(id, target, velocity);
@@ -247,7 +258,7 @@ namespace ds {
 	// -----------------------------------------------
 	void World::lookAt(ID id, ID target, float ttl) {
 		if (_actions[AT_LOOK_AT] == 0) {
-			_actions[AT_LOOK_AT] = new LookAtAction(_data);
+			_actions[AT_LOOK_AT] = new LookAtAction(_data, _boundingRect);
 		}
 		LookAtAction* action = (LookAtAction*)_actions[AT_LOOK_AT];
 		action->attach(id, target, ttl);
@@ -258,7 +269,7 @@ namespace ds {
 	// -----------------------------------------------
 	void World::rotateTo(ID id, ID target, float angleVelocity) {
 		if (_actions[AT_ROTATE_TO_TARGET] == 0) {
-			_actions[AT_ROTATE_TO_TARGET] = new RotateToTargetAction(_data);
+			_actions[AT_ROTATE_TO_TARGET] = new RotateToTargetAction(_data, _boundingRect);
 		}
 		RotateToTargetAction* action = (RotateToTargetAction*)_actions[AT_ROTATE_TO_TARGET];
 		action->attach(id, target, angleVelocity);
@@ -269,7 +280,7 @@ namespace ds {
 	// -----------------------------------------------
 	void World::rotateBy(ID id, float angle, float ttl) {
 		if (_actions[AT_ROTATE_BY] == 0) {
-			_actions[AT_ROTATE_BY] = new RotateByAction(_data);
+			_actions[AT_ROTATE_BY] = new RotateByAction(_data, _boundingRect);
 		}
 		RotateByAction* action = (RotateByAction*)_actions[AT_ROTATE_BY];
 		action->attach(id, angle, ttl);

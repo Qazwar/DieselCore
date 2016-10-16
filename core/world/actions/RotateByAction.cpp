@@ -6,7 +6,7 @@ namespace ds {
 	// -------------------------------------------------------
 	// 
 	// -------------------------------------------------------
-	RotateByAction::RotateByAction(ChannelArray* array) : AbstractAction(array, "rotate_by") {
+	RotateByAction::RotateByAction(ChannelArray* array, const Rect& boundingRect) : AbstractAction(array, boundingRect, "rotate_by") {
 		int sizes[] = { sizeof(ID), sizeof(float), sizeof(float), sizeof(float)};
 		_buffer.init(sizes, 4);
 	}
@@ -38,7 +38,7 @@ namespace ds {
 	void RotateByAction::update(float dt,ActionEventBuffer& buffer) {	
 		if (_buffer.size > 0) {
 			// move
-			for (int i = 0; i < _buffer.size; ++i) {
+			for (uint32_t i = 0; i < _buffer.size; ++i) {
 				v3 r = _array->get<v3>(_ids[i], WEC_ROTATION);
 				r.x += _angles[i] * dt;
 				r.y += _angles[i] * dt;

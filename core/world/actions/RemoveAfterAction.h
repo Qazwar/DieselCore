@@ -7,7 +7,7 @@ namespace ds {
 	class RemoveAfterAction : public AbstractAction {
 
 	public:
-		RemoveAfterAction(ChannelArray* array);
+		RemoveAfterAction(ChannelArray* array, const Rect& boundingRect);
 		virtual ~RemoveAfterAction() {}
 		void attach(ID id, float ttl);
 		void update(float dt,ActionEventBuffer& buffer);

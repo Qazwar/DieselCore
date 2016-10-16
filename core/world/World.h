@@ -51,6 +51,8 @@ namespace ds {
 	public:
 		World();
 		~World();
+		void setWorldDimension(const v2& dim);
+		void setBoundingRect(const Rect& r);
 		ID create();
 		ID create(const v2& pos, const Texture& texture, int type, float rotation = 0.0f, const v2& scale = v2(1,1), const Color& color = Color::WHITE);
 		uint32_t size() const;
@@ -122,6 +124,8 @@ namespace ds {
 		ChannelArray* _data;
 		AbstractAction* _actions[32];
 		ActionEventBuffer _buffer;
+		Rect _boundingRect;
+		
 	};
 
 }

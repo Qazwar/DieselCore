@@ -6,7 +6,7 @@ namespace ds {
 	// -------------------------------------------------------
 	// 
 	// -------------------------------------------------------
-	SeekAction::SeekAction(ChannelArray* array) : AbstractAction(array, "seek") {
+	SeekAction::SeekAction(ChannelArray* array, const Rect& boundingRect) : AbstractAction(array, boundingRect, "seek") {
 		int sizes[] = { sizeof(ID), sizeof(ID), sizeof(float) };
 		_buffer.init(sizes, 3);
 	}
@@ -33,7 +33,7 @@ namespace ds {
 	// -------------------------------------------------------
 	void SeekAction::update(float dt,ActionEventBuffer& buffer) {
 		if (_buffer.size > 0) {
-			for (int i = 0; i < _buffer.size; ++i) {
+			for (uint32_t i = 0; i < _buffer.size; ++i) {
 				v3 p = _array->get<v3>(_ids[i], WEC_POSITION);
 				v3 t = _array->get<v3>(_targets[i],WEC_POSITION);
 				v3 f = _array->get<v3>(_ids[i], WEC_FORCE);

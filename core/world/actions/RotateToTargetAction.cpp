@@ -6,7 +6,7 @@ namespace ds {
 	// -------------------------------------------------------
 	// 
 	// -------------------------------------------------------
-	RotateToTargetAction::RotateToTargetAction(ChannelArray* array) : AbstractAction(array, "rotate_to_target") {
+	RotateToTargetAction::RotateToTargetAction(ChannelArray* array, const Rect& boundingRect) : AbstractAction(array, boundingRect, "rotate_to_target") {
 		int sizes[] = { sizeof(ID), sizeof(ID), sizeof(float)};
 		_buffer.init(sizes, 3);
 	}
@@ -36,7 +36,7 @@ namespace ds {
 	void RotateToTargetAction::update(float dt, ActionEventBuffer& buffer) {
 		if (_buffer.size > 0) {
 			// move
-			for (int i = 0; i < _buffer.size; ++i) {
+			for (uint32_t i = 0; i < _buffer.size; ++i) {
 				v3 current = _array->get<v3>(_ids[i], WEC_POSITION);
 				v3 target = _array->get<v3>(_targets[i], WEC_POSITION);
 				v3 diff = target - current;

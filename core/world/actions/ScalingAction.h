@@ -10,7 +10,7 @@ namespace ds {
 	class ScalingAction : public AbstractAction {
 		
 	public:
-		ScalingAction(ChannelArray* array);
+		ScalingAction(ChannelArray* array, const Rect& boundingRect);
 		virtual ~ScalingAction();
 		void attach(ID id, int channel, const v3& startScale, const v3& endScale,float ttl,int mode = 0,const tweening::TweeningType& tweeningType = &tweening::easeOutQuad);
 		void update(float dt,ActionEventBuffer& buffer);

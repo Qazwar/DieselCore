@@ -16,7 +16,7 @@ namespace ds {
 		};
 		
 	public:
-		CollisionAction(ChannelArray* array);
+		CollisionAction(ChannelArray* array, const Rect& boundingRect);
 		virtual ~CollisionAction();
 		void ignore(int firstType, int secondType);
 		void attach(ID id, ShapeType type, const v3& extent);

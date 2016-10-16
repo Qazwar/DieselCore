@@ -11,9 +11,9 @@ namespace ds {
 	class AbstractAction {
 
 		public:
-			AbstractAction(ChannelArray* array, const char* name) : _array(array), _name(name) {
+			AbstractAction(ChannelArray* array, const Rect& boundingRect, const char* name) : _array(array), m_BoundingRect(boundingRect) , _name(name) {
 				_hash = StaticHash(name);
-				m_BoundingRect = Rect(0, 0, 1024, 768);
+				//m_BoundingRect = Rect(0, 0, 1024, 768);
 			}
 			virtual ~AbstractAction() {}
 			virtual void update(float dt,ActionEventBuffer& buffer) = 0;

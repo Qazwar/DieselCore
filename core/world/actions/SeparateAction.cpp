@@ -6,10 +6,7 @@ namespace ds {
 	// -------------------------------------------------------
 	// 
 	// -------------------------------------------------------
-	int* _types;
-	float* _minDistances;
-	float* _relaxations;
-	SeparateAction::SeparateAction(ChannelArray* array) : AbstractAction(array, "separate") {
+	SeparateAction::SeparateAction(ChannelArray* array, const Rect& boundingRect) : AbstractAction(array, boundingRect, "separate") {
 		int sizes[] = { sizeof(ID), sizeof(int), sizeof(float), sizeof(float) };
 		_buffer.init(sizes, 4);
 	}
@@ -53,7 +50,7 @@ namespace ds {
 	void SeparateAction::update(float dt,ActionEventBuffer& buffer) {
 		ID ids[256];
 		if (_buffer.size > 0) {
-			for (int i = 0; i < _buffer.size; ++i) {
+			for (uint32_t i = 0; i < _buffer.size; ++i) {
 				float sqrDist = _minDistances[i] * _minDistances[i];
 				v3 f = _array->get<v3>(_ids[i], WEC_FORCE);
 				v3 currentPos = _array->get<v3>(_ids[i], WEC_POSITION);

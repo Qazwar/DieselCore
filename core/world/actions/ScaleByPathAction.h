@@ -8,7 +8,7 @@ namespace ds {
 	class ScaleByPathAction : public AbstractAction {
 
 	public:
-		ScaleByPathAction(ChannelArray* array);
+		ScaleByPathAction(ChannelArray* array, const Rect& boundingRect);
 		virtual ~ScaleByPathAction();
 		void attach(ID id, V3Path* path, float ttl);
 		void update(float dt,ActionEventBuffer& buffer);

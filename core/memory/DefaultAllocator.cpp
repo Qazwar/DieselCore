@@ -29,7 +29,7 @@ DefaultAllocator::~DefaultAllocator() {
 	}
 	free(_buffer);
 	free(_headers);
-	delete _tracer;
+	//delete _tracer;
 }
 
 void* DefaultAllocator::allocate(uint32_t size, const char* file, int line) {

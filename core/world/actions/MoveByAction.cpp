@@ -6,7 +6,7 @@ namespace ds {
 	// -------------------------------------------------------
 	// 
 	// -------------------------------------------------------
-	MoveByAction::MoveByAction(ChannelArray* array) : AbstractAction(array, "move_by") {
+	MoveByAction::MoveByAction(ChannelArray* array, const Rect& boundingRect) : AbstractAction(array, boundingRect, "move_by") {
 		int sizes[] = { sizeof(ID), sizeof(v3), sizeof(float), sizeof(float), sizeof(bool) };
 		_buffer.init(sizes, 5);
 	}
@@ -55,7 +55,7 @@ namespace ds {
 	}
 	
 	void MoveByAction::bounce(ID sid, BounceDirection direction,float dt) {
-		for (int i = 0; i < _buffer.size; ++i) {
+		for (uint32_t i = 0; i < _buffer.size; ++i) {
 			if (_ids[i] == sid) {
 				if (direction == BD_Y || direction == BD_BOTH) {
 					_velocities[i].y *= -1.0f;

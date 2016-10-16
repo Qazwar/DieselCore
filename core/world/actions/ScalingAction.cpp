@@ -6,7 +6,7 @@ namespace ds {
 	// -------------------------------------------------------
 	// 
 	// -------------------------------------------------------
-	ScalingAction::ScalingAction(ChannelArray* array) : AbstractAction(array,"scale") {
+	ScalingAction::ScalingAction(ChannelArray* array, const Rect& boundingRect) : AbstractAction(array, boundingRect, "scale") {
 		int sizes[] = { sizeof(ID), sizeof(int), sizeof(v3), sizeof(v3), sizeof(float), sizeof(float), sizeof(tweening::TweeningType), sizeof(int) };
 		_buffer.init(sizes, 8);
 	}

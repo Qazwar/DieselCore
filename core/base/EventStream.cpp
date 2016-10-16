@@ -102,7 +102,7 @@ namespace ds {
 		// contains type
 		// -------------------------------------------------------
 		bool containsType(uint32_t type) {
-			for (int i = 0; i < _eventCtx->mappings.size(); ++i) {
+			for (uint32_t i = 0; i < _eventCtx->mappings.size(); ++i) {
 				if (getType(i) == type) {
 					return true;
 				}

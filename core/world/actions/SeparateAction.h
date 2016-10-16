@@ -7,7 +7,7 @@ namespace ds {
 	class SeparateAction : public AbstractAction {
 
 	public:
-		SeparateAction(ChannelArray* array);
+		SeparateAction(ChannelArray* array, const Rect& boundingRect);
 		virtual ~SeparateAction() {}
 		void attach(ID id, int type, float minDistance, float relaxation);
 		void update(float dt,ActionEventBuffer& buffer);

@@ -7,7 +7,7 @@ namespace ds {
 	class MoveByAction : public AbstractAction {
 
 	public:
-		MoveByAction(ChannelArray* array);
+		MoveByAction(ChannelArray* array, const Rect& boundingRect);
 		virtual ~MoveByAction() {}
 		void attach(ID id,const v3& velocity,float ttl = -1.0f, bool bounce = true);
 		void update(float dt,ActionEventBuffer& buffer);

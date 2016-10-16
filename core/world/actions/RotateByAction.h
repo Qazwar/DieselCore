@@ -8,7 +8,7 @@ namespace ds {
 	class RotateByAction : public AbstractAction {
 
 	public:
-		RotateByAction(ChannelArray* array);
+		RotateByAction(ChannelArray* array, const Rect& boundingRect);
 		virtual ~RotateByAction() {}
 		void attach(ID id,float angle, float ttl);
 		void update(float dt,ActionEventBuffer& buffer);

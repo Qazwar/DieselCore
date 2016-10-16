@@ -6,7 +6,7 @@ namespace ds {
 	// -------------------------------------------------------
 	// 
 	// -------------------------------------------------------
-	RemoveAfterAction::RemoveAfterAction(ChannelArray* array) : AbstractAction(array, "remove_after") {
+	RemoveAfterAction::RemoveAfterAction(ChannelArray* array, const Rect& boundingRect) : AbstractAction(array, boundingRect, "remove_after") {
 		int sizes[] = { sizeof(ID), sizeof(float), sizeof(float) };
 		_buffer.init(sizes, 3);
 	}

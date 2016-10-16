@@ -7,7 +7,7 @@ namespace ds {
 	class LookAtAction : public AbstractAction {
 
 	public:
-		LookAtAction(ChannelArray* array);
+		LookAtAction(ChannelArray* array, const Rect& boundingRect);
 		virtual ~LookAtAction() {}
 		void attach(ID id, ID target, float ttl = -1.0f);
 		void update(float dt,ActionEventBuffer& buffer);

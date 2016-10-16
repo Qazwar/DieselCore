@@ -1,22 +1,8 @@
-/* 
- * File:   Log.h
- * Author: mecky
- *
- * Created on 3. November 2010, 08:05
- */
-
-#ifndef LOG_H
-#define	LOG_H
-
+#pragma once
 #include <sstream>
 #include <stdio.h>
 #include "..\lib\collection_types.h"
-
-enum LogTypes {
-	LT_NONE,
-	LT_CONSOLE,
-	LT_FILE
-};
+#include "..\string\StaticHash.h"
 
 class AssertOutputHandler {
 
@@ -28,8 +14,6 @@ public:
 void MyAssert(char* expr_str, bool expr, char* file, int line, char* msg);
 void MyAssert_fmt(char* expr_str, bool expr, char* file, int line, char* fomat, ...);
 void MyAssert_fmt(char* file, int line, char* format, ...);
-
-void init_logger(int logTypes,int width, int height);
 
 void init_logger();
 
@@ -62,7 +46,7 @@ enum LogLevel {
 	LL_WARN,
 	LL_ERROR
 };
-
+/*
 struct LogCategoryDefinition {
 	const char* category;
 	LogLevel level;
@@ -86,11 +70,12 @@ struct LogConfiguration {
 		definitions.push_back(def);
 	}
 };
-
+*/
 class Log {
     
 public:
     Log();    
+	Log(StaticHash category, LogLevel level);
     virtual ~Log();
     std::ostringstream& get();
 	std::ostringstream& error();
@@ -103,22 +88,26 @@ public:
 protected:
     std::ostringstream os;		
 private:
+	bool matches();
 	void log_file_line(const char *file, const unsigned long line, bool isError);
     std::string NowTime();
 	void NowTime(char* ret, int max);
     Log(const Log&);
     Log& operator =(const Log&);	
 	bool _errorFlag;
+	LogLevel _level;
+	LogLevel _categoryLevel;
 };
-
-#ifndef FILELOG_MAX_LEVEL
-#define FILELOG_MAX_LEVEL logDEBUG
-#endif
 
 #define LG \
 	Log().get()
 
 #define LOG Log().get(__FILE__,__LINE__)
+#define LOGC(CATEGORY) Log(SID(CATEGORY),LL_DEBUG).get(__FILE__,__LINE__)
+#define LOGT(CATEGORY) Log(SID(CATEGORY),LL_TRACE).get(__FILE__,__LINE__)
+#define LOGD(CATEGORY) Log(SID(CATEGORY),LL_DEBUG).get(__FILE__,__LINE__)
+#define LOGI(CATEGORY) Log(SID(CATEGORY),LL_INFO).get(__FILE__,__LINE__)
+#define LOGW(CATEGORY) Log(SID(CATEGORY),LL_WARN).get(__FILE__,__LINE__)
 #define LOGE Log().error(__FILE__,__LINE__)
 
 #define ELOG(M) \
@@ -126,5 +115,5 @@ private:
 		Log().error(__FILE__,__LINE__,M); \
 	} while (0)
 
-#endif	/* LOG_H */
+
 

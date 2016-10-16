@@ -7,7 +7,7 @@ namespace ds {
 	// -------------------------------------------------------
 	// 
 	// -------------------------------------------------------
-	CollisionAction::CollisionAction(ChannelArray* array) : AbstractAction(array,"collision") {
+	CollisionAction::CollisionAction(ChannelArray* array, const Rect& boundingRect) : AbstractAction(array, boundingRect, "collision") {
 		int sizes[] = { sizeof(ID), sizeof(v3), sizeof(ShapeType), sizeof(v3) };
 		_buffer.init(sizes, 4);
 	}
@@ -30,6 +30,7 @@ namespace ds {
 	// -------------------------------------------------------
 	void CollisionAction::attach(ID id, ShapeType type, const v3& extent) {
 		int idx = create(id);
+		LOGC("physics") << "attach collider - id: " << id << " index: " << idx << " type: " << type << " extent: " << DBG_V3(extent);
 		_ids[idx] = id;
 		_previous[idx] = _array->get<v3>(id, WEC_POSITION);
 		_types[idx] = type;
@@ -84,7 +85,7 @@ namespace ds {
 						c.secondType = _array->get<int>(_ids[j], WEC_TYPE);
 						if (isSupported(c.firstType, c.secondType)) {
 							if (intersects(i, j, &c)) {
-								LOG << "intersection between " << i << " ( id: " << _ids[i] << " type: " << c.firstType << ") and " << j << " ( id: " << _ids[j] << " type: " << c.secondType << ")";
+								LOGC("physics") << "intersection between " << i << " ( id: " << _ids[i] << " type: " << c.firstType << ") and " << j << " ( id: " << _ids[j] << " type: " << c.secondType << ")";
 								c.firstID = _ids[i];
 								c.secondID = _ids[j];
 								if (!containsCollision(c)) {

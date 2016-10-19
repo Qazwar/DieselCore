@@ -9,6 +9,7 @@
 #include "..\io\ReportWriter.h"
 #include "..\physics\ColliderArray.h"
 #include "AdditionalData.h"
+#include "WorldEntityTemplates.h"
 
 namespace ds {
 
@@ -27,18 +28,6 @@ namespace ds {
 		PST_NONE
 	};
 
-	struct WorldEntity {
-
-		v3 position;
-		v3 scale;
-		v3 rotation;
-		Texture texture;
-		Color color;
-		float timer;
-		int type;
-		v3 force;
-	};
-
 	enum WorldEntityChannel {
 		WEC_POSITION,WEC_SCALE,WEC_ROTATION,WEC_TEXTURE,WEC_COLOR,WEC_TIMER,WEC_TYPE,WEC_FORCE
 	};
@@ -53,7 +42,9 @@ namespace ds {
 		~World();
 		void setWorldDimension(const v2& dim);
 		void setBoundingRect(const Rect& r);
+		void useTemplates(WorldEntityTemplates* templates);
 		ID create();
+		ID create(const v2& pos,StaticHash entityHash);
 		ID create(const v2& pos, const Texture& texture, int type, float rotation = 0.0f, const v2& scale = v2(1,1), const Color& color = Color::WHITE);
 		uint32_t size() const;
 		bool contains(ID id) const;
@@ -82,6 +73,8 @@ namespace ds {
 		void setRotation(ID id, float rotation);
 		const v3& getRotation(ID id) const;
 		void setColor(ID id, const Color& color);
+		const v3& getScale(ID id) const;
+		void setScale(ID id, const v3& s);
 		int getType(ID id) const;
 
 		void tick(float dt);
@@ -125,7 +118,7 @@ namespace ds {
 		AbstractAction* _actions[32];
 		ActionEventBuffer _buffer;
 		Rect _boundingRect;
-		
+		WorldEntityTemplates* _templates;
 	};
 
 }

@@ -21,6 +21,7 @@ namespace ds {
 		_data = new ChannelArray;
 		int sizes[] = { sizeof(v3), sizeof(v3), sizeof(v3) ,sizeof(Texture) , sizeof(Color), sizeof(float), sizeof(int), sizeof(v3)};
 		_data->init(sizes, 8);
+		_templates = 0;
 	}
 
 
@@ -45,6 +46,10 @@ namespace ds {
 
 	void World::setBoundingRect(const Rect& r) {
 		_boundingRect = r;
+	}
+
+	void World::useTemplates(WorldEntityTemplates* templates) {
+		_templates = templates;
 	}
 	// -----------------------------------------------
 	// create
@@ -74,6 +79,14 @@ namespace ds {
 		_data->set<int>(id, WEC_TYPE, type);
 		_data->set<v3>(id, WEC_FORCE, v3(0.0f));
 		return id;
+	}
+
+	ID World::create(const v2& pos, StaticHash entityHash) {
+		assert(_templates != 0);
+		int eidx = _templates->findIndex(entityHash);
+		assert(eidx != -1);
+		const WorldEntity& tpl = _templates->getTemplate(eidx);
+		return create(pos, tpl.texture, tpl.type, tpl.rotation.x, tpl.scale.xy(), tpl.color);
 	}
 
 	uint32_t World::size() const {
@@ -108,6 +121,13 @@ namespace ds {
 		return _data->get<v3>(id, WEC_ROTATION);
 	}
 
+	const v3& World::getScale(ID id) const {
+		return _data->get<v3>(id, WEC_SCALE);
+	}
+
+	void World::setScale(ID id, const v3& s) {
+		_data->set<v3>(id, WEC_SCALE, s);
+	}
 	// -----------------------------------------------
 	// scale by path
 	// -----------------------------------------------

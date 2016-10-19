@@ -2,9 +2,20 @@
 #include "..\lib\collection_types.h"
 #include "..\io\DataFile.h"
 #include "..\string\StaticHash.h"
-#include "World.h"
 
 namespace ds {
+
+	struct WorldEntity {
+
+		v3 position;
+		v3 scale;
+		v3 rotation;
+		Texture texture;
+		Color color;
+		float timer;
+		int type;
+		v3 force;
+	};
 
 	class WorldEntityTemplates : public JSONAssetFile {
 
@@ -21,6 +32,7 @@ namespace ds {
 		int findIndex(const StaticHash& sid) const;
 		bool loadData(const JSONReader& loader);
 		bool reloadData(const JSONReader& loader);
+		const WorldEntity& getTemplate(int idx) const;
 	private:
 		Array<SheetEntry> _entries;
 	};

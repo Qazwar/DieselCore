@@ -25,7 +25,7 @@ namespace ds {
 				return i;
 			}
 		}
-		XASSERT(1 == 2, "No matching spritesheet found for '%s'", name);
+		XASSERT(1 == 2, "No matching WorldEntityTemplate found for '%s'", name);
 		return -1;
 	}
 
@@ -35,8 +35,13 @@ namespace ds {
 				return i;
 			}
 		}
-		XASSERT(1 == 2, "No matching spritesheet found for '%d'", sid);
+		XASSERT(1 == 2, "No matching WorldEntityTemplate found for '%d'", sid);
 		return -1;
+	}
+
+	const WorldEntity& WorldEntityTemplates::getTemplate(int idx) const {
+		XASSERT(idx >= 0 && idx < _entries.size(), "Invalid Index");
+		return _entries[idx].entity;
 	}
 
 	bool WorldEntityTemplates::loadData(const JSONReader& loader) {

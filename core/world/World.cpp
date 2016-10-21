@@ -198,6 +198,9 @@ namespace ds {
 	}
 
 	void World::ignoreCollisions(int firstType, int secondType) {
+		if (_collisionAction == 0) {
+			_collisionAction = new CollisionAction(_data, _boundingRect);
+		}
 		_collisionAction->ignore(firstType, secondType);
 	}
 

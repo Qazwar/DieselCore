@@ -45,6 +45,14 @@ double StopWatch::elapsed() {
 	auto time_span = std::chrono::duration_cast<std::chrono::microseconds>(duration).count();
 
 	//auto delta = std::chrono::duration_cast<double>(_end - _start);
+	return static_cast<double>(time_span);
+}
+
+double StopWatch::elapsedMS() {
+	auto duration = _end - _start;
+	auto time_span = std::chrono::duration_cast<std::chrono::microseconds>(duration).count();
+
+	//auto delta = std::chrono::duration_cast<double>(_end - _start);
 	return static_cast<double>(time_span) / 1000.0;
 }
 

@@ -6,6 +6,8 @@
 #include "..\graphics\Texture.h"
 #include "..\graphics\Color.h"
 
+class StopWatch;
+
 namespace ds {
 
 	class ReportWriter {
@@ -36,6 +38,7 @@ namespace ds {
 			return _open;
 		}
 	private:
+		StopWatch* _watch;
 		FILE* _file;
 		bool _open;
 	};

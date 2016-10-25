@@ -22,7 +22,7 @@ public:
 	void start();
 	void end();
 	double elapsed();
-	
+	double elapsedMS();
 private:
 	std::chrono::steady_clock::time_point _start, _end;
 	char _name[32];

@@ -1,9 +1,12 @@
 #include "ReportWriter.h"
+#include "..\profiler\Profiler.h"
 #include "..\log\Log.h"
 
 namespace ds {
 
 	ReportWriter::ReportWriter(const char* fileName) {
+		_watch = new StopWatch;
+		_watch->start();
 		_file = fopen(fileName, "w");
 		if (_file) {
 			fprintf(_file, "<!doctype html>\n<html>\n<head>\n");
@@ -24,9 +27,15 @@ namespace ds {
 
 	ReportWriter::~ReportWriter() {
 		if (_file) {
+			_watch->end();
+			fprintf(_file, "<h4>Report took :");
+			fprintf(_file, "%g", _watch->elapsed());
+			fprintf(_file, " perf time %g",perf::get_current_total_time());
+			fprintf(_file, "</h4>\n");
 			fprintf(_file, "</body></html>\n");
 			fclose(_file);
 		}
+		delete _watch;
 	}
 	void ReportWriter::addHeader(const char* header) const {
 		fprintf(_file, "<h1>%s</h1>\n", header);

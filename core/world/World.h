@@ -65,6 +65,7 @@ namespace ds {
 		void lookAt(ID id, ID target, float ttl = -1.0f);
 		void seek(ID id, ID target, float velocity);
 		void separate(ID id, int type, float minDistance, float relaxation);
+		void alphaFadeTo(ID id, float start, float end, float ttl);
 		void stopAction(ID id, ActionType type);
 
 		void setPosition(ID id, const v2& pos);

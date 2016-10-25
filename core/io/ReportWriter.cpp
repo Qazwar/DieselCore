@@ -28,10 +28,19 @@ namespace ds {
 	ReportWriter::~ReportWriter() {
 		if (_file) {
 			_watch->end();
-			fprintf(_file, "<h4>Report took :");
-			fprintf(_file, "%g", _watch->elapsed());
-			fprintf(_file, " perf time %g",perf::get_current_total_time());
-			fprintf(_file, "</h4>\n");
+			startBox("Report");
+			const char* headers[] = { "Type","Time" };
+			startTable(headers,2);
+			startRow();
+			addCell("Report");
+			addCell((float)_watch->elapsedMS());
+			endRow();
+			startRow();
+			addCell("Perf");
+			addCell(perf::get_current_total_time());
+			endRow();
+			endTable();
+			endBox();
 			fprintf(_file, "</body></html>\n");
 			fclose(_file);
 		}

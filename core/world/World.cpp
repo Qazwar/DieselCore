@@ -10,6 +10,7 @@
 #include "actions\SeparateAction.h"
 #include "..\profiler\Profiler.h"
 #include "actions\CollisionAction.h"
+#include "actions\AlphaFadeToAction.h"
 
 namespace ds {
 
@@ -257,6 +258,13 @@ namespace ds {
 		action->attach(id, ttl);
 	}
 
+	void World::alphaFadeTo(ID id, float start, float end, float ttl) {
+		if (_actions[AT_ALPHA_FADE_TO] == 0) {
+			_actions[AT_ALPHA_FADE_TO] = new AlphaFadeToAction(_data, _boundingRect);
+		}
+		AlphaFadeToAction* action = (AlphaFadeToAction*)_actions[AT_ALPHA_FADE_TO];
+		action->attach(id, start, end, ttl);
+	}
 	// -----------------------------------------------
 	// separate
 	// -----------------------------------------------

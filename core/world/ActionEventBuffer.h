@@ -28,7 +28,8 @@ namespace ds {
 		AT_ROTATE_TO_TARGET,
 		AT_LOOK_AT,
 		AT_SEEK,
-		AT_SEPARATE
+		AT_SEPARATE,
+		AT_CUSTOM
 	};
 
 	struct ActionEvent {

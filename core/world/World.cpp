@@ -13,7 +13,7 @@
 
 namespace ds {
 
-	World::World() {
+	World::World() : _boundingRect(0,0,1024,768) {
 		for (int i = 0; i < 32; ++i) {
 			_actions[i] = 0;
 		}
@@ -70,7 +70,7 @@ namespace ds {
 	// -----------------------------------------------
 	ID World::create(const v2& pos, const Texture& texture, int type, float rotation, const v2& scale, const Color& color) {
 		ID id = _data->add();
-		LOGC("world") << "create - id: " << id;
+		//LOGC("world") << "create - id: " << id;
 		_data->set<v3>(id, WEC_POSITION, v3(pos));
 		_data->set<Texture>(id, WEC_TEXTURE, texture);
 		_data->set<v3>(id, WEC_ROTATION, v3(rotation,0.0f,0.0f));
@@ -154,12 +154,15 @@ namespace ds {
 	// remove
 	// -----------------------------------------------
 	void World::remove(ID id) {
-		LOGC("world") << "removing: " << id;
+		//LOGC("world") << "removing: " << id;
 		if (_data->contains(id)) {
 			for (int i = 0; i < 32; ++i) {
 				if (_actions[i] != 0) {
 					_actions[i]->removeByID(id);
 				}
+			}
+			for (uint32_t i = 0; i < _customActions.size(); ++i) {
+				_customActions[i]->removeByID(id);
 			}
 			_collisionAction->removeByID(id);
 			_additionalData.remove(id);
@@ -339,6 +342,13 @@ namespace ds {
 				}
 			}
 		}
+		// update all custom actions
+		{
+			ZoneTracker("World::tick::updateCustom");
+			for (uint32_t i = 0; i < _customActions.size(); ++i) {
+				_customActions[i]->update(dt, _buffer);
+			}
+		}
 		// apply forces
 		{
 			ZoneTracker("World::tick::applyForces");
@@ -394,10 +404,14 @@ namespace ds {
 		}
 		writer.endTable();
 		writer.endBox();
+		_additionalData.save(writer);
 		for (int i = 0; i < 32; ++i) {
 			if (_actions[i] != 0) {
 				_actions[i]->saveReport(writer);
 			}
+		}
+		for (uint32_t i = 0; i < _customActions.size(); ++i) {
+			_customActions[i]->saveReport(writer);
 		}
 		_collisionAction->saveReport(writer);
 	}

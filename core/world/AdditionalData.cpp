@@ -1,6 +1,7 @@
 #include "AdditionalData.h"
 #include "..\log\Log.h"
 #include <stdint.h>
+#include "..\profiler\Profiler.h"
 
 namespace ds {
 
@@ -8,6 +9,7 @@ namespace ds {
 	// attach
 	// -----------------------------------------------------
 	void* AdditionalData::attach(ID sid, int size,int identifier) {
+		ZoneTracker z("AdditionalData::attach");
 		int idx = find_free_header(size);
 		if (idx == -1) {
 			AdditionalDataHeader header;
@@ -16,7 +18,7 @@ namespace ds {
 			header.index = data.size;
 			header.used = true;
 			header.identifier = identifier;
-			//LOG << "==> attached sid: " << sid << " size: " << size << " identifier: " << identifier << " index: " << header.index;
+			//LOGC("World") << "==> attached sid: " << sid << " size: " << size << " identifier: " << identifier << " index: " << header.index;
 			headers.push_back(header);
 			return data.alloc(size);
 		}
@@ -25,7 +27,7 @@ namespace ds {
 			header.used = true;
 			header.sid = sid;
 			header.identifier = identifier;
-			//LOG << "==> reusing sid: " << sid << " size: " << size << " identifier: " << identifier << " index: " << header.index;
+			//LOGC("World") << "==> reusing sid: " << sid << " size: " << size << " identifier: " << identifier << " index: " << header.index;
 			return data.data + header.index;
 		}
 	}
@@ -35,7 +37,7 @@ namespace ds {
 	// -----------------------------------------------------
 	void AdditionalData::remove(ID sid) {
 		int idx = find_header(sid);
-		//LOG << "==> removing sid: " << sid << " header index: " << idx;
+		//LOGC("World") << "==> removing sid: " << sid << " header index: " << idx;
 		if (idx != -1) {
 			AdditionalDataHeader& header = headers[idx];
 			if (header.used) {
@@ -55,7 +57,7 @@ namespace ds {
 				return data.data + header.index;
 			}
 		}
-		//LOG << "No data found for: " << sid;
+		//LOGC("World") << "No data found for: " << sid;
 		debug();
 		return 0;
 	}
@@ -78,7 +80,8 @@ namespace ds {
 	int AdditionalData::find_free_header(int size) {
 		for (uint32_t i = 0; i < headers.size(); ++i) {
 			const AdditionalDataHeader& h = headers[i];
-			if (h.size == size && !h.used) {
+			//if (h.size == size && !h.used) {
+			if (h.size <= size && !h.used) {
 				return i;
 			}
 		}

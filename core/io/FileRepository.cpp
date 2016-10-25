@@ -180,6 +180,7 @@ namespace ds {
 		// -----------------------------------------------------------
 		void reload() {
 			if (_repository->mode == RM_DEBUG) {
+				ZoneTracker z("repo:reload");
 				int reloaded = 0;
 				for (auto& info : _repository->files) {
 					const char* name = _repository->name_buffer.data + info.name_index;

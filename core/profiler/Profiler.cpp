@@ -79,13 +79,13 @@ namespace perf {
 	static ZoneTrackerContext* zoneTrackerCtx = 0;
 
 	void init() {
-		assert(zoneTrackerCtx == 0);
-		zoneTrackerCtx = new ZoneTrackerContext;
-		QueryPerformanceFrequency(&zoneTrackerCtx->frequency);
+		if (zoneTrackerCtx == 0) {
+			zoneTrackerCtx = new ZoneTrackerContext;
+			QueryPerformanceFrequency(&zoneTrackerCtx->frequency);
+		}
 		zoneTrackerCtx->frames = 0;
 		zoneTrackerCtx->fpsTimer = 0.0f;
 		zoneTrackerCtx->fps = 0;
-
 	}
 
 	void reset() {

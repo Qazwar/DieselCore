@@ -110,12 +110,19 @@ namespace ds {
 		uint32_t numEvents() const {
 			return _buffer.events.size();
 		}
+		template<class T>
+		T* addCustomAction(const char* name) {
+			T* t = new T(_data, _boundingRect, name);
+			_customActions.push_back(t);
+			return t;
+		}
 	private:
 		int _numChannels;
 		AdditionalData _additionalData;
 		CollisionAction* _collisionAction;
 		ChannelArray* _data;
 		AbstractAction* _actions[32];
+		Array<AbstractAction*> _customActions;
 		ActionEventBuffer _buffer;
 		Rect _boundingRect;
 		WorldEntityTemplates* _templates;

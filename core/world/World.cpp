@@ -157,21 +157,23 @@ namespace ds {
 	void World::remove(ID id) {
 		//LOGC("world") << "removing: " << id;
 		if (_data->contains(id)) {
-			for (int i = 0; i < 32; ++i) {
-				if (_actions[i] != 0) {
-					_actions[i]->removeByID(id);
-				}
-			}
-			for (uint32_t i = 0; i < _customActions.size(); ++i) {
-				_customActions[i]->removeByID(id);
-			}
-			_collisionAction->removeByID(id);
-			_additionalData.remove(id);
 			_data->remove(id);
 		}
 		else {
 			LOGE << "requesting to remove " << id << " but it is not part of the world";
 		}
+		for (int i = 0; i < 32; ++i) {
+			if (_actions[i] != 0) {
+				_actions[i]->removeByID(id);
+			}
+		}
+		for (uint32_t i = 0; i < _customActions.size(); ++i) {
+			_customActions[i]->removeByID(id);
+		}
+		if (_collisionAction != 0) {
+			_collisionAction->removeByID(id);
+		}
+		_additionalData.remove(id);			
 	}
 
 	// -----------------------------------------------
@@ -357,6 +359,16 @@ namespace ds {
 				_customActions[i]->update(dt, _buffer);
 			}
 		}
+		// process events / kill entities
+		{
+			ZoneTracker("World::tick::events");
+			for (uint32_t i = 0; i < _buffer.events.size(); ++i) {
+				const ActionEvent& e = _buffer.events[i];
+				if (e.action == AT_KILL) {
+					remove(e.id);
+				}
+			}
+		}
 		// apply forces
 		{
 			ZoneTracker("World::tick::applyForces");
@@ -374,17 +386,7 @@ namespace ds {
 			if (_collisionAction != 0) {
 				_collisionAction->update(dt, _buffer);
 			}
-		}
-		// process events
-		{
-			ZoneTracker("World::tick::events");
-			for (uint32_t i = 0; i < _buffer.events.size(); ++i) {
-				const ActionEvent& e = _buffer.events[i];
-				if (e.action == AT_KILL) {
-					remove(e.id);
-				}
-			}
-		}
+		}		
 	}
 
 	// -----------------------------------------------

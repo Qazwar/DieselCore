@@ -423,7 +423,9 @@ namespace ds {
 		for (uint32_t i = 0; i < _customActions.size(); ++i) {
 			_customActions[i]->saveReport(writer);
 		}
-		_collisionAction->saveReport(writer);
+		if (_collisionAction != 0) {
+			_collisionAction->saveReport(writer);
+		}
 	}
 
 }

@@ -57,7 +57,7 @@ namespace ds {
 				return data.data + header.index;
 			}
 		}
-		//LOGC("World") << "No data found for: " << sid;
+		LOGC("World") << "No data found for: " << sid;
 		debug();
 		return 0;
 	}
@@ -81,7 +81,7 @@ namespace ds {
 		for (uint32_t i = 0; i < headers.size(); ++i) {
 			const AdditionalDataHeader& h = headers[i];
 			//if (h.size == size && !h.used) {
-			if (h.size <= size && !h.used) {
+			if (h.size >= size && !h.used) {
 				return i;
 			}
 		}

@@ -29,7 +29,8 @@ namespace ds {
 		AT_LOOK_AT,
 		AT_SEEK,
 		AT_SEPARATE,
-		AT_CUSTOM
+		AT_CUSTOM,
+		AT_SCALE_AXES
 	};
 
 	struct ActionEvent {

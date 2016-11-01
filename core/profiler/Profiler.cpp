@@ -58,10 +58,27 @@ double StopWatch::elapsedMS() {
 
 namespace perf {
 
+	const int MAX_TIME_TRACKER_VALUES = 16;
+
 	double LIToSecs(LARGE_INTEGER & L, LARGE_INTEGER frequency) {
 		return ((double)L.QuadPart * 1000.0 / (double)frequency.QuadPart);
 	}
 
+	// -----------------------------------------------------------
+	// time tracker array
+	// -----------------------------------------------------------
+	struct TimeTrackerArray {
+		char name[20];
+		StaticHash hash;
+		float values[MAX_TIME_TRACKER_VALUES];
+		int index;
+		int size;
+		LARGE_INTEGER started;
+	};
+
+	// -----------------------------------------------------------
+	// zone tracker event
+	// -----------------------------------------------------------
 	struct ZoneTrackerEvent {
 		StaticHash hash;
 		int parent;
@@ -71,6 +88,9 @@ namespace perf {
 		int ident;
 	};
 
+	// -----------------------------------------------------------
+	// Zone tracker context
+	// -----------------------------------------------------------
 	struct ZoneTrackerContext {
 		LARGE_INTEGER frequency;
 		ds::CharBuffer names;
@@ -82,10 +102,14 @@ namespace perf {
 		int frames;
 		float fpsTimer;
 		int fps;
+		ds::Array<TimeTrackerArray> timeTrackers;
 	};
 
 	static ZoneTrackerContext* zoneTrackerCtx = 0;
 
+	// -----------------------------------------------------------
+	// init
+	// -----------------------------------------------------------
 	void init() {
 		if (zoneTrackerCtx == 0) {
 			zoneTrackerCtx = new ZoneTrackerContext;
@@ -96,6 +120,9 @@ namespace perf {
 		zoneTrackerCtx->fps = 0;
 	}
 
+	// -----------------------------------------------------------
+	// reset
+	// -----------------------------------------------------------
 	void reset() {
 		zoneTrackerCtx->names.size = 0;
 		zoneTrackerCtx->events.clear();
@@ -106,10 +133,16 @@ namespace perf {
 		zoneTrackerCtx->current_parent = zoneTrackerCtx->root_event;
 	}
 
+	// -----------------------------------------------------------
+	// finalize
+	// -----------------------------------------------------------
 	void finalize() {
 		end(zoneTrackerCtx->root_event);
 	}
 
+	// -----------------------------------------------------------
+	// debug
+	// -----------------------------------------------------------
 	void debug() {
 		LOG << "------------------------------------------------------------";
 		LOG << " Percent | Accu       | Name";
@@ -135,6 +168,9 @@ namespace perf {
 
 	}
 
+	// -----------------------------------------------------------
+	// tick FPS
+	// -----------------------------------------------------------
 	void tickFPS(float dt) {
 		zoneTrackerCtx->fpsTimer += dt;
 		if (zoneTrackerCtx->fpsTimer >= 1.0f) {
@@ -144,10 +180,16 @@ namespace perf {
 		}
 	}
 
+	// -----------------------------------------------------------
+	// increment frame
+	// -----------------------------------------------------------
 	void incFrame() {
 		++zoneTrackerCtx->frames;
 	}
 
+	// -----------------------------------------------------------
+	// find by hash
+	// -----------------------------------------------------------
 	int findHash(const StaticHash& hash) {
 		for (uint32_t i = 0; i < zoneTrackerCtx->events.size(); ++i) {
 			if (zoneTrackerCtx->events[i].hash == hash) {
@@ -157,6 +199,9 @@ namespace perf {
 		return -1;
 	}
 
+	// -----------------------------------------------------------
+	// start zone tracking
+	// -----------------------------------------------------------
 	int start(const char* name) {
 		// create event
 		ZoneTrackerEvent event;
@@ -183,6 +228,9 @@ namespace perf {
 		return eventIndex;
 	}
 
+	// -----------------------------------------------------------
+	// end zone tracking
+	// -----------------------------------------------------------
 	void end(int index) {
 
 		ZoneTrackerEvent& event = zoneTrackerCtx->events[index];
@@ -197,10 +245,16 @@ namespace perf {
 		--zoneTrackerCtx->ident;
 	}
 
+	// -----------------------------------------------------------
+	// shutdown
+	// -----------------------------------------------------------
 	void shutdown() {
 		delete zoneTrackerCtx;
 	}
 
+	// -----------------------------------------------------------
+	// Call aggregator
+	// -----------------------------------------------------------
 	struct CallAggregator {
 
 		StaticHash hash;
@@ -213,6 +267,9 @@ namespace perf {
 		}
 	};
 	
+	// -----------------------------------------------------------
+	// save performance report
+	// -----------------------------------------------------------
 	void save(const ds::ReportWriter& writer) {
 		char buffer[256];
 		sprintf_s(buffer, 256, "Perf - Profiling (%d FPS)", zoneTrackerCtx->fps);
@@ -276,8 +333,33 @@ namespace perf {
 		writer.endTable();
 		writer.endBox();
 
+		for (uint32_t i = 0; i < zoneTrackerCtx->timeTrackers.size(); ++i) {
+			const TimeTrackerArray& tta = zoneTrackerCtx->timeTrackers[i];
+			sprintf(buffer, "TimeTracker - %s", tta.name);
+			writer.startBox(buffer);
+			const char* TTA_HEADERS[] = { "Index", "Value"};
+			writer.startTable(TTA_HEADERS, 2);
+			int s = tta.index;
+			int m = tta.size;
+			for ( int j = 0; j < m; ++j) {
+				writer.startRow();
+				writer.addCell(s);
+				writer.addCell(tta.values[s]);
+				writer.endRow();
+				++s;
+				if (s >= tta.size) {
+					s = 0;
+				}
+			}
+			writer.endTable();
+			writer.endBox();
+		}
+
 	}
 	
+	// -----------------------------------------------------------
+	// get current total time
+	// -----------------------------------------------------------
 	float get_current_total_time() {
 		if (zoneTrackerCtx->events.size() > 0) {
 			return zoneTrackerCtx->events[0].duration;
@@ -285,6 +367,106 @@ namespace perf {
 		else {
 			return 0.0f;
 		}
+	}
+
+	// -----------------------------------------------------------
+	// find time tracker
+	// -----------------------------------------------------------
+	int findTimeTracker(const char* name) {
+		StaticHash hash = StaticHash(name);
+		for (uint32_t i = 0; i < zoneTrackerCtx->timeTrackers.size(); ++i) {
+			const TimeTrackerArray& tta = zoneTrackerCtx->timeTrackers[i];
+			if (hash == tta.hash) {
+				return i;
+			}
+		}
+		return -1;
+	}
+
+	// -----------------------------------------------------------
+	// start time tracker
+	// -----------------------------------------------------------
+	int createTimer(const char* name) {
+		TimeTrackerArray tta;
+		QueryPerformanceCounter(&tta.started);
+		tta.hash = StaticHash(name);
+		tta.size = 0;
+		tta.index = 0;
+		strcpy(tta.name, name);
+		for (int i = 0; i < MAX_TIME_TRACKER_VALUES; ++i) {
+			tta.values[i] = 0.0f;
+		}
+		zoneTrackerCtx->timeTrackers.push_back(tta);
+		return zoneTrackerCtx->timeTrackers.size() - 1;
+	}
+
+	// -----------------------------------------------------------
+	// start time tracker
+	// -----------------------------------------------------------
+	int startTimer(const char* name) {
+		int idx = findTimeTracker(name);
+		if (idx != -1) {
+			TimeTrackerArray& tta = zoneTrackerCtx->timeTrackers[idx];
+			QueryPerformanceCounter(&tta.started);
+			return idx;
+		}
+		else {
+			return createTimer(name);			
+		}
+	}
+
+	// -----------------------------------------------------------
+	// end time tracker
+	// -----------------------------------------------------------
+	void endTimer(int idx) {
+		TimeTrackerArray& tta = zoneTrackerCtx->timeTrackers[idx];
+		LARGE_INTEGER EndingTime;
+		QueryPerformanceCounter(&EndingTime);
+		LARGE_INTEGER time;
+		time.QuadPart = EndingTime.QuadPart - tta.started.QuadPart;
+		tta.values[tta.index++] = LIToSecs(time, zoneTrackerCtx->frequency);
+		if (tta.index >= MAX_TIME_TRACKER_VALUES) {
+			tta.index = 0;
+		}
+		if (tta.size < MAX_TIME_TRACKER_VALUES) {
+			++tta.size;
+		}
+	}
+
+	// -----------------------------------------------------------
+	// add time tracker value
+	// -----------------------------------------------------------
+	void addTimerValue(const char* name, float value) {
+		int idx = findTimeTracker(name);
+		if (idx == -1) {
+			idx = createTimer(name);
+		}
+		TimeTrackerArray& tta = zoneTrackerCtx->timeTrackers[idx];
+		tta.values[tta.index++] = value;
+		if (tta.index >= MAX_TIME_TRACKER_VALUES) {
+			tta.index = 0;
+		}
+		if (tta.size < MAX_TIME_TRACKER_VALUES) {
+			++tta.size;
+		}
+	}
+
+	// -----------------------------------------------------------
+	// get time tracker values
+	// -----------------------------------------------------------
+	int getTimerValues(const char* name,float* values, int max) {
+		int idx = findTimeTracker(name);
+		if ( idx != -1 ) {
+			const TimeTrackerArray& tta = zoneTrackerCtx->timeTrackers[idx];
+			int cnt = 0;
+			for (int j = 0; j < tta.size; ++j) {
+				if (cnt < max) {
+					values[cnt++] = tta.values[j];
+				}
+			}
+			return cnt;
+		}
+		return 0;
 	}
 	/*
 	void showDialog(v2* position) {

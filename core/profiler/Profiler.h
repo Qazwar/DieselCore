@@ -69,6 +69,14 @@ namespace perf {
 	//int get_snapshot(ProfileSnapshot* items, int max);
 
 	float get_current_total_time();
+
+	int startTimer(const char* name);
+
+	void endTimer(int idx);
+
+	void addTimerValue(const char* name, float value);
+
+	int getTimerValues(const char* name,float* values, int max);
 }
 
 class ZoneTracker {
@@ -79,6 +87,19 @@ public:
 	}
 	~ZoneTracker() {
 		perf::end(_index);
+	}
+private:
+	int _index;
+};
+
+class TimeTracker {
+
+public:
+	TimeTracker(const char* name) {
+		_index = perf::startTimer(name);
+	}
+	~TimeTracker() {
+		perf::endTimer(_index);
 	}
 private:
 	int _index;

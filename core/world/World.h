@@ -51,6 +51,7 @@ namespace ds {
 
 		void ignoreCollisions(int firstType, int secondType);
 		void attachCollider(ID id, ShapeType type, const v2& extent);
+		void attachCollider(ID id, ShapeType type);
 		bool hasCollisions() const;
 		const Collision& getCollision(int idx) const;
 		uint32_t numCollisions() const;
@@ -59,6 +60,7 @@ namespace ds {
 		void moveBy(ID id, const v3& velocity, float ttl = -1.0f, bool bounce = true);
 		void scaleByPath(ID id, V3Path* path, float ttl);
 		void scale(ID id, const v3& start, const v3& end, float ttl, int mode = 0, const tweening::TweeningType& tweeningType = &tweening::linear);
+		void scaleAxes(ID id, int axes, float start, float end, float ttl, int mode = 0, const tweening::TweeningType& tweeningType = &tweening::linear);
 		void removeAfter(ID sid, float ttl);
 		void rotateBy(ID id, float angle, float ttl);
 		void rotateTo(ID id, ID target, float angleVelocity);

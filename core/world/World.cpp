@@ -11,6 +11,7 @@
 #include "..\profiler\Profiler.h"
 #include "actions\CollisionAction.h"
 #include "actions\AlphaFadeToAction.h"
+#include "actions\ScaleAxesAction.h"
 
 namespace ds {
 
@@ -140,6 +141,13 @@ namespace ds {
 		action->attach(id, path, ttl);
 	}
 
+	void World::scaleAxes(ID id, int axes, float start, float end, float ttl, int mode, const tweening::TweeningType& tweeningType) {
+		if (_actions[AT_SCALE_AXES] == 0) {
+			_actions[AT_SCALE_AXES] = new ScaleAxesAction(_data, _boundingRect);
+		}
+		ScaleAxesAction* action = (ScaleAxesAction*)_actions[AT_SCALE_AXES];
+		action->attach(id, axes, start, end, ttl, mode, tweeningType);
+	}
 	// -----------------------------------------------
 	// scale
 	// -----------------------------------------------
@@ -191,6 +199,18 @@ namespace ds {
 			}
 		}
 		return cnt;
+	}
+
+	// -----------------------------------------------
+	// attach collider
+	// -----------------------------------------------
+	void World::attachCollider(ID id, ShapeType type) {
+		if (_collisionAction == 0) {
+			_collisionAction = new CollisionAction(_data, _boundingRect);
+		}
+		const Texture& t = _data->get<Texture>(id, WEC_TEXTURE);
+		v3 extent = v3(t.dim.x, t.dim.y,0.0f);
+		_collisionAction->attach(id, type, extent);
 	}
 
 	// -----------------------------------------------

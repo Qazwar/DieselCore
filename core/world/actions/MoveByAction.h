@@ -19,7 +19,7 @@ namespace ds {
 	private:
 		void allocate(int sz);
 		void rotateTo(int index);
-		bool isOutOfBounds(const v3& pos, const v3& v);
+		int isOutOfBounds(const v3& pos, const v3& v,const v2& dim);
 
 		v3* _velocities;
 		float* _timers;

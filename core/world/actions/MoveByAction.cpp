@@ -38,20 +38,21 @@ namespace ds {
 		_array->set<v3>(_ids[index],WEC_ROTATION,v3(angle));
 	}
 
-	bool MoveByAction::isOutOfBounds(const v3& pos, const v3& v) {
-		if (v.x > 0.0f && pos.x > m_BoundingRect.right) {
-			return true;
+	int MoveByAction::isOutOfBounds(const v3& pos, const v3& v, const v2& dim) {
+		int dir = 0;
+		if (v.x > 0.0f && pos.x > (m_BoundingRect.right - dim.x)) {
+			dir |= 1;
 		}
-		if (v.x < 0.0f && pos.x < m_BoundingRect.left) {
-			return true;
+		if (v.x < 0.0f && pos.x < (m_BoundingRect.left + dim.x)) {
+			dir |= 2;
 		}
-		if (v.y > 0.0f && pos.y > m_BoundingRect.bottom) {
-			return true;
+		if (v.y > 0.0f && pos.y > (m_BoundingRect.bottom - dim.y)) {
+			dir |= 4;
 		}
-		if (v.y < 0.0f && pos.y < m_BoundingRect.top) {
-			return true;
+		if (v.y < 0.0f && pos.y < (m_BoundingRect.top + dim.y)) {
+			dir |= 8;
 		}
-		return false;
+		return dir;
 	}
 	
 	void MoveByAction::bounce(ID sid, BounceDirection direction,float dt) {
@@ -81,18 +82,20 @@ namespace ds {
 				v3 p = _array->get<v3>(_ids[i],WEC_FORCE);
 				p += _velocities[i] * dt;
 				v3 pos = _array->get<v3>(_ids[i], WEC_POSITION);
-				pos += p;
-				if (isOutOfBounds(pos, _velocities[i])) {
-					if (_bounce[i]) {
-						if (pos.y > m_BoundingRect.bottom || pos.y < m_BoundingRect.top) {
+				pos += p;				
+				const Texture& t = _array->get<Texture>(_ids[i], WEC_TEXTURE);
+				int d = isOutOfBounds(pos, _velocities[i], t.dim * 0.5f);
+				if (d != 0) {
+					if (_bounce[i]) {										
+						if ( (d & 4) == 4 || (d & 8) == 8) {
 							_velocities[i].y *= -1.0f;
 						}
-						if (pos.x < m_BoundingRect.left || pos.x > m_BoundingRect.right) {
+						if ((d & 1) == 1 || (d & 2) == 2) {
 							_velocities[i].x *= -1.0f;
 						}
 						buffer.add(_ids[i], AT_BOUNCE, -1, &_velocities[i], sizeof(v3));
 						rotateTo(i);
-						p += _velocities[i] * dt * 1.5f;
+						p += _velocities[i] * dt;// *1.5f;
 					}
 					else {
 						int t = _array->get<int>(_ids[i], WEC_TYPE);

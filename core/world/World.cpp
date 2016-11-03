@@ -355,7 +355,7 @@ namespace ds {
 	// tick
 	// -----------------------------------------------
 	void World::tick(float dt) {
-		ZoneTracker("World::tick");
+		ZoneTracker m("World::tick");
 		_buffer.reset();
 		// reset forces
 		v3* forces = (v3*)_data->get_ptr(WEC_FORCE);		
@@ -365,7 +365,7 @@ namespace ds {
 		}
 		// update all actions
 		{
-			ZoneTracker("World::tick::update");
+			ZoneTracker u1("World::tick::update");
 			for (int i = 0; i < 32; ++i) {
 				if (_actions[i] != 0) {
 					_actions[i]->update(dt, _buffer);
@@ -374,14 +374,14 @@ namespace ds {
 		}
 		// update all custom actions
 		{
-			ZoneTracker("World::tick::updateCustom");
+			ZoneTracker u2("World::tick::updateCustom");
 			for (uint32_t i = 0; i < _customActions.size(); ++i) {
 				_customActions[i]->update(dt, _buffer);
 			}
 		}
 		// process events / kill entities
 		{
-			ZoneTracker("World::tick::events");
+			ZoneTracker ev("World::tick::events");
 			for (uint32_t i = 0; i < _buffer.events.size(); ++i) {
 				const ActionEvent& e = _buffer.events[i];
 				if (e.action == AT_KILL) {
@@ -391,7 +391,7 @@ namespace ds {
 		}
 		// apply forces
 		{
-			ZoneTracker("World::tick::applyForces");
+			ZoneTracker af("World::tick::applyForces");
 			forces = (v3*)_data->get_ptr(WEC_FORCE);
 			v3* positions = (v3*)_data->get_ptr(WEC_POSITION);
 			for (uint32_t i = 0; i < _data->size; ++i) {
@@ -402,7 +402,7 @@ namespace ds {
 		}
 		// handle collisions
 		{
-			ZoneTracker("World::tick::collisions");
+			ZoneTracker cl("World::tick::collisions");
 			if (_collisionAction != 0) {
 				_collisionAction->update(dt, _buffer);
 			}

@@ -117,7 +117,7 @@ namespace ds {
 	void ReportWriter::addCell(int ident, const char* v) const {
 		fprintf(_file, "    <td>");
 		for (int i = 0; i < ident; ++i) {
-			fprintf(_file, "&nbsp;");
+			fprintf(_file, "-&nbsp;");
 		}
 		fprintf(_file, "%s</td>\n", v);
 	}

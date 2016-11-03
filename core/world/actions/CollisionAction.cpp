@@ -74,6 +74,7 @@ namespace ds {
 	// 
 	// -------------------------------------------------------
 	void CollisionAction::update(float dt,ActionEventBuffer& buffer) {
+		ZoneTracker z("CollisionAction::update");
 		_collisions.clear();
 		float dist = 0.0f;
 		if (_buffer.size > 0) {
@@ -85,7 +86,7 @@ namespace ds {
 						c.secondType = _array->get<int>(_ids[j], WEC_TYPE);
 						if (isSupported(c.firstType, c.secondType)) {
 							if (intersects(i, j, &c)) {
-								LOGC("physics") << "intersection between " << i << " ( id: " << _ids[i] << " type: " << c.firstType << ") and " << j << " ( id: " << _ids[j] << " type: " << c.secondType << ")";
+								//LOGC("physics") << "intersection between " << i << " ( id: " << _ids[i] << " type: " << c.firstType << ") and " << j << " ( id: " << _ids[j] << " type: " << c.secondType << ")";
 								c.firstID = _ids[i];
 								c.secondID = _ids[j];
 								if (!containsCollision(c)) {

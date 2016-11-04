@@ -4,6 +4,7 @@
 #include "actions\ScaleByPathAction.h"
 #include "actions\MoveByAction.h"
 #include "actions\RotateByAction.h"
+#include "actions\RotateAction.h"
 #include "actions\RotateToTargetAction.h"
 #include "actions\LookAtAction.h"
 #include "actions\SeekAction.h"
@@ -331,6 +332,13 @@ namespace ds {
 		action->attach(id, target, angleVelocity);
 	}
 
+	void World::rotate(ID id, const v3& velocity, float ttl) {
+		if (_actions[AT_ROTATE] == 0) {
+			_actions[AT_ROTATE] = new RotateAction(_data, _boundingRect);
+		}
+		RotateAction* action = (RotateAction*)_actions[AT_ROTATE];
+		action->attach(id, velocity, ttl);
+	}
 	// -----------------------------------------------
 	// rotate by
 	// -----------------------------------------------

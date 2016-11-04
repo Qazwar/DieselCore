@@ -62,6 +62,7 @@ namespace ds {
 		void scale(ID id, const v3& start, const v3& end, float ttl, int mode = 0, const tweening::TweeningType& tweeningType = &tweening::linear);
 		void scaleAxes(ID id, int axes, float start, float end, float ttl, int mode = 0, const tweening::TweeningType& tweeningType = &tweening::linear);
 		void removeAfter(ID sid, float ttl);
+		void rotate(ID id, const v3& velocity, float ttl);
 		void rotateBy(ID id, float angle, float ttl);
 		void rotateTo(ID id, ID target, float angleVelocity);
 		void lookAt(ID id, ID target, float ttl = -1.0f);

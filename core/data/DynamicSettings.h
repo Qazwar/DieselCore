@@ -56,7 +56,7 @@ namespace ds {
 		//void addRect(const char* name, Rect* value, const Rect& defaultValue);
 		//bool setRect(const char* name, const Rect& value);
 
-		//void addColor(const char* name, Color* value, const Color& defaultValue);
+		void add(const char* name, Color* value, const Color& defaultValue);
 		//bool setColor(const char* name, const Color& value);
 
 		void add(const char* name, V3Path* value);

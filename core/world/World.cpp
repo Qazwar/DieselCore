@@ -13,6 +13,7 @@
 #include "actions\CollisionAction.h"
 #include "actions\AlphaFadeToAction.h"
 #include "actions\ScaleAxesAction.h"
+#include "actions\ColorFlashAction.h"
 
 namespace ds {
 
@@ -279,6 +280,14 @@ namespace ds {
 		}
 		RemoveAfterAction* action = (RemoveAfterAction*)_actions[AT_REMOVE_AFTER];
 		action->attach(id, ttl);
+	}
+
+	void World::flashColor(ID id, const Color& startColor, const Color& endColor, float ttl, int mode, const tweening::TweeningType& tweeningType) {
+		if (_actions[AT_COLOR_FLASH] == 0) {
+			_actions[AT_COLOR_FLASH] = new ColorFlashAction(_data, _boundingRect);
+		}
+		ColorFlashAction* action = (ColorFlashAction*)_actions[AT_COLOR_FLASH];
+		action->attach(id, startColor, endColor, ttl, mode, tweeningType);
 	}
 
 	void World::alphaFadeTo(ID id, float start, float end, float ttl) {

@@ -57,7 +57,7 @@ namespace ds {
 						_timers[i] = 0.0f;
 					}
 					else if ( _modes[i] == 0 ) {
-						_array->set<Color>(_ids[i], WEC_COLOR, _startColors[i]);
+						_array->set<Color>(_ids[i], WEC_COLOR, _endColors[i]);
 						removeByIndex(i);
 					}
 					else {

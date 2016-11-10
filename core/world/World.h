@@ -70,6 +70,7 @@ namespace ds {
 		void separate(ID id, int type, float minDistance, float relaxation);
 		void alphaFadeTo(ID id, float start, float end, float ttl);
 		void stopAction(ID id, ActionType type);
+		bool isActive(ID id, ActionType type);
 		void flashColor(ID id, const Color& startColor, const Color& endColor, float ttl, int mode = 0, const tweening::TweeningType& tweeningType = &tweening::linear);
 
 		void setPosition(ID id, const v2& pos);
@@ -121,6 +122,7 @@ namespace ds {
 			_customActions.push_back(t);
 			return t;
 		}
+		void generateJSON(std::string& resp);
 	private:
 		int _numChannels;
 		AdditionalData _additionalData;

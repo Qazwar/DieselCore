@@ -369,6 +369,16 @@ namespace ds {
 	}
 
 	// -----------------------------------------------
+	// is active
+	// -----------------------------------------------
+	bool World::isActive(ID id, ActionType type) {
+		if (_actions[type] != 0) {
+			return _actions[type]->contains(id);
+		}
+		return false;
+	}
+
+	// -----------------------------------------------
 	// tick
 	// -----------------------------------------------
 	void World::tick(float dt) {
@@ -426,6 +436,33 @@ namespace ds {
 		}		
 	}
 
+	void World::generateJSON(std::string& resp) {
+		int* indices = _data->_sparse;
+		resp.append("[\n");
+		bool started = true;
+		for (int i = 0; i < _data->capacity; ++i) {
+			if (indices[i] != -1) {
+				if (started) {
+					started = false;
+				}
+				else {
+					resp.append(" , \n");
+				}
+				resp.append("{\n");
+				resp.append("\"ID\" : \"1\",\n");
+				resp.append("\"Index\" : \"1\",\n");
+				resp.append("\"Position\" : \"1\",\n");
+				resp.append("\"Texture\" : \"1\",\n");
+				resp.append("\"Rotation\" : \"1\",\n");
+				resp.append("\"Scale\" : \"1\",\n");
+				resp.append("\"Color\" : \"1\",\n");
+				resp.append("\"Type\" : \"1\",\n");
+				resp.append("\"Force\" : \"1\"\n");
+				resp.append("}\n");
+			}
+		}
+		resp.append("]\n");
+	}
 	// -----------------------------------------------
 	// save report
 	// -----------------------------------------------

@@ -100,8 +100,17 @@ namespace ds  {
 					if (_callback != 0) {
 						_response.data.clear();
 						_callback->get(_request, &_response);
+						std::string header;
+						header.append("HTTP/1.1 \n");
+						header.append("Server: Diesel Game server\n");
+						//header.append("Connection: close");
+						header.append("Content-Type: text/html; charset=ISO-8859-1\n");
+						header.append("Content-Length: " + _response.data.size());
+						header.append("\nAccess - Control - Allow - Origin: *\n");
+						header.append("\n");						
 						//int sent_bytes = ::send(client, "HTTP/1.0 404 Not found", 22, 0);
-						int sent_bytes = ::send(client, _response.data.c_str(), _response.data.size(), 0);
+						int sent_bytes = ::send(client, header.c_str(), header.size(), 0);
+						sent_bytes = ::send(client, _response.data.c_str(), _response.data.size(), 0);
 					}
 					else {
 						int sent_bytes = ::send(client, "HTTP/1.0 404 Not found", 22, 0);
@@ -137,6 +146,8 @@ namespace ds  {
 		}
 		strncpy(_request.path, tmp, p - tmp);
 		_request.path[l] = '\0';
+		_request.copyParams();
+		LOG << "params: " << _request.countParams;
 	}
 	
 	bool GameServer::send(const char* line) {

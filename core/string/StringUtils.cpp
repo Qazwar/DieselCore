@@ -169,6 +169,39 @@ namespace ds {
 			return cnt;
 		}
 
+		int find(char* text, char* pattern) {
+			int inplen = strlen(text);
+			if (inplen < strlen(pattern)) {
+				return -1;
+			}
+			char* tmp = text;
+			int p = 0;
+			while (tmp != NULL) {
+
+				char *remTxt = tmp;
+				char *remPat = pattern;
+				
+				if (strlen(remTxt) < strlen(remPat)) {
+					return -1;
+				}
+
+				while (*remTxt++ == *remPat++) {
+
+					if (*remPat == '\0') {
+						return p;
+					}
+					if (remTxt == NULL) {
+						return -1;
+					}
+
+				}
+				remPat = pattern;
+				++p;
+				tmp++;
+			}
+			return -1;
+		}
+
 		void split(const std::string& str, Array<std::string>& words, const char delimiter) {
 			std::string word;
 			std::stringstream stream(str);

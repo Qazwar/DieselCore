@@ -7,6 +7,7 @@
 //#pragma comment( lib, "wsock32.lib" )
 #pragma comment (lib, "Ws2_32.lib")
 #include <string>
+#include "..\string\StringUtils.h"
 
 namespace ds {
 
@@ -20,10 +21,37 @@ namespace ds {
 
 	struct HTTPRequest {
 		HTTPMethod method;
-		char path[128];
+		char path[256];
+		char params[256];
 		char* host;
 		char data[1024];
 		int size;
+		int countParams;
+		int indices[32];
+
+		void copyParams() {
+			params[0] = '\0';
+			countParams = 0;
+			int idx = string::find(path, "?");
+			if (idx != -1) {
+				strcpy(params, path + idx + 1);
+				countParams = 1;
+				int l = strlen(params);
+				for (int i = 0; i < l; ++i) {
+					if (params[i] == '&') {
+						indices[countParams++] = i;
+						params[i] = '\0';
+					}
+				}
+			}
+		}
+		
+		const char* getParameter(char* name) {
+			int idx = string::find(params, name);
+			if (idx != -1) {
+				int l = strlen(name);
+			}
+		}
 	};
 
 	struct HTTPResponse {

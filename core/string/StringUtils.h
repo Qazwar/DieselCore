@@ -102,6 +102,8 @@ namespace string {
 
 	bool isCharacter(const char p);
 
+	int find(char* text, char* pattern);
+
 
 	template <class T>
 	inline std::string to_string (const T& t) {

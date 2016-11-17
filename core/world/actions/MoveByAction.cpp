@@ -93,7 +93,8 @@ namespace ds {
 						if ((d & 1) == 1 || (d & 2) == 2) {
 							_velocities[i].x *= -1.0f;
 						}
-						buffer.add(_ids[i], AT_BOUNCE, -1, &_velocities[i], sizeof(v3));
+						int t = _array->get<int>(_ids[i], WEC_TYPE);
+						buffer.add(_ids[i], AT_BOUNCE, t, &_velocities[i], sizeof(v3));
 						rotateTo(i);
 						p += _velocities[i] * dt;// *1.5f;
 					}

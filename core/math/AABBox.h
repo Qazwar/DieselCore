@@ -46,7 +46,7 @@ namespace ds {
 			return ret;
 		}
 
-		bool contains(const v3& point) const {
+		const bool contains(const v3& point) const {
 			if (point.x < min.x || max.x < point.x) {
 				return false;
 			}

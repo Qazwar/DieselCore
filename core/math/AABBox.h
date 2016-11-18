@@ -1,5 +1,6 @@
 #pragma once
 #include <Vector.h>
+#include "math_types.h"
 
 namespace ds {
 
@@ -60,25 +61,24 @@ namespace ds {
 			const v3 T = b.position - position;
 			return fabs(T.x) <= (extent.x + b.extent.x) && fabs(T.y) <= (extent.y + b.extent.y) && fabs(T.z) <= (extent.z + b.extent.z);
 		}
-		/*
+		
 		const bool overlaps(const Sphere& sphere) const {
-		float s, d = 0;
-		//find the square of the distance
-		//from the sphere to the box
-		for (int i = 0; i < 2; ++i) {
-		if (sphere.position[i] < min_value(i)) {
-		s = sphere.position[i] - min_value(i);
-		d += s*s;
+			float s, d = 0;
+			//find the square of the distance
+			//from the sphere to the box
+			for (int i = 0; i < 3; ++i) {
+				if (sphere.pos[i] < min_value(i)) {
+					s = sphere.pos[i] - min_value(i);
+					d += s*s;
+				}
+				else if (sphere.pos[i] > max_value(i)) {
+					s = sphere.pos[i] - max_value(i);
+					d += s*s;
+				}	
+			}
+			return d <= sphere.radius * sphere.radius;
 		}
-		else if (sphere.position[i] > max_value(i)) {
-		s = sphere.position[i] - max_value(i);
-		d += s*s;
-		}
-
-		}
-		return d <= sphere.radius * sphere.radius;
-		}
-		*/
+		
 		float min_value(int index) const {
 			return min[index];
 		}

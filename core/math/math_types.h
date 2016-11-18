@@ -213,12 +213,12 @@ namespace ds {
 	// -------------------------------------------------------
 	struct Circle {
 
-		Vector2f pos;
+		v2 pos;
 		float radius;
 
 		Circle() : pos(0.0f, 0.0f), radius(0.0f) {}
 
-		Circle(const Vector2f& p, float r) : pos(p), radius(r) {}
+		Circle(const v2& p, float r) : pos(p), radius(r) {}
 	};
 
 	struct Plane {
@@ -228,5 +228,18 @@ namespace ds {
 
 		Plane() : position(0, 0, 0), normal(0, 0, 0) {}
 		Plane(const v3& p, const v3& n) : position(p), normal(n) {}
+	};
+
+	// -------------------------------------------------------
+	// Sphere
+	// -------------------------------------------------------
+	struct Sphere {
+
+		v3 pos;
+		float radius;
+
+		Sphere() : pos(v3(0.0f)), radius(0.0f) {}
+
+		Sphere(const v3& p, float r) : pos(p), radius(r) {}
 	};
 }

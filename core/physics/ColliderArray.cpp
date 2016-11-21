@@ -7,8 +7,8 @@ namespace ds {
 	namespace physics {
 
 		void debug(const Collision& c) {
-			LOG << "first  - id: " << c.firstID << " type: " << c.firstType << " pos: " << DBG_V3(c.firstPos);
-			LOG << "second - id: " << c.secondID << " type: " << c.secondType << " pos: " << DBG_V3(c.secondPos);
+			LOG << "first  - id: " << c.firstID << " type: " << c.firstType << " pos: " << c.firstPos;
+			LOG << "second - id: " << c.secondID << " type: " << c.secondType << " pos: " << c.secondPos;
 		}
 
 		// Given three colinear points p, q, r, the function checks if

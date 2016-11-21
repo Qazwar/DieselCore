@@ -30,7 +30,7 @@ namespace ds {
 	// -------------------------------------------------------
 	void CollisionAction::attach(ID id, ShapeType type, const v3& extent) {
 		int idx = create(id);
-		LOGC("physics") << "attach collider - id: " << id << " index: " << idx << " type: " << type << " extent: " << DBG_V3(extent);
+		LOGC("physics") << "attach collider - id: " << id << " index: " << idx << " type: " << type << " extent: " << extent;
 		_ids[idx] = id;
 		_previous[idx] = _array->get<v3>(id, WEC_POSITION);
 		_types[idx] = type;

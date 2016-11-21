@@ -9,51 +9,6 @@
 
 namespace ds {
 
-	class DString {
-
-	public:
-
-		void add(char c) {
-			_buffer.push_back(c);
-		}
-
-		void add(const char* txt) {
-			int n = strlen(txt);
-			for (int i = 0; i < n; ++i) {
-				_buffer.push_back(txt[i]);
-			}
-		}
-
-		const char* c_str() {
-			_buffer.push_back('\0');
-			_buffer.pop_back();
-			return _buffer.data();
-		}
-	private:
-		Array<char> _buffer;
-	};
-
-	class StringStream {
-
-	typedef Array<char> Buffer;
-
-	public:
-		StringStream& operator<<(char c);
-		StringStream& operator<<(const char *s);
-		StringStream& operator<<(float f);
-		StringStream& operator<<(int i);
-		StringStream& operator<<(uint32_t i);
-		StringStream& operator<<(const v2& v);
-		StringStream& operator<<(const v3& v);
-		StringStream& operator<<(const Color& v);
-		StringStream& operator<<(const Rect& v);
-		StringStream& format(const char *format, ...);
-		const char *c_str();
-	private:
-		StringStream& push(const char *data, uint32_t n);
-		Buffer _buffer;
-	};
-
 namespace string {
 
 	//Array<std::string> split(const std::string& str,const char delimiter = ',');

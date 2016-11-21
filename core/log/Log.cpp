@@ -261,7 +261,7 @@ bool Log::matches() {
 	return (_logContext->available && _level >= _categoryLevel);
 }
 
-std::ostringstream& Log::get() {
+ds::StringStream& Log::get() {
 	if (matches()) {
 		os << NowTime();
 		os << " : ";
@@ -288,14 +288,14 @@ void Log::log_file_line(const char *file, const unsigned long line, bool isError
 	}
 }
 
-std::ostringstream& Log::get(const char *file, const unsigned long line) {
+ds::StringStream& Log::get(const char *file, const unsigned long line) {
 	if (matches()) {
 		log_file_line(file, line, false);
 	}
 	return os;
 }
 
-std::ostringstream& Log::error(const char *file, const unsigned long line) {
+ds::StringStream& Log::error(const char *file, const unsigned long line) {
 	if (matches()) {
 		log_file_line(file, line, true);
 	}
@@ -303,7 +303,7 @@ std::ostringstream& Log::error(const char *file, const unsigned long line) {
 	return os;
 }
 
-std::ostringstream& Log::error(const char *file, const unsigned long line,const char* message) {
+ds::StringStream& Log::error(const char *file, const unsigned long line, const char* message) {
 	if (matches()) {
 		log_file_line(file, line, true);
 		os << message;
@@ -312,7 +312,7 @@ std::ostringstream& Log::error(const char *file, const unsigned long line,const 
 	return os;
 }
 
-std::ostringstream& Log::error(const char *file, const unsigned long line, char* format, va_list args) {
+ds::StringStream& Log::error(const char *file, const unsigned long line, char* format, va_list args) {
 	_level = LL_ERROR;
 	if (matches()) {
 		log_file_line(file, line, true);
@@ -325,7 +325,7 @@ std::ostringstream& Log::error(const char *file, const unsigned long line, char*
 	return os;
 }
 
-std::ostringstream& Log::error(const char *file, const unsigned long line, char* format, ...) {
+ds::StringStream& Log::error(const char *file, const unsigned long line, char* format, ...) {
 	_level = LL_ERROR;
 	if (matches()) {
 		va_list args;
@@ -337,7 +337,7 @@ std::ostringstream& Log::error(const char *file, const unsigned long line, char*
 	return os;
 }
 
-std::ostringstream& Log::error() {
+ds::StringStream& Log::error() {
 	_level = LL_ERROR;
 	if (matches()) {
 		os << NowTime();
@@ -349,8 +349,7 @@ std::ostringstream& Log::error() {
 
 Log::~Log() {
 	if (matches()) {
-		os << std::endl;
-		//OutputDebugStringA(os.str().c_str());
+		os << '\n';
 		unsigned long res;
 		if (_logContext->useConsole) {
 			if (_errorFlag) {
@@ -359,10 +358,10 @@ Log::~Log() {
 			else {
 				SetConsoleTextAttribute(_logContext->console, FOREGROUND_RED | FOREGROUND_BLUE | FOREGROUND_GREEN);
 			}
-			WriteConsole(_logContext->console, os.str().c_str(), strlen(os.str().c_str()), &res, 0);
+			WriteConsole(_logContext->console, os.c_str(), strlen(os.c_str()), &res, 0);
 		}
 		if (_logContext->useFile) {
-			fprintf(_logContext->file, "%s", os.str().c_str());
+			fprintf(_logContext->file, "%s", os.c_str());
 		}
 	}
 }

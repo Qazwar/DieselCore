@@ -1,7 +1,10 @@
 #pragma once
 #include <assert.h>
 #include <stdint.h>
+#include <stdarg.h>
 #include "..\memory\DefaultAllocator.h"
+#include <Vector.h>
+#include <Point.h>
 
 namespace ds {
 
@@ -43,75 +46,119 @@ namespace ds {
 		int num;
 		Allocator* _allocator;
 
-		CharBuffer(Allocator* allocator = gDefaultMemory) : data(0), size(0), capacity(0), num(0) , _allocator(allocator) {}
+		CharBuffer(Allocator* allocator = gDefaultMemory);
+		CharBuffer(const CharBuffer& b);
+		CharBuffer& operator =(const CharBuffer& b);
+		~CharBuffer();
 
-		~CharBuffer() {
-			if (data != 0) {
-				//delete[] data;
-				//_allocator->deallocate(data);
-				DEALLOC(data);
-			}
-		}
+		void* alloc(int sz);
+		void resize(int newCap);
+		int append(const char* s, int len);
+		int append(const char* s);
+		int append(char s);
 
-		void* alloc(int sz) {
-			if (size + sz > capacity) {
-				int d = capacity * 2 + 8;
-				if (d < sz) {
-					d = sz * 2 + 8;
-				}
-				resize(d);
-			}
-			auto res = data + size;
-			size += sz;
-			int d = sz / 4;
-			if (d == 0) {
-				d = 1;
-			}
-			num += d;
-			return res;
-		}
-
-		void resize(int newCap) {
-			if (newCap > capacity) {
-				char* tmp = (char*)ALLOC(newCap);
-				if (data != 0) {
-					memcpy(tmp, data, capacity);
-					DEALLOC(data);
-				}
-				capacity = newCap;
-				data = tmp;
-			}
-		}
-
-		int append(const char* s, int len) {
-			if (size + len + 1 > capacity) {
-				resize(capacity + len + 1 + 8);
-			}
-			const char* t = s;
-			int ret = size;
-			for (int i = 0; i < len; ++i) {
-				data[size++] = *t;
-				++t;
-			}
-			data[size++] = '\0';
-			return ret;
-		}
-
-		int append(const char* s) {
-			int len = strlen(s);
-			if (size + len + 1 > capacity) {
-				resize(capacity + len + 1 + 8);
-			}
-			const char* t = s;
-			int ret = size;
-			for (int i = 0; i < len; ++i) {
-				data[size++] = *t;
-				++t;
-			}
-			data[size++] = '\0';
-			return ret;
-		}
 	};
+
+	class StringStream {
+
+	public:
+		StringStream(Allocator* allocator = gDefaultMemory);
+		~StringStream();
+		void append(const char* s);
+		void append(const char* s,int len);
+		void append(char s);
+		const char* c_str();
+		void printf(const char *fmt, ...);
+
+		template <typename T>
+		void printf_small(const char *fmt, const T &t) {
+			char s[32] = { '\0' };
+			_snprintf(s, 32, fmt, t);
+			append(s);
+		}
+	private:
+		void* alloc(int sz);
+		void resize(int newCap);
+		char* _data;
+		int _size;
+		int _capacity;
+		Allocator* _allocator;
+	};
+
+	inline StringStream& operator<<(StringStream& s, char v) {
+		s.append(v);
+		return s;
+	}
+
+	inline StringStream& operator<<(StringStream& s, const char* v) {
+		s.append(v);
+		return s;
+	}
+
+	inline StringStream& operator<<(StringStream& s, uint32_t v) {
+		s.printf_small<uint32_t>("%d", v);
+		return s;
+	}
+
+	inline StringStream& operator<<(StringStream& s, float v) {
+		s.printf_small("%g", v);
+		return s;
+	}
+
+	inline StringStream& operator<<(StringStream& s, int v) {
+		s.printf_small("%d", v);
+		return s;
+	}
+
+	inline StringStream& operator<<(StringStream& s, double v) {
+		s.printf_small("%g", v);
+		return s;
+	}
+
+	inline StringStream& operator<<(StringStream& s, const v2& v) {
+		s.printf("x: %g y: %g", v.x, v.y);
+		return s;
+	}
+
+	inline StringStream& operator<<(StringStream& s, const v3& v) {
+		s.printf("x: %g y: %g z: %g", v.x, v.y, v.z);
+		return s;
+	}
+
+	inline StringStream& operator<<(StringStream& s, const v4& v) {
+		s.printf("x: %g y: %g z: %g w: %g", v.x, v.y, v.z, v.w);
+		return s;
+	}
+
+	inline StringStream& operator<<(StringStream& s, const Color& v) {
+		s.printf("x: %g y: %g z: %g w: %g", v.r, v.g, v.b, v.a);
+		return s;
+	}
+
+	inline StringStream& operator<<(StringStream& s, const p2i& v) {
+		s.printf("x: %d y: %d", v.x, v.y);
+		return s;
+	}
+
+	inline StringStream& operator<<(StringStream& s, const std::string& v) {
+		s.append(v.c_str());
+		return s;
+	}
+
+	inline StringStream& operator<<(StringStream& s, unsigned long v) {
+		s.printf("%lu", v);
+		return s;
+	}
+
+	/*
+	#ifndef DBG_RECT
+	#define DBG_RECT(v) "top: " << v.top << " left: " << v.left << " width: " << v.width() << " height: " << v.height()
+	#endif
+	#ifndef DBG_TEX
+	#define DBG_TEX(v) "top: " << v.rect.top << " left: " << v.rect.left << " dim.x: " << v.dim.x << " dim.y: " << v.dim.y << " uv0: " << v.uv[0].x << " " << v.uv[0].y << " uv1: " << v.uv[1].x << " " << v.uv[1].y << " uv2: " << v.uv[2].x << " " << v.uv[2].y << " uv3: " << v.uv[3].x << " " << v.uv[3].y
+	#endif
+
+	*/
 
 	template<class T>
 	class Array {

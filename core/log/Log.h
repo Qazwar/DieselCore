@@ -77,16 +77,16 @@ public:
     Log();    
 	Log(StaticHash category, LogLevel level);
     virtual ~Log();
-    std::ostringstream& get();
-	std::ostringstream& error();
-	std::ostringstream& get(const char *file, const unsigned long line);    
-	std::ostringstream& error(const char *file, const unsigned long line);
-	std::ostringstream& error(const char *file, const unsigned long line,const char* message);
-	std::ostringstream& error(const char *file, const unsigned long line, char* format, va_list args);
-	std::ostringstream& error(const char *file, const unsigned long line, char* format, ...);
+	ds::StringStream& get();
+	ds::StringStream& error();
+	ds::StringStream& get(const char *file, const unsigned long line);
+	ds::StringStream& error(const char *file, const unsigned long line);
+	ds::StringStream& error(const char *file, const unsigned long line, const char* message);
+	ds::StringStream& error(const char *file, const unsigned long line, char* format, va_list args);
+	ds::StringStream& error(const char *file, const unsigned long line, char* format, ...);
 	static LogOutputHandler& handler();        
 protected:
-    std::ostringstream os;		
+	ds::StringStream os;
 private:
 	bool matches();
 	void log_file_line(const char *file, const unsigned long line, bool isError);

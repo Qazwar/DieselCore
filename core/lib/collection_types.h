@@ -48,6 +48,7 @@ namespace ds {
 
 		CharBuffer(Allocator* allocator = gDefaultMemory);
 		CharBuffer(const CharBuffer& b);
+		CharBuffer(CharBuffer&& other);
 		CharBuffer& operator =(const CharBuffer& b);
 		~CharBuffer();
 
@@ -73,7 +74,7 @@ namespace ds {
 		template <typename T>
 		void printf_small(const char *fmt, const T &t) {
 			char s[32] = { '\0' };
-			_snprintf(s, 32, fmt, t);
+			_snprintf_s(s, 32, fmt, t);
 			append(s);
 		}
 	private:
@@ -150,15 +151,15 @@ namespace ds {
 		return s;
 	}
 
-	/*
-	#ifndef DBG_RECT
-	#define DBG_RECT(v) "top: " << v.top << " left: " << v.left << " width: " << v.width() << " height: " << v.height()
-	#endif
-	#ifndef DBG_TEX
-	#define DBG_TEX(v) "top: " << v.rect.top << " left: " << v.rect.left << " dim.x: " << v.dim.x << " dim.y: " << v.dim.y << " uv0: " << v.uv[0].x << " " << v.uv[0].y << " uv1: " << v.uv[1].x << " " << v.uv[1].y << " uv2: " << v.uv[2].x << " " << v.uv[2].y << " uv3: " << v.uv[3].x << " " << v.uv[3].y
-	#endif
+	inline StringStream& operator<<(StringStream& s, const Rect& r) {
+		s.printf("top: %d left: %d width: %d height: %d", r.top,r.left,r.width(),r.height());
+		return s;
+	}
 
-	*/
+	inline StringStream& operator<<(StringStream& s, const Texture& t) {
+		s.printf("top: %d left: %d dim.x: %d dim.y: %d", t.rect.top,t.rect.left,t.dim.x,t.dim.y);
+		return s;
+	}
 
 	template<class T>
 	class Array {
@@ -350,6 +351,13 @@ namespace ds {
 		}
 
 		void push_back(const T& t) {
+			if (_size + 1 > _capacity) {
+				grow(_capacity * 2 + 8);
+			}
+			_items[_size++] = t;
+		}
+
+		void push_back(T&& t) {
 			if (_size + 1 > _capacity) {
 				grow(_capacity * 2 + 8);
 			}

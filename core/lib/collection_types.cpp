@@ -3,13 +3,24 @@
 namespace ds {
 
 
-	CharBuffer::CharBuffer(Allocator* allocator) : data(0), size(0), capacity(0), num(0), _allocator(allocator) {}
+	CharBuffer::CharBuffer(Allocator* allocator) : data(nullptr), size(0), capacity(0), num(0), _allocator(allocator) {}
 
 	CharBuffer::CharBuffer(const CharBuffer& b) {
 		_allocator = gDefaultMemory;
 		int sz = b.size;
 		resize(sz);
 		memcpy(data, b.data, sz);
+	}
+
+	CharBuffer::CharBuffer(CharBuffer&& other) : size(0) , capacity(0) , data(nullptr) {
+		_allocator = gDefaultMemory;
+		size = other.size;
+		data = other.data;
+		capacity = other.capacity;
+		// reset other
+		other.size = 0;
+		other.capacity = 0;
+		other.data = nullptr;
 	}
 
 	CharBuffer& CharBuffer::operator =(const CharBuffer& b) {
@@ -20,7 +31,7 @@ namespace ds {
 	}
 
 	CharBuffer::~CharBuffer() {
-		if (data != 0) {
+		if (data != nullptr) {
 			DEALLOC(data);
 		}
 	}
@@ -46,7 +57,7 @@ namespace ds {
 	void CharBuffer::resize(int newCap) {
 		if (newCap > capacity) {
 			char* tmp = (char*)ALLOC(newCap);
-			if (data != 0) {
+			if (data != nullptr) {
 				memcpy(tmp, data, size);
 				DEALLOC(data);
 			}
@@ -156,7 +167,9 @@ namespace ds {
 	}
 
 	const char* StringStream::c_str() {
-		append('\0');
+		if (_data[_size - 1] != '\0') {
+			append('\0');
+		}
 		return _data;
 	}
 
@@ -166,17 +179,11 @@ namespace ds {
 		int n = vsnprintf(NULL, 0, fmt, args);
 		va_end(args);
 		uint32_t end = _size;
-
-		//if (end > 0) {
-			//--end;
-		//}
 		resize(end + n + 1);
 		va_start(args, fmt);
 		vsnprintf(_data + end, n + 1, fmt, args);
 		va_end(args);
 		_size = end + n;
-		//resize(end + n);
-		//_data[_size++] = '\0';
 	}
 
 }

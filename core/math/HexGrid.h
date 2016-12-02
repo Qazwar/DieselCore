@@ -2,6 +2,7 @@
 #include <Vector.h>
 #include "hex.h"
 #include <vector>
+#include "..\memory\DefaultAllocator.h"
 
 namespace ds {
 
@@ -25,16 +26,20 @@ namespace ds {
 		int rMax() const {
 			return _rMax;
 		}
+
+		void setLayout(const Layout& l) {
+			_layout = l;
+		}
 		// -------------------------------------------------------
 		// resize
 		// -------------------------------------------------------
 		void resize(int qMax, int rMax) {
 			if (_items != 0) {
-				delete[] _items;
+				DEALLOC(_items);
 			}
 			_qMax = qMax;
 			_rMax = rMax;
-			_items = new T[qMax * rMax];
+			_items = (T*)ALLOC(qMax * rMax * sizeof(T));
 		}
 		
 		// -------------------------------------------------------

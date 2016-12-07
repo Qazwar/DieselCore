@@ -74,6 +74,7 @@ namespace ds {
 		bool get_uint(int category_id, const char* name, uint32_t* ret) const;
 		bool get(int category_id, const char* name, uint16_t* ret) const;
 		bool get(int category_id, const char* name, uint32_t* ret) const;
+		bool get(int category_id, const char* name, StaticHash* ret) const;
 		bool get_float(int category_id, const char* name, float* ret) const;
 		bool get(int category_id, const char* name, float* ret) const;
 		bool get_vec2(int category_id, const char* name, v2* ret) const;

@@ -270,10 +270,13 @@ namespace ds {
 			}
 			if (_size - it.index() - 1 > 0) {
 				uint32_t d = _size - it.index() - 1;
-				T* old = ptr + d;
+				T* old = ptr + 1;
 				memcpy(ptr, old, d);
 			}
 			--_size;
+			if (_size == 0) {
+				return end();
+			}
 			return iterator(ptr);
 		}
 

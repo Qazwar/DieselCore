@@ -632,6 +632,18 @@ bool JSONReader::get(int category_id, const char* name, Rect* ret) const {
 }
 
 // -------------------------------------------
+// get StaticHash
+// -------------------------------------------
+bool JSONReader::get(int category_id, const char* name, StaticHash* ret) const {
+	int idx = get_index(category_id, name);
+	if (idx != -1) {
+		const char* txt = get_string(category_id, name);
+		*ret = SID(txt);
+		return true;
+	}
+	return false;
+}
+// -------------------------------------------
 // get string
 // ------------------------------------------- 
 const char* JSONReader::get_string(int category_id, const char* name) const {

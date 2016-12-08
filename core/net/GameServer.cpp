@@ -106,11 +106,12 @@ namespace ds  {
 						//header.append("Connection: close");
 						header.append("Content-Type: text/html; charset=ISO-8859-1\n");
 						header.append("Content-Length: " + _response.data.size());
-						header.append("\nAccess - Control - Allow - Origin: *\n");
+						header.append("\nAccess-Control-Allow-Origin: *\n");
 						header.append("\n");						
 						//int sent_bytes = ::send(client, "HTTP/1.0 404 Not found", 22, 0);
 						int sent_bytes = ::send(client, header.c_str(), header.size(), 0);
 						sent_bytes = ::send(client, _response.data.c_str(), _response.data.size(), 0);
+						LOG << "sending back: '" << _response.data << "'";
 					}
 					else {
 						int sent_bytes = ::send(client, "HTTP/1.0 404 Not found", 22, 0);

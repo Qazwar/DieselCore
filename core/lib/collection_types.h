@@ -204,6 +204,7 @@ namespace ds {
 			typedef T* pointer;
 			typedef int difference_type;
 			iterator(pointer ptr) : ptr_(ptr), _index(0) { }
+			iterator(pointer ptr,int idx) : ptr_(ptr), _index(idx) {}
 			self_type operator++() { self_type i = *this; ptr_++; ++_index; return i; }
 			self_type operator++(int junk) { ptr_++; ++_index; return *this; }
 			self_type operator+(int junk) { ptr_ += junk; _index += junk; return *this; }
@@ -268,16 +269,13 @@ namespace ds {
 			if (_destructor) {
 				Destruct<T>(ptr);
 			}
-			if (_size - it.index() - 1 > 0) {
-				uint32_t d = _size - it.index() - 1;
-				T* old = ptr + 1;
-				memcpy(ptr, old, d);
-			}
+			_items[it.index()] = _items[_size - 1];
 			--_size;
+			ptr = &_items[it.index()];
 			if (_size == 0) {
 				return end();
 			}
-			return iterator(ptr);
+			return iterator(ptr,it.index());
 		}
 
 		int remove_all(const T& t) {

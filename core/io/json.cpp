@@ -604,6 +604,16 @@ bool JSONReader::get_color(int category_id, const char* name, Color* ret) const 
 	return false;
 }
 
+bool JSONReader::get(int category_id, const char* name, p2i* ret) const {
+	int idx = get_index(category_id, name);
+	if (idx != -1) {
+		ret->x = get(_data_indices[idx]);
+		ret->y = get(_data_indices[idx] + 1);
+		return true;
+	}
+	return false;
+}
+
 bool JSONReader::get(int category_id, const char* name, Color* ret) const {
 	int idx = get_index(category_id, name);
 	if (idx != -1) {

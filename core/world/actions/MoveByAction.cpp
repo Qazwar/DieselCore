@@ -20,6 +20,17 @@ namespace ds {
 			_bounce = (bool*)_buffer.get_ptr(4);
 		}
 	}
+
+	void MoveByAction::attach(ID id, ActionSettings* settings) {
+		MoveByActionSettings* s = (MoveByActionSettings*)settings;
+		v3 vel = s->velocity;
+		if (s->radialVelocity != 0.0f) {
+			v3 angle = _array->get<v3>(id, WEC_ROTATION);
+			vel = v3(math::getRadialVelocity(angle.x, s->radialVelocity));
+		}
+		attach(id, vel, s->ttl, s->bounce);
+	}
+
 	// -------------------------------------------------------
 	// 
 	// -------------------------------------------------------

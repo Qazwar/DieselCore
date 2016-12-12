@@ -4,12 +4,23 @@
 
 namespace ds {
 
+	struct LookAtActionSettings : public ActionSettings {
+
+		StaticHash target;
+		float ttl;
+
+		LookAtActionSettings(StaticHash h, float t) : target(h), ttl(t) {
+			type = AT_LOOK_AT;
+		}
+	};
+
 	class LookAtAction : public AbstractAction {
 
 	public:
 		LookAtAction(ChannelArray* array, const Rect& boundingRect);
 		virtual ~LookAtAction() {}
 		void attach(ID id, ID target, float ttl = -1.0f);
+		void attach(ID id, ActionSettings* settings);
 		void update(float dt,ActionEventBuffer& buffer);
 		ActionType getActionType() const {
 			return AT_LOOK_AT;

@@ -1,6 +1,7 @@
 #include "LookAtAction.h"
 #include "..\..\log\Log.h"
 #include "..\..\math\math.h"
+#include "..\..\base\Assert.h"
 
 namespace ds {
 	// -------------------------------------------------------
@@ -19,15 +20,43 @@ namespace ds {
 			_ttl = (float*)_buffer.get_ptr(3);
 		}
 	}
+
+	void LookAtAction::attach(ID id, ActionSettings* settings) {
+		LookAtActionSettings* s = (LookAtActionSettings*)settings;
+		ID target = INVALID_ID;
+		int* indices = _array->_sparse;
+		for (int i = 0; i < _array->capacity; ++i) {
+			if (indices[i] != -1) {
+				StaticHash current = _array->get<StaticHash>(i, WEC_HASH);
+				if (s->target == current) {
+					target = i;
+				}
+			}
+		}
+		XASSERT(target != INVALID_ID, "Cannot find target");
+		if (target != INVALID_ID) {
+			attach(id, target, s->ttl);
+		}
+	}
+
 	// -------------------------------------------------------
 	// 
 	// -------------------------------------------------------
 	void LookAtAction::attach(ID id, ID target, float ttl) {
-		int idx = create(id);
-		_ids[idx] = id;
-		_targets[idx] = target;
-		_timers[idx] = 0.0f;
-		_ttl[idx] = ttl;
+		if (ttl == 0.0f) {
+			v3 p = _array->get<v3>(id, WEC_POSITION);
+			v3 t = _array->get<v3>(target, WEC_POSITION);
+			v3 r = _array->get<v3>(id, WEC_ROTATION);
+			r.x = math::getAngle(p.xy(), t.xy());
+			_array->set<v3>(id, WEC_ROTATION, r);
+		}
+		else {
+			int idx = create(id);
+			_ids[idx] = id;
+			_targets[idx] = target;
+			_timers[idx] = 0.0f;
+			_ttl[idx] = ttl;
+		}
 	}
 
 	// -------------------------------------------------------

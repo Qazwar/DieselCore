@@ -57,8 +57,11 @@ namespace ds {
 		int append(const char* s, int len);
 		int append(const char* s);
 		int append(char s);
+		const char* get(int index) const;
 
 	};
+
+	extern CharBuffer* gStringBuffer;
 
 	class StringStream {
 

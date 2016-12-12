@@ -26,6 +26,16 @@ namespace ds {
 			_ttl = (float*)_buffer.get_ptr(3);
 		}
 	}
+
+	// -------------------------------------------------------
+	// attach
+	// -------------------------------------------------------
+	void ScaleByPathAction::attach(ID id, ActionSettings* settings) {
+		ScaleByPathActionSettings* s = (ScaleByPathActionSettings*)settings;
+		float ttl = s->ttl;
+		attach(id, s->path, ttl);
+	}
+
 	// -------------------------------------------------------
 	// 
 	// -------------------------------------------------------

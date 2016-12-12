@@ -1,4 +1,5 @@
 #include "World.h"
+#include "..\base\Assert.h"
 #include "actions\ScalingAction.h"
 #include "actions\RemoveAfterAction.h"
 #include "actions\ScaleByPathAction.h"
@@ -23,8 +24,8 @@ namespace ds {
 		}
 		_collisionAction = 0;
 		_data = new ChannelArray;
-		int sizes[] = { sizeof(v3), sizeof(v3), sizeof(v3) ,sizeof(Texture) , sizeof(Color), sizeof(float), sizeof(int), sizeof(v3)};
-		_data->init(sizes, 8);
+		int sizes[] = { sizeof(v3), sizeof(v3), sizeof(v3) ,sizeof(Texture) , sizeof(Color), sizeof(float), sizeof(int), sizeof(v3),sizeof(int),sizeof(StaticHash)};
+		_data->init(sizes, 10);
 		_templates = 0;
 	}
 
@@ -37,6 +38,9 @@ namespace ds {
 		}
 		if (_collisionAction != 0) {
 			delete _collisionAction;
+		}
+		for (uint32_t i = 0; i < _behaviors.size(); ++i) {
+			_behaviors[i]->settings.destroy_all();
 		}
 		delete _data;
 	}
@@ -82,6 +86,8 @@ namespace ds {
 		_data->set<Color>(id, WEC_COLOR, color);
 		_data->set<int>(id, WEC_TYPE, type);
 		_data->set<v3>(id, WEC_FORCE, v3(0.0f));
+		_data->set<int>(id, WEC_NAME, -1);
+		_data->set<StaticHash>(id, WEC_HASH, SID("-"));
 		return id;
 	}
 
@@ -187,6 +193,33 @@ namespace ds {
 	}
 
 	// -----------------------------------------------
+	// remove all by type
+	// -----------------------------------------------
+	void World::removeByType(int type) {
+		ID ids[1024];
+		int num = find_by_type(type, ids, 1024);
+		for (int i = 0; i < num; ++i) {
+			remove(ids[i]);
+		}		
+	}
+
+	// -----------------------------------------------
+	// find by name
+	// -----------------------------------------------
+	ID World::findByName(StaticHash hash) {
+		int* indices = _data->_sparse;
+		for (int i = 0; i < _data->capacity; ++i) {
+			if (indices[i] != -1) {
+				StaticHash current = _data->get<StaticHash>(i, WEC_HASH);
+				if (hash == current) {
+					return i;
+				}
+			}
+		}
+		return INVALID_ID;
+	}
+
+	// -----------------------------------------------
 	// find by type
 	// -----------------------------------------------
 	int World::find_by_type(int type, ID* ids, int max) const {
@@ -201,6 +234,17 @@ namespace ds {
 			}
 		}
 		return cnt;
+	}
+
+	// -----------------------------------------------
+	// attach name
+	// -----------------------------------------------
+	void World::attachName(ID id, const char* name) {
+		int idx = gStringBuffer->append(name);
+		_data->set<int>(id, WEC_NAME, idx);
+		StaticHash hash = SID(name);
+		_data->set<StaticHash>(id, WEC_HASH, hash);
+		LOG << "id: " << id << " name: " << name << " hash: " << hash.get();
 	}
 
 	// -----------------------------------------------
@@ -414,6 +458,11 @@ namespace ds {
 				if (e.action == AT_KILL) {
 					remove(e.id);
 				}
+				int tid = findTransition(e.action, e.type);
+				if (tid != -1) {					
+					const BehaviorTransition& t = _transitions[tid];
+					startBehavior(t.to, e.id);
+				}
 			}
 		}
 		// apply forces
@@ -468,8 +517,8 @@ namespace ds {
 	// -----------------------------------------------
 	void World::saveReport(const ds::ReportWriter& writer) {
 		writer.startBox("World");
-		const char* OVERVIEW_HEADERS[] = { "ID", "Index", "Position", "Texture", "Rotation", "Scale", "Color", "Type", "Force" };
-		writer.startTable(OVERVIEW_HEADERS, 9);
+		const char* OVERVIEW_HEADERS[] = { "ID", "Index", "Position", "Texture", "Rotation", "Scale", "Color", "Type", "Force","Name","Hash" };
+		writer.startTable(OVERVIEW_HEADERS, 11);
 		int* indices = _data->_sparse;
 		for (int i = 0; i < _data->capacity; ++i) {
 			if (indices[i] != -1) {
@@ -483,6 +532,14 @@ namespace ds {
 				writer.addCell(_data->get<Color>(i, WEC_COLOR));
 				writer.addCell(_data->get<int>(i, WEC_TYPE));
 				writer.addCell(_data->get<v3>(i, WEC_FORCE));
+				int idx = _data->get<int>(i, WEC_NAME);
+				if (idx != -1) {
+					writer.addCell(gStringBuffer->get(idx));
+				}
+				else {
+					writer.addCell("-");
+				}
+				writer.addCell(_data->get<StaticHash>(i, WEC_HASH).get());
 				writer.endRow();
 			}
 		}
@@ -502,4 +559,122 @@ namespace ds {
 		}
 	}
 
+	// -----------------------------------------------
+	// create behavior
+	// -----------------------------------------------
+	ID World::createBehavior(const char* name) {
+		Behavior* b = new Behavior;
+		b->hash = SID(name);
+		_behaviors.push_back(b);
+		return _behaviors.size() - 1;
+	}
+
+	// -----------------------------------------------
+	// add settings to behavior
+	// -----------------------------------------------
+	void World::addSettings(ID behaviorID, ActionSettings* settings) {
+		Behavior* b = _behaviors[behaviorID];
+		b->settings.push_back(settings);
+	}
+
+	// -----------------------------------------------
+	// start behavior
+	// -----------------------------------------------
+	void World::startBehavior(const StaticHash& hash, ID id) {
+		int idx = -1;
+		for (uint32_t i = 0; i < _behaviors.size(); ++i) {
+			if (_behaviors[i]->hash == hash) {
+				idx = i;
+			}
+		}
+		XASSERT(idx != -1, "Cannot find matching behavior");
+		startBehavior(idx, id);
+	}
+
+	// -----------------------------------------------
+	// start behavior by index
+	// -----------------------------------------------
+	void World::startBehavior(int idx, ID id) {
+		if (idx != -1) {
+			Behavior* b = _behaviors[idx];
+			for (uint32_t i = 0; i < b->settings.size(); ++i) {
+				ActionSettings* s = b->settings[i];
+				if (_actions[s->type] == 0) {
+					createAction(s->type);
+				}
+				_actions[s->type]->attach(id, s);
+			}
+		}
+	}
+
+	// -----------------------------------------------
+	// connect behaviors
+	// -----------------------------------------------
+	void World::connectBehaviors(StaticHash first, StaticHash second, const ActionType& type, int objectType) {
+		BehaviorTransition transition;
+		ID from = INVALID_ID;
+		ID to = INVALID_ID;
+		for (uint32_t i = 0; i < _behaviors.size(); ++i) {
+			if (_behaviors[i]->hash == first) {
+				from = i;
+			}
+			if (_behaviors[i]->hash == second) {
+				to = i;
+			}
+		}
+		transition.from = from;
+		transition.to = to;
+		transition.type = type;
+		transition.objectType = objectType;
+		_transitions.push_back(transition);
+	}
+
+	// -----------------------------------------------
+	// connect behaviors
+	// -----------------------------------------------
+	void World::connectBehaviors(ID first, ID second, const ActionType& type, int objectType) {
+		BehaviorTransition transition;
+		transition.from = first;
+		transition.to = second;
+		transition.type = type;
+		transition.objectType = objectType;
+		_transitions.push_back(transition);
+	}
+
+	// -----------------------------------------------
+	// find transition
+	// -----------------------------------------------
+	ID World::findTransition(ActionType type, int objectType) {
+		for (uint32_t i = 0; i < _transitions.size(); ++i) {
+			const BehaviorTransition& t = _transitions[i];
+			if (t.type == type && t.objectType == objectType) {
+				return i;
+			}
+		}
+		return -1;
+	}
+
+	// -----------------------------------------------
+	// create action by type
+	// -----------------------------------------------
+	void World::createAction(ActionType type) {
+		if (_actions[type] == 0) {
+			switch (type) {
+				case AT_SCALE_BY_PATH:_actions[AT_SCALE_BY_PATH] = new ScaleByPathAction(_data, _boundingRect); break;
+				case AT_SCALE_AXES: _actions[AT_SCALE_AXES] = new ScaleAxesAction(_data, _boundingRect); break;
+				case AT_SCALE: _actions[AT_SCALE] = new ScalingAction(_data, _boundingRect); break;
+				case AT_COLLISION: _collisionAction = new CollisionAction(_data, _boundingRect); break;
+				case AT_MOVE_BY: _actions[AT_MOVE_BY] = new MoveByAction(_data, _boundingRect); break;
+				case AT_REMOVE_AFTER: _actions[AT_REMOVE_AFTER] = new RemoveAfterAction(_data, _boundingRect); break;
+				case AT_COLOR_FLASH: _actions[AT_COLOR_FLASH] = new ColorFlashAction(_data, _boundingRect); break;
+				case AT_ALPHA_FADE_TO: _actions[AT_ALPHA_FADE_TO] = new AlphaFadeToAction(_data, _boundingRect); break;
+				case AT_SEPARATE: _actions[AT_SEPARATE] = new SeparateAction(_data, _boundingRect); break;
+				case AT_SEEK: _actions[AT_SEEK] = new SeekAction(_data, _boundingRect); break;
+				case AT_LOOK_AT: _actions[AT_LOOK_AT] = new LookAtAction(_data, _boundingRect); break;
+				case AT_ROTATE_TO_TARGET: _actions[AT_ROTATE_TO_TARGET] = new RotateToTargetAction(_data, _boundingRect); break;
+				case AT_ROTATE: _actions[AT_ROTATE] = new RotateAction(_data, _boundingRect); break;
+				case AT_ROTATE_BY: _actions[AT_ROTATE_BY] = new RotateByAction(_data, _boundingRect); break;
+			}
+		}
+	}
 }

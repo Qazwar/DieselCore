@@ -2,6 +2,7 @@
 
 namespace ds {
 
+	CharBuffer* gStringBuffer;
 
 	CharBuffer::CharBuffer(Allocator* allocator) : data(nullptr), size(0), capacity(0), num(0), _allocator(allocator) {}
 
@@ -64,6 +65,10 @@ namespace ds {
 			capacity = newCap;
 			data = tmp;
 		}
+	}
+
+	const char* CharBuffer::get(int index) const {
+		return data + index;
 	}
 
 	int CharBuffer::append(const char* s, int len) {

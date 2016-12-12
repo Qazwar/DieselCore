@@ -5,7 +5,6 @@
 #include "..\lib\collection_types.h"
 #include "DataFile.h"
 #include "..\io\FileUtils.h"
-#include "..\string\GlobalStringBuffer.h"
 #include "..\string\StaticHash.h"
 #include "BinaryFile.h"
 

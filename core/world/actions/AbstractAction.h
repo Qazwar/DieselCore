@@ -8,6 +8,12 @@
 
 namespace ds {
 
+	struct ActionSettings {
+
+		ActionType type;
+		
+	};
+
 	class AbstractAction {
 
 		public:
@@ -31,6 +37,7 @@ namespace ds {
 				return _hash;
 			}
 			virtual void saveReport(const ReportWriter& writer) = 0;
+			virtual void attach(ID id, ActionSettings* settings) {}
 		protected:
 			int create(ID id);
 			int find(ID id);

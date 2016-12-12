@@ -1,6 +1,7 @@
 #pragma once
 #include "..\io\json.h"
 #include "..\profiler\Profiler.h"
+#include "..\lib\collection_types.h"
 #include <assert.h>
 
 namespace ds {
@@ -9,11 +10,15 @@ namespace ds {
 
 	public:
 		DataFile(const char* fileName) : _loaded(false) {
+			_nameIndex = gStringBuffer->append(fileName);
 			_hash = StaticHash(fileName);
 		}
 		virtual ~DataFile() {}
 		const StaticHash& getFileName() const {
 			return _hash;
+		}
+		const char* getPlainFileName() const {
+			return gStringBuffer->get(_nameIndex);
 		}
 		virtual bool load() = 0;
 		bool isLoaded() const {
@@ -22,6 +27,7 @@ namespace ds {
 	protected:
 		bool _loaded;
 		StaticHash _hash;
+		int _nameIndex;
 	};
 
 	class JSONAssetFile : public DataFile {

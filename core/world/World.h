@@ -29,11 +29,24 @@ namespace ds {
 	};
 
 	enum WorldEntityChannel {
-		WEC_POSITION,WEC_SCALE,WEC_ROTATION,WEC_TEXTURE,WEC_COLOR,WEC_TIMER,WEC_TYPE,WEC_FORCE
+		WEC_POSITION,WEC_SCALE,WEC_ROTATION,WEC_TEXTURE,WEC_COLOR,WEC_TIMER,WEC_TYPE,WEC_FORCE,WEC_NAME,WEC_HASH
 	};
 	
 	class AbstractAction;
 	class CollisionAction;
+	struct ActionSettings;
+
+	struct Behavior {
+		StaticHash hash;
+		Array<ActionSettings*> settings;
+	};
+
+	struct BehaviorTransition {
+		ID from;
+		ID to;
+		ActionType type;
+		int objectType;
+	};
 
 	class World {
 
@@ -48,14 +61,15 @@ namespace ds {
 		ID create(const v2& pos, const Texture& texture, int type, float rotation = 0.0f, const v2& scale = v2(1,1), const Color& color = Color::WHITE);
 		uint32_t size() const;
 		bool contains(ID id) const;
+		void attachName(ID id, const char* name);
+		ID findByName(StaticHash hash);
 
 		void ignoreCollisions(int firstType, int secondType);
 		void attachCollider(ID id, ShapeType type, const v2& extent);
 		void attachCollider(ID id, ShapeType type);
 		bool hasCollisions() const;
 		const Collision& getCollision(int idx) const;
-		uint32_t numCollisions() const;
-
+		uint32_t numCollisions() const;		
 		void moveBy(ID id, const v2& velocity, float ttl = -1.0f, bool bounce = true);
 		void moveBy(ID id, const v3& velocity, float ttl = -1.0f, bool bounce = true);
 		void scaleByPath(ID id, V3Path* path, float ttl);
@@ -85,6 +99,7 @@ namespace ds {
 
 		void tick(float dt);
 		void remove(ID id);
+		void removeByType(int type);
 		ChannelArray* getChannelArray() const {
 			return _data;
 		}
@@ -123,7 +138,16 @@ namespace ds {
 			return t;
 		}
 		void generateJSON(std::string& resp);
+
+		ID createBehavior(const char* name);
+		void addSettings(ID behaviorID, ActionSettings* settings);
+		void startBehavior(const StaticHash& hash, ID id);
+		void connectBehaviors(ID first, ID second, const ActionType& type,int objectType);
+		void connectBehaviors(StaticHash first, StaticHash second, const ActionType& type, int objectType);
 	private:
+		void startBehavior(int index, ID id);
+		ID findTransition(ActionType type, int objectType);
+		void createAction(ActionType type);
 		int _numChannels;
 		AdditionalData _additionalData;
 		CollisionAction* _collisionAction;
@@ -133,6 +157,8 @@ namespace ds {
 		ActionEventBuffer _buffer;
 		Rect _boundingRect;
 		WorldEntityTemplates* _templates;
+		Array<Behavior*> _behaviors;
+		Array<BehaviorTransition> _transitions;
 	};
 
 }

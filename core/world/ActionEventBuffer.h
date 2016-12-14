@@ -30,7 +30,9 @@ namespace ds {
 		AT_SEEK,
 		AT_SEPARATE,
 		AT_CUSTOM,
-		AT_SCALE_AXES
+		AT_SCALE_AXES,
+		AT_WIGGLE,
+		AT_ALIGN_TO_FORCE
 	};
 
 	struct ActionEvent {

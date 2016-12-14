@@ -142,8 +142,8 @@ namespace ds {
 		ID createBehavior(const char* name);
 		void addSettings(ID behaviorID, ActionSettings* settings);
 		void startBehavior(const StaticHash& hash, ID id);
-		void connectBehaviors(ID first, ID second, const ActionType& type,int objectType);
-		void connectBehaviors(StaticHash first, StaticHash second, const ActionType& type, int objectType);
+		void connectBehaviors(ID first, const ActionType& type, ID second, int objectType);
+		void connectBehaviors(StaticHash first, const ActionType& type, StaticHash second, int objectType);
 	private:
 		void startBehavior(int index, ID id);
 		ID findTransition(ActionType type, int objectType);

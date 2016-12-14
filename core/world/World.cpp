@@ -15,6 +15,8 @@
 #include "actions\AlphaFadeToAction.h"
 #include "actions\ScaleAxesAction.h"
 #include "actions\ColorFlashAction.h"
+#include "actions\WiggleAction.h"
+#include "actions\AlignToForceAction.h"
 
 namespace ds {
 
@@ -470,10 +472,14 @@ namespace ds {
 			ZoneTracker af("World::tick::applyForces");
 			forces = (v3*)_data->get_ptr(WEC_FORCE);
 			v3* positions = (v3*)_data->get_ptr(WEC_POSITION);
+			//v3* rotations = (v3*)_data->get_ptr(WEC_ROTATION);
 			for (uint32_t i = 0; i < _data->size; ++i) {
 				*positions += *forces;
+				//float angle = math::calculateRotation(forces->xy());
+				//*rotations = v3(angle, 0.0f, 0.0f);
 				++forces;
 				++positions;
+				//++rotations;
 			}
 		}
 		// handle collisions
@@ -610,7 +616,7 @@ namespace ds {
 	// -----------------------------------------------
 	// connect behaviors
 	// -----------------------------------------------
-	void World::connectBehaviors(StaticHash first, StaticHash second, const ActionType& type, int objectType) {
+	void World::connectBehaviors(StaticHash first, const ActionType& type, StaticHash second, int objectType) {
 		BehaviorTransition transition;
 		ID from = INVALID_ID;
 		ID to = INVALID_ID;
@@ -632,7 +638,7 @@ namespace ds {
 	// -----------------------------------------------
 	// connect behaviors
 	// -----------------------------------------------
-	void World::connectBehaviors(ID first, ID second, const ActionType& type, int objectType) {
+	void World::connectBehaviors(ID first, const ActionType& type, ID second, int objectType) {
 		BehaviorTransition transition;
 		transition.from = first;
 		transition.to = second;
@@ -674,6 +680,8 @@ namespace ds {
 				case AT_ROTATE_TO_TARGET: _actions[AT_ROTATE_TO_TARGET] = new RotateToTargetAction(_data, _boundingRect); break;
 				case AT_ROTATE: _actions[AT_ROTATE] = new RotateAction(_data, _boundingRect); break;
 				case AT_ROTATE_BY: _actions[AT_ROTATE_BY] = new RotateByAction(_data, _boundingRect); break;
+				case AT_WIGGLE: _actions[AT_WIGGLE] = new WiggleAction(_data, _boundingRect); break;
+				case AT_ALIGN_TO_FORCE: _actions[AT_ALIGN_TO_FORCE] = new AlignToForceAction(_data, _boundingRect); break;
 			}
 		}
 	}

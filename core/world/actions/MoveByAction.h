@@ -8,21 +8,27 @@ namespace ds {
 
 		v3 velocity;
 		float radialVelocity;
-		float ttl;
-		float ttlVariance;
 		bool bounce;
 
-		MoveByActionSettings() : velocity(0.0f), radialVelocity(0.0f), ttl(0.0f), ttlVariance(0.0f), bounce(false) {
+		MoveByActionSettings() : velocity(0.0f), radialVelocity(0.0f), bounce(false) {
 			type = AT_MOVE_BY;
+			ttl = 0.0f;
+			ttlVariance = 0.0f;
 		}
-		MoveByActionSettings(const v3& vel,float t) : velocity(vel), radialVelocity(0.0f), ttl(t), ttlVariance(0.0f), bounce(false) {
+		MoveByActionSettings(const v3& vel,float t) : velocity(vel), radialVelocity(0.0f), bounce(false) {
 			type = AT_MOVE_BY;
+			ttl = t;
+			ttlVariance = 0.0f;
 		}
-		MoveByActionSettings(float vel, float t) : velocity(0.0f), radialVelocity(vel), ttl(t), ttlVariance(0.0f), bounce(false) {
+		MoveByActionSettings(float vel, float t) : velocity(0.0f), radialVelocity(vel), bounce(false) {
 			type = AT_MOVE_BY;
+			ttl = t;
+			ttlVariance = 0.0f;
 		}
-		MoveByActionSettings(float vel, float t,bool b) : velocity(0.0f), radialVelocity(vel), ttl(t), ttlVariance(0.0f), bounce(b) {
+		MoveByActionSettings(float vel, float t,bool b) : velocity(0.0f), radialVelocity(vel), bounce(b) {
 			type = AT_MOVE_BY;
+			ttl = t;
+			ttlVariance = 0.0f;
 		}
 
 	};

@@ -21,29 +21,18 @@
 namespace ds {
 
 	World::World() : _boundingRect(0,0,1024,768) {
-		for (int i = 0; i < 32; ++i) {
-			_actions[i] = 0;
-		}
-		_collisionAction = 0;
 		_data = new ChannelArray;
 		int sizes[] = { sizeof(v3), sizeof(v3), sizeof(v3) ,sizeof(Texture) , sizeof(Color), sizeof(float), sizeof(int), sizeof(v3),sizeof(int),sizeof(StaticHash)};
 		_data->init(sizes, 10);
 		_templates = 0;
+		_actionManager = new ActionManager(_data,_boundingRect);
+		_behaviors = new Behaviors(_actionManager);
 	}
 
 
 	World::~World()	{
-		for (int i = 0; i < 32; ++i) {
-			if (_actions[i] != 0) {
-				delete _actions[i];
-			}
-		}
-		if (_collisionAction != 0) {
-			delete _collisionAction;
-		}
-		for (uint32_t i = 0; i < _behaviors.size(); ++i) {
-			_behaviors[i]->settings.destroy_all();
-		}
+		delete _behaviors;
+		delete _actionManager;		
 		delete _data;
 	}
 
@@ -56,6 +45,7 @@ namespace ds {
 
 	void World::setBoundingRect(const Rect& r) {
 		_boundingRect = r;
+		_actionManager->setBoundingRect(r);
 	}
 
 	void World::useTemplates(WorldEntityTemplates* templates) {
@@ -144,28 +134,19 @@ namespace ds {
 	// scale by path
 	// -----------------------------------------------
 	void World::scaleByPath(ID id, V3Path* path, float ttl) {
-		if (_actions[AT_SCALE_BY_PATH] == 0) {
-			_actions[AT_SCALE_BY_PATH] = new ScaleByPathAction(_data, _boundingRect);
-		}
-		ScaleByPathAction* action = (ScaleByPathAction*)_actions[AT_SCALE_BY_PATH];
+		ScaleByPathAction* action = (ScaleByPathAction*)_actionManager->get(AT_SCALE_BY_PATH);
 		action->attach(id, path, ttl);
 	}
 
 	void World::scaleAxes(ID id, int axes, float start, float end, float ttl, int mode, const tweening::TweeningType& tweeningType) {
-		if (_actions[AT_SCALE_AXES] == 0) {
-			_actions[AT_SCALE_AXES] = new ScaleAxesAction(_data, _boundingRect);
-		}
-		ScaleAxesAction* action = (ScaleAxesAction*)_actions[AT_SCALE_AXES];
+		ScaleAxesAction* action = (ScaleAxesAction*)_actionManager->get(AT_SCALE_AXES);
 		action->attach(id, axes, start, end, ttl, mode, tweeningType);
 	}
 	// -----------------------------------------------
 	// scale
 	// -----------------------------------------------
-	void World::scale(ID id, const v3& start, const v3& end, float ttl, int mode, const tweening::TweeningType& tweeningType) {
-		if (_actions[AT_SCALE] == 0) {
-			_actions[AT_SCALE] = new ScalingAction(_data, _boundingRect);
-		}
-		ScalingAction* action = (ScalingAction*)_actions[AT_SCALE];
+	void World::scale(ID id, const v3& start, const v3& end, float ttl, int mode, const tweening::TweeningType& tweeningType) {		
+		ScalingAction* action = (ScalingAction*)_actionManager->get(AT_SCALE);
 		action->attach(id, WEC_SCALE, start, end, ttl, mode, tweeningType);
 	}
 
@@ -180,16 +161,13 @@ namespace ds {
 		else {
 			LOGE << "requesting to remove " << id << " but it is not part of the world";
 		}
-		for (int i = 0; i < 32; ++i) {
-			if (_actions[i] != 0) {
-				_actions[i]->removeByID(id);
-			}
-		}
+		_actionManager->removeByID(id);
 		for (uint32_t i = 0; i < _customActions.size(); ++i) {
 			_customActions[i]->removeByID(id);
 		}
-		if (_collisionAction != 0) {
-			_collisionAction->removeByID(id);
+		if (_actionManager->supportCollisions()) {
+			CollisionAction* collisionAction = _actionManager->getCollisionAction();
+			collisionAction->removeByID(id);
 		}
 		_additionalData.remove(id);			
 	}
@@ -253,50 +231,48 @@ namespace ds {
 	// attach collider
 	// -----------------------------------------------
 	void World::attachCollider(ID id, ShapeType type) {
-		if (_collisionAction == 0) {
-			_collisionAction = new CollisionAction(_data, _boundingRect);
-		}
+		CollisionAction* collisionAction = _actionManager->getCollisionAction();
 		const Texture& t = _data->get<Texture>(id, WEC_TEXTURE);
 		v3 extent = v3(t.dim.x, t.dim.y,0.0f);
-		_collisionAction->attach(id, type, extent);
+		collisionAction->attach(id, type, extent);
 	}
 
 	// -----------------------------------------------
 	// attach collider
 	// -----------------------------------------------
 	void World::attachCollider(ID id, ShapeType type, const v2& extent) {
-		if (_collisionAction == 0) {
-			_collisionAction = new CollisionAction(_data, _boundingRect);
-		}
-		_collisionAction->attach(id, type, v3(extent));
+		CollisionAction* collisionAction = _actionManager->getCollisionAction();
+		collisionAction->attach(id, type, v3(extent));
 	}
 
 	void World::ignoreCollisions(int firstType, int secondType) {
-		if (_collisionAction == 0) {
-			_collisionAction = new CollisionAction(_data, _boundingRect);
-		}
-		_collisionAction->ignore(firstType, secondType);
+		CollisionAction* collisionAction = _actionManager->getCollisionAction();
+		collisionAction->ignore(firstType, secondType);
 	}
 
 	// -----------------------------------------------
 	// has collisions
 	// -----------------------------------------------
 	bool World::hasCollisions() const {
-		return _collisionAction->hasCollisions();
+		CollisionAction* collisionAction = _actionManager->getCollisionAction();
+		return collisionAction->hasCollisions();
 	}
 
 	// -----------------------------------------------
 	// get collision
 	// -----------------------------------------------
 	const Collision& World::getCollision(int idx) const {
-		return _collisionAction->getCollision(idx);
+		CollisionAction* collisionAction = _actionManager->getCollisionAction();
+		return collisionAction->getCollision(idx);
 	}
 
 	// -----------------------------------------------
 	// num collisions
 	// -----------------------------------------------
 	uint32_t World::numCollisions() const {
-		return _collisionAction->numCollisions();
+		CollisionAction* collisionAction = _actionManager->getCollisionAction();
+		//return _collisionAction->numCollisions();
+		return collisionAction->numCollisions();
 	}
 
 	// -----------------------------------------------
@@ -310,47 +286,32 @@ namespace ds {
 	// move by
 	// -----------------------------------------------
 	void World::moveBy(ID id, const v3& velocity, float ttl, bool bounce) {
-		if (_actions[AT_MOVE_BY] == 0) {
-			_actions[AT_MOVE_BY] = new MoveByAction(_data, _boundingRect);
-		}
-		MoveByAction* action = (MoveByAction*)_actions[AT_MOVE_BY];
+		MoveByAction* action = (MoveByAction*)_actionManager->get(AT_MOVE_BY);
 		action->attach(id, velocity, ttl, bounce);
 	}
 
 	// -----------------------------------------------
 	// remove after
 	// -----------------------------------------------
-	void World::removeAfter(ID id, float ttl) {
-		if (_actions[AT_REMOVE_AFTER] == 0) {
-			_actions[AT_REMOVE_AFTER] = new RemoveAfterAction(_data, _boundingRect);
-		}
-		RemoveAfterAction* action = (RemoveAfterAction*)_actions[AT_REMOVE_AFTER];
+	void World::removeAfter(ID id, float ttl) {		
+		RemoveAfterAction* action = (RemoveAfterAction*)_actionManager->get(AT_REMOVE_AFTER);
 		action->attach(id, ttl);
 	}
 
 	void World::flashColor(ID id, const Color& startColor, const Color& endColor, float ttl, int mode, const tweening::TweeningType& tweeningType) {
-		if (_actions[AT_COLOR_FLASH] == 0) {
-			_actions[AT_COLOR_FLASH] = new ColorFlashAction(_data, _boundingRect);
-		}
-		ColorFlashAction* action = (ColorFlashAction*)_actions[AT_COLOR_FLASH];
+		ColorFlashAction* action = (ColorFlashAction*)_actionManager->get(AT_COLOR_FLASH);
 		action->attach(id, startColor, endColor, ttl, mode, tweeningType);
 	}
 
 	void World::alphaFadeTo(ID id, float start, float end, float ttl) {
-		if (_actions[AT_ALPHA_FADE_TO] == 0) {
-			_actions[AT_ALPHA_FADE_TO] = new AlphaFadeToAction(_data, _boundingRect);
-		}
-		AlphaFadeToAction* action = (AlphaFadeToAction*)_actions[AT_ALPHA_FADE_TO];
+		AlphaFadeToAction* action = (AlphaFadeToAction*)_actionManager->get(AT_ALPHA_FADE_TO);
 		action->attach(id, start, end, ttl);
 	}
 	// -----------------------------------------------
 	// separate
 	// -----------------------------------------------
 	void World::separate(ID id, int type, float minDistance, float relaxation) {
-		if (_actions[AT_SEPARATE] == 0) {
-			_actions[AT_SEPARATE] = new SeparateAction(_data, _boundingRect);
-		}
-		SeparateAction* action = (SeparateAction*)_actions[AT_SEPARATE];
+		SeparateAction* action = (SeparateAction*)_actionManager->get(AT_SEPARATE);
 		action->attach(id, type, minDistance, relaxation);
 	}
 
@@ -358,10 +319,7 @@ namespace ds {
 	// seek
 	// -----------------------------------------------
 	void World::seek(ID id, ID target, float velocity) {
-		if (_actions[AT_SEEK] == 0) {
-			_actions[AT_SEEK] = new SeekAction(_data, _boundingRect);
-		}
-		SeekAction* action = (SeekAction*)_actions[AT_SEEK];
+		SeekAction* action = (SeekAction*)_actionManager->get(AT_SEEK);
 		action->attach(id, target, velocity);
 	}
 
@@ -369,10 +327,7 @@ namespace ds {
 	// look at
 	// -----------------------------------------------
 	void World::lookAt(ID id, ID target, float ttl) {
-		if (_actions[AT_LOOK_AT] == 0) {
-			_actions[AT_LOOK_AT] = new LookAtAction(_data, _boundingRect);
-		}
-		LookAtAction* action = (LookAtAction*)_actions[AT_LOOK_AT];
+		LookAtAction* action = (LookAtAction*)_actionManager->get(AT_LOOK_AT);
 		action->attach(id, target, ttl);
 	}
 
@@ -380,28 +335,19 @@ namespace ds {
 	// rotate to
 	// -----------------------------------------------
 	void World::rotateTo(ID id, ID target, float angleVelocity) {
-		if (_actions[AT_ROTATE_TO_TARGET] == 0) {
-			_actions[AT_ROTATE_TO_TARGET] = new RotateToTargetAction(_data, _boundingRect);
-		}
-		RotateToTargetAction* action = (RotateToTargetAction*)_actions[AT_ROTATE_TO_TARGET];
+		RotateToTargetAction* action = (RotateToTargetAction*)_actionManager->get(AT_ROTATE_TO_TARGET);
 		action->attach(id, target, angleVelocity);
 	}
 
 	void World::rotate(ID id, const v3& velocity, float ttl) {
-		if (_actions[AT_ROTATE] == 0) {
-			_actions[AT_ROTATE] = new RotateAction(_data, _boundingRect);
-		}
-		RotateAction* action = (RotateAction*)_actions[AT_ROTATE];
+		RotateAction* action = (RotateAction*)_actionManager->get(AT_ROTATE);
 		action->attach(id, velocity, ttl);
 	}
 	// -----------------------------------------------
 	// rotate by
 	// -----------------------------------------------
 	void World::rotateBy(ID id, float angle, float ttl) {
-		if (_actions[AT_ROTATE_BY] == 0) {
-			_actions[AT_ROTATE_BY] = new RotateByAction(_data, _boundingRect);
-		}
-		RotateByAction* action = (RotateByAction*)_actions[AT_ROTATE_BY];
+		RotateByAction* action = (RotateByAction*)_actionManager->get(AT_ROTATE_BY);
 		action->attach(id, angle, ttl);
 	}
 
@@ -409,19 +355,14 @@ namespace ds {
 	// stop action
 	// -----------------------------------------------
 	void World::stopAction(ID id, ActionType type) {
-		if (_actions[type] != 0) {
-			_actions[type]->removeByID(id);
-		}
+		_actionManager->stopAction(id, type);
 	}
 
 	// -----------------------------------------------
 	// is active
 	// -----------------------------------------------
 	bool World::isActive(ID id, ActionType type) {
-		if (_actions[type] != 0) {
-			return _actions[type]->contains(id);
-		}
-		return false;
+		return _actionManager->isActive(id, type);
 	}
 
 	// -----------------------------------------------
@@ -436,15 +377,9 @@ namespace ds {
 			*forces = v3(0.0f);
 			++forces;
 		}
-		// update all actions
-		{
-			ZoneTracker u1("World::tick::update");
-			for (int i = 0; i < 32; ++i) {
-				if (_actions[i] != 0) {
-					_actions[i]->update(dt, _buffer);
-				}
-			}
-		}
+
+		_actionManager->update(dt, _buffer);
+		
 		// update all custom actions
 		{
 			ZoneTracker u2("World::tick::updateCustom");
@@ -452,6 +387,31 @@ namespace ds {
 				_customActions[i]->update(dt, _buffer);
 			}
 		}
+		
+
+		_behaviors->tick(dt);
+
+		// apply forces
+		{
+			ZoneTracker af("World::tick::applyForces");
+			forces = (v3*)_data->get_ptr(WEC_FORCE);
+			v3* positions = (v3*)_data->get_ptr(WEC_POSITION);
+			for (uint32_t i = 0; i < _data->size; ++i) {
+				*positions += *forces;
+				++forces;
+				++positions;
+			}
+		}
+		// handle collisions
+		{
+			ZoneTracker cl("World::tick::collisions");
+			// do not create collision action
+			if (_actionManager->supportCollisions()) {
+				CollisionAction* collisionAction = _actionManager->getCollisionAction();
+				collisionAction->update(dt, _buffer);
+			}
+		}		
+
 		// process events / kill entities
 		{
 			ZoneTracker ev("World::tick::events");
@@ -460,35 +420,9 @@ namespace ds {
 				if (e.action == AT_KILL) {
 					remove(e.id);
 				}
-				int tid = findTransition(e.action, e.type);
-				if (tid != -1) {					
-					const BehaviorTransition& t = _transitions[tid];
-					startBehavior(t.to, e.id);
-				}
+				_behaviors->processEvent(e);
 			}
 		}
-		// apply forces
-		{
-			ZoneTracker af("World::tick::applyForces");
-			forces = (v3*)_data->get_ptr(WEC_FORCE);
-			v3* positions = (v3*)_data->get_ptr(WEC_POSITION);
-			//v3* rotations = (v3*)_data->get_ptr(WEC_ROTATION);
-			for (uint32_t i = 0; i < _data->size; ++i) {
-				*positions += *forces;
-				//float angle = math::calculateRotation(forces->xy());
-				//*rotations = v3(angle, 0.0f, 0.0f);
-				++forces;
-				++positions;
-				//++rotations;
-			}
-		}
-		// handle collisions
-		{
-			ZoneTracker cl("World::tick::collisions");
-			if (_collisionAction != 0) {
-				_collisionAction->update(dt, _buffer);
-			}
-		}		
 	}
 
 	void World::generateJSON(std::string& resp) {
@@ -552,16 +486,13 @@ namespace ds {
 		writer.endTable();
 		writer.endBox();
 		_additionalData.save(writer);
-		for (int i = 0; i < 32; ++i) {
-			if (_actions[i] != 0) {
-				_actions[i]->saveReport(writer);
-			}
-		}
+		_actionManager->saveReport(writer);
 		for (uint32_t i = 0; i < _customActions.size(); ++i) {
 			_customActions[i]->saveReport(writer);
 		}
-		if (_collisionAction != 0) {
-			_collisionAction->saveReport(writer);
+		if (_actionManager->supportCollisions()) {
+			CollisionAction* collisionAction = _actionManager->getCollisionAction();
+			collisionAction->saveReport(writer);
 		}
 	}
 
@@ -569,120 +500,53 @@ namespace ds {
 	// create behavior
 	// -----------------------------------------------
 	ID World::createBehavior(const char* name) {
-		Behavior* b = new Behavior;
-		b->hash = SID(name);
-		_behaviors.push_back(b);
-		return _behaviors.size() - 1;
+		return _behaviors->create(name);		
+	}
+
+	// -----------------------------------------------
+	// add array of settings to behavior
+	// -----------------------------------------------
+	void World::addSettings(SettingsDefinition* definitions, int num) {
+		for (int i = 0; i < num; ++i) {
+			_behaviors->addSettings(definitions[i].behavior, definitions[i].settings);
+		}
 	}
 
 	// -----------------------------------------------
 	// add settings to behavior
 	// -----------------------------------------------
 	void World::addSettings(ID behaviorID, ActionSettings* settings) {
-		Behavior* b = _behaviors[behaviorID];
-		b->settings.push_back(settings);
+		_behaviors->addSettings(behaviorID, settings);
 	}
 
 	// -----------------------------------------------
 	// start behavior
 	// -----------------------------------------------
 	void World::startBehavior(const StaticHash& hash, ID id) {
-		int idx = -1;
-		for (uint32_t i = 0; i < _behaviors.size(); ++i) {
-			if (_behaviors[i]->hash == hash) {
-				idx = i;
-			}
-		}
-		XASSERT(idx != -1, "Cannot find matching behavior");
-		startBehavior(idx, id);
-	}
-
-	// -----------------------------------------------
-	// start behavior by index
-	// -----------------------------------------------
-	void World::startBehavior(int idx, ID id) {
-		if (idx != -1) {
-			Behavior* b = _behaviors[idx];
-			for (uint32_t i = 0; i < b->settings.size(); ++i) {
-				ActionSettings* s = b->settings[i];
-				if (_actions[s->type] == 0) {
-					createAction(s->type);
-				}
-				_actions[s->type]->attach(id, s);
-			}
-		}
+		_behaviors->start(hash, id);		
 	}
 
 	// -----------------------------------------------
 	// connect behaviors
 	// -----------------------------------------------
 	void World::connectBehaviors(StaticHash first, const ActionType& type, StaticHash second, int objectType) {
-		BehaviorTransition transition;
-		ID from = INVALID_ID;
-		ID to = INVALID_ID;
-		for (uint32_t i = 0; i < _behaviors.size(); ++i) {
-			if (_behaviors[i]->hash == first) {
-				from = i;
-			}
-			if (_behaviors[i]->hash == second) {
-				to = i;
-			}
-		}
-		transition.from = from;
-		transition.to = to;
-		transition.type = type;
-		transition.objectType = objectType;
-		_transitions.push_back(transition);
+		_behaviors->connect(first, type, second, objectType);		
 	}
 
 	// -----------------------------------------------
 	// connect behaviors
 	// -----------------------------------------------
 	void World::connectBehaviors(ID first, const ActionType& type, ID second, int objectType) {
-		BehaviorTransition transition;
-		transition.from = first;
-		transition.to = second;
-		transition.type = type;
-		transition.objectType = objectType;
-		_transitions.push_back(transition);
+		_behaviors->connect(first, type, second, objectType);		
 	}
 
 	// -----------------------------------------------
-	// find transition
+	// connect behaviors
 	// -----------------------------------------------
-	ID World::findTransition(ActionType type, int objectType) {
-		for (uint32_t i = 0; i < _transitions.size(); ++i) {
-			const BehaviorTransition& t = _transitions[i];
-			if (t.type == type && t.objectType == objectType) {
-				return i;
-			}
+	void World::connectBehaviors(ConnectionDefinition* definitions, int num, int objectType) {
+		for (int i = 0; i < num; ++i) {
+			_behaviors->connect(definitions[i].from, definitions[i].type, definitions[i].to, objectType);
 		}
-		return -1;
 	}
 
-	// -----------------------------------------------
-	// create action by type
-	// -----------------------------------------------
-	void World::createAction(ActionType type) {
-		if (_actions[type] == 0) {
-			switch (type) {
-				case AT_SCALE_BY_PATH:_actions[AT_SCALE_BY_PATH] = new ScaleByPathAction(_data, _boundingRect); break;
-				case AT_SCALE_AXES: _actions[AT_SCALE_AXES] = new ScaleAxesAction(_data, _boundingRect); break;
-				case AT_SCALE: _actions[AT_SCALE] = new ScalingAction(_data, _boundingRect); break;
-				case AT_COLLISION: _collisionAction = new CollisionAction(_data, _boundingRect); break;
-				case AT_MOVE_BY: _actions[AT_MOVE_BY] = new MoveByAction(_data, _boundingRect); break;
-				case AT_REMOVE_AFTER: _actions[AT_REMOVE_AFTER] = new RemoveAfterAction(_data, _boundingRect); break;
-				case AT_COLOR_FLASH: _actions[AT_COLOR_FLASH] = new ColorFlashAction(_data, _boundingRect); break;
-				case AT_ALPHA_FADE_TO: _actions[AT_ALPHA_FADE_TO] = new AlphaFadeToAction(_data, _boundingRect); break;
-				case AT_SEPARATE: _actions[AT_SEPARATE] = new SeparateAction(_data, _boundingRect); break;
-				case AT_SEEK: _actions[AT_SEEK] = new SeekAction(_data, _boundingRect); break;
-				case AT_LOOK_AT: _actions[AT_LOOK_AT] = new LookAtAction(_data, _boundingRect); break;
-				case AT_ROTATE_TO_TARGET: _actions[AT_ROTATE_TO_TARGET] = new RotateToTargetAction(_data, _boundingRect); break;
-				case AT_ROTATE: _actions[AT_ROTATE] = new RotateAction(_data, _boundingRect); break;
-				case AT_ROTATE_BY: _actions[AT_ROTATE_BY] = new RotateByAction(_data, _boundingRect); break;
-				case AT_WIGGLE: _actions[AT_WIGGLE] = new WiggleAction(_data, _boundingRect); break;
-				case AT_ALIGN_TO_FORCE: _actions[AT_ALIGN_TO_FORCE] = new AlignToForceAction(_data, _boundingRect); break;
-			}
-		}
-	}
 }

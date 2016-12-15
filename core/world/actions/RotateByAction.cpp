@@ -21,6 +21,12 @@ namespace ds {
 			_ttl = (float*)_buffer.get_ptr(3);
 		}
 	}
+
+	void RotateByAction::attach(ID id, ActionSettings* settings) {
+		RotateBySettings* s = (RotateBySettings*)settings;
+		attach(id, s->angle, s->ttl);
+	}
+
 	// -------------------------------------------------------
 	// 
 	// -------------------------------------------------------

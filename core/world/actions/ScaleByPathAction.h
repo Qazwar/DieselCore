@@ -8,17 +8,21 @@ namespace ds {
 	struct ScaleByPathActionSettings : public ActionSettings {
 
 		V3Path* path;
-		float ttl;
-		float ttlVariance;
-
-		ScaleByPathActionSettings() : path(0), ttl(0.0f) , ttlVariance(0.0f) {
+		
+		ScaleByPathActionSettings() : path(0) {
 			type = AT_SCALE_BY_PATH;
+			ttl = 0.0f;
+			ttlVariance = 0.0f;
 		}
-		ScaleByPathActionSettings(V3Path* p, float t) : path(p), ttl(t), ttlVariance(0.0f) {
+		ScaleByPathActionSettings(V3Path* p, float t) : path(p) {
 			type = AT_SCALE_BY_PATH;
+			ttl = t;
+			ttlVariance = 0.0f;
 		}
-		ScaleByPathActionSettings(V3Path* p, float t, float tv) : path(p), ttl(t), ttlVariance(tv) {
+		ScaleByPathActionSettings(V3Path* p, float t, float tv) : path(p) {
 			type = AT_SCALE_BY_PATH;
+			ttl = t;
+			ttlVariance = tv;
 		}
 
 	};

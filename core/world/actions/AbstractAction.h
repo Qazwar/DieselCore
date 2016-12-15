@@ -11,6 +11,8 @@ namespace ds {
 	struct ActionSettings {
 
 		ActionType type;
+		float ttl;
+		float ttlVariance;
 		
 	};
 

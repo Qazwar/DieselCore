@@ -5,16 +5,17 @@
 namespace ds {
 
 	struct AlignToForceActionSettings : public ActionSettings {
-
-		float ttl;
-		float ttlVariance;
-
-		AlignToForceActionSettings() : ttl(0.0f), ttlVariance(0.0f) {
+		
+		AlignToForceActionSettings() {
 			type = AT_ALIGN_TO_FORCE;
+			ttl = 0.0f;
+			ttlVariance = 0.0f;
 		}
 
-		AlignToForceActionSettings(float t) : ttl(t), ttlVariance(0.0f) {
+		AlignToForceActionSettings(float t) {
 			type = AT_ALIGN_TO_FORCE;
+			ttl = t;
+			ttlVariance = 0.0f;
 		}
 		
 

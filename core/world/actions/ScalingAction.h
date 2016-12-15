@@ -7,6 +7,25 @@
 
 namespace ds {
 
+	struct ScaleSettings : public ActionSettings {
+
+		v3 startScale;
+		v3 endScale;
+		tweening::TweeningType tweeningType;
+
+		ScaleSettings() : startScale(1.0f), endScale(1.0f) {
+			type = AT_SCALE;
+			ttl = 0.0f;
+			ttlVariance = 0.0f;
+		}
+		ScaleSettings(const v3& s,const v3& e,float t) : startScale(s), endScale(e) {
+			type = AT_SCALE;
+			ttl = t;
+			ttlVariance = 0.0f;
+		}
+
+	};
+
 	class ScalingAction : public AbstractAction {
 		
 	public:

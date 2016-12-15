@@ -32,7 +32,8 @@ namespace ds {
 		AT_CUSTOM,
 		AT_SCALE_AXES,
 		AT_WIGGLE,
-		AT_ALIGN_TO_FORCE
+		AT_ALIGN_TO_FORCE,
+		AT_COLLIDER_ATTACHED
 	};
 
 	struct ActionEvent {

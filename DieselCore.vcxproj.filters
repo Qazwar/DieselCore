@@ -34,6 +34,21 @@
     <Filter Include="log">
       <UniqueIdentifier>{8f676403-baba-4d6f-8ae6-6e15c30eaa10}</UniqueIdentifier>
     </Filter>
+    <Filter Include="script">
+      <UniqueIdentifier>{ed6784cf-0ccc-47f7-b6ea-4c4260f1fd4d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="world">
+      <UniqueIdentifier>{ae7ef93c-9f0d-45e0-93ea-630ef289b42d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="world\actions">
+      <UniqueIdentifier>{16049e7e-9c5a-4fc1-ba82-fde5d89be7bf}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="physics">
+      <UniqueIdentifier>{82a37971-7bc7-40da-a532-6a59b3c85b5c}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="net">
+      <UniqueIdentifier>{7c38b7d2-9ff9-4b6f-bca0-b2f9904f5ae2}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="core\base\CrashReporter.cpp">
@@ -105,9 +120,6 @@
     <ClCompile Include="core\profiler\Profiler.cpp">
       <Filter>profiler</Filter>
     </ClCompile>
-    <ClCompile Include="core\string\GlobalStringBuffer.cpp">
-      <Filter>string</Filter>
-    </ClCompile>
     <ClCompile Include="core\string\StaticHash.cpp">
       <Filter>string</Filter>
     </ClCompile>
@@ -119,6 +131,90 @@
     </ClCompile>
     <ClCompile Include="core\utils\TileMapReader.cpp">
       <Filter>utils</Filter>
+    </ClCompile>
+    <ClCompile Include="core\base\ShortcutsHandler.cpp">
+      <Filter>base</Filter>
+    </ClCompile>
+    <ClCompile Include="core\script\vm.cpp">
+      <Filter>script</Filter>
+    </ClCompile>
+    <ClCompile Include="core\world\World.cpp">
+      <Filter>world</Filter>
+    </ClCompile>
+    <ClCompile Include="core\world\actions\AbstractAction.cpp">
+      <Filter>world\actions</Filter>
+    </ClCompile>
+    <ClCompile Include="core\world\actions\ScalingAction.cpp">
+      <Filter>world\actions</Filter>
+    </ClCompile>
+    <ClCompile Include="core\world\actions\RemoveAfterAction.cpp">
+      <Filter>world\actions</Filter>
+    </ClCompile>
+    <ClCompile Include="core\world\actions\ScaleByPathAction.cpp">
+      <Filter>world\actions</Filter>
+    </ClCompile>
+    <ClCompile Include="core\io\ReportWriter.cpp">
+      <Filter>io</Filter>
+    </ClCompile>
+    <ClCompile Include="core\world\actions\MoveByAction.cpp">
+      <Filter>world\actions</Filter>
+    </ClCompile>
+    <ClCompile Include="core\world\actions\CollisionAction.cpp">
+      <Filter>world\actions</Filter>
+    </ClCompile>
+    <ClCompile Include="core\world\AdditionalData.cpp">
+      <Filter>world</Filter>
+    </ClCompile>
+    <ClCompile Include="core\physics\ColliderArray.cpp">
+      <Filter>physics</Filter>
+    </ClCompile>
+    <ClCompile Include="core\world\actions\RotateByAction.cpp">
+      <Filter>world\actions</Filter>
+    </ClCompile>
+    <ClCompile Include="core\world\actions\RotateToTargetAction.cpp">
+      <Filter>world\actions</Filter>
+    </ClCompile>
+    <ClCompile Include="core\world\actions\LookAtAction.cpp">
+      <Filter>world\actions</Filter>
+    </ClCompile>
+    <ClCompile Include="core\world\actions\SeekAction.cpp">
+      <Filter>world\actions</Filter>
+    </ClCompile>
+    <ClCompile Include="core\world\actions\SeparateAction.cpp">
+      <Filter>world\actions</Filter>
+    </ClCompile>
+    <ClCompile Include="core\world\WorldEntityTemplates.cpp">
+      <Filter>world</Filter>
+    </ClCompile>
+    <ClCompile Include="core\world\actions\AlphaFadeToAction.cpp">
+      <Filter>world\actions</Filter>
+    </ClCompile>
+    <ClCompile Include="core\world\actions\ScaleAxesAction.cpp">
+      <Filter>world\actions</Filter>
+    </ClCompile>
+    <ClCompile Include="core\world\actions\RotateAction.cpp">
+      <Filter>world\actions</Filter>
+    </ClCompile>
+    <ClCompile Include="core\world\actions\ColorFlashAction.cpp">
+      <Filter>world\actions</Filter>
+    </ClCompile>
+    <ClCompile Include="core\net\GameServer.cpp">
+      <Filter>net</Filter>
+    </ClCompile>
+    <ClCompile Include="core\lib\collection_types.cpp">
+      <Filter>lib</Filter>
+    </ClCompile>
+    <ClCompile Include="core\world\actions\WiggleAction.cpp">
+      <Filter>world\actions</Filter>
+    </ClCompile>
+    <ClCompile Include="core\world\actions\AlignToForceAction.cpp">
+      <Filter>world\actions</Filter>
+    </ClCompile>
+    <ClCompile Include="core\world\ActionManager.cpp">
+      <Filter>world</Filter>
+    </ClCompile>
+    <ClCompile Include="core\world\Behaviors.cpp">
+      <Filter>world</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -230,9 +326,6 @@
     <ClInclude Include="core\profiler\Profiler.h">
       <Filter>profiler</Filter>
     </ClInclude>
-    <ClInclude Include="core\string\GlobalStringBuffer.h">
-      <Filter>string</Filter>
-    </ClInclude>
     <ClInclude Include="core\string\StaticHash.h">
       <Filter>string</Filter>
     </ClInclude>
@@ -249,6 +342,90 @@
       <Filter>utils</Filter>
     </ClInclude>
     <ClInclude Include="core\Common.h" />
+    <ClInclude Include="core\base\ShortcutsHandler.h">
+      <Filter>base</Filter>
+    </ClInclude>
+    <ClInclude Include="core\script\vm.h">
+      <Filter>script</Filter>
+    </ClInclude>
+    <ClInclude Include="core\world\World.h">
+      <Filter>world</Filter>
+    </ClInclude>
+    <ClInclude Include="core\world\actions\AbstractAction.h">
+      <Filter>world\actions</Filter>
+    </ClInclude>
+    <ClInclude Include="core\world\actions\ScalingAction.h">
+      <Filter>world\actions</Filter>
+    </ClInclude>
+    <ClInclude Include="core\world\ActionEventBuffer.h">
+      <Filter>world</Filter>
+    </ClInclude>
+    <ClInclude Include="core\world\actions\RemoveAfterAction.h">
+      <Filter>world\actions</Filter>
+    </ClInclude>
+    <ClInclude Include="core\world\actions\ScaleByPathAction.h">
+      <Filter>world\actions</Filter>
+    </ClInclude>
+    <ClInclude Include="core\io\ReportWriter.h">
+      <Filter>io</Filter>
+    </ClInclude>
+    <ClInclude Include="core\world\actions\MoveByAction.h">
+      <Filter>world\actions</Filter>
+    </ClInclude>
+    <ClInclude Include="core\world\actions\CollisionAction.h">
+      <Filter>world\actions</Filter>
+    </ClInclude>
+    <ClInclude Include="core\world\AdditionalData.h">
+      <Filter>world</Filter>
+    </ClInclude>
+    <ClInclude Include="core\physics\ColliderArray.h">
+      <Filter>physics</Filter>
+    </ClInclude>
+    <ClInclude Include="core\world\actions\RotateByAction.h">
+      <Filter>world\actions</Filter>
+    </ClInclude>
+    <ClInclude Include="core\world\actions\RotateToTargetAction.h">
+      <Filter>world\actions</Filter>
+    </ClInclude>
+    <ClInclude Include="core\world\actions\LookAtAction.h">
+      <Filter>world\actions</Filter>
+    </ClInclude>
+    <ClInclude Include="core\world\actions\SeekAction.h">
+      <Filter>world\actions</Filter>
+    </ClInclude>
+    <ClInclude Include="core\world\actions\SeparateAction.h">
+      <Filter>world\actions</Filter>
+    </ClInclude>
+    <ClInclude Include="core\world\WorldEntityTemplates.h">
+      <Filter>world</Filter>
+    </ClInclude>
+    <ClInclude Include="core\world\actions\AlphaFadeToAction.h">
+      <Filter>world\actions</Filter>
+    </ClInclude>
+    <ClInclude Include="core\world\actions\ScaleAxesAction.h">
+      <Filter>world\actions</Filter>
+    </ClInclude>
+    <ClInclude Include="core\world\actions\RotateAction.h">
+      <Filter>world\actions</Filter>
+    </ClInclude>
+    <ClInclude Include="core\world\actions\ColorFlashAction.h">
+      <Filter>world\actions</Filter>
+    </ClInclude>
+    <ClInclude Include="core\net\GameServer.h">
+      <Filter>net</Filter>
+    </ClInclude>
+    <ClInclude Include="core\world\actions\WiggleAction.h">
+      <Filter>world\actions</Filter>
+    </ClInclude>
+    <ClInclude Include="core\world\actions\AlignToForceAction.h">
+      <Filter>world\actions</Filter>
+    </ClInclude>
+    <ClInclude Include="core\world\ActionManager.h">
+      <Filter>world</Filter>
+    </ClInclude>
+    <ClInclude Include="core\world\Behaviors.h">
+      <Filter>world</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="TODO.md" />

@@ -7,10 +7,11 @@ namespace ds {
 	struct LookAtActionSettings : public ActionSettings {
 
 		StaticHash target;
-		float ttl;
 
-		LookAtActionSettings(StaticHash h, float t) : target(h), ttl(t) {
+		LookAtActionSettings(StaticHash h, float t) : target(h) {
 			type = AT_LOOK_AT;
+			ttl = t;
+			ttlVariance = 0.0f;
 		}
 	};
 

@@ -10,6 +10,8 @@
 #include "..\physics\ColliderArray.h"
 #include "AdditionalData.h"
 #include "WorldEntityTemplates.h"
+#include "ActionManager.h"
+#include "Behaviors.h"
 
 namespace ds {
 
@@ -20,14 +22,6 @@ namespace ds {
 		BD_EOL
 	};
 
-	enum ShapeType {
-		PST_BOX,
-		PST_CIRCLE,
-		PST_QUAD,
-		PST_SPHERE,
-		PST_NONE
-	};
-
 	enum WorldEntityChannel {
 		WEC_POSITION,WEC_SCALE,WEC_ROTATION,WEC_TEXTURE,WEC_COLOR,WEC_TIMER,WEC_TYPE,WEC_FORCE,WEC_NAME,WEC_HASH
 	};
@@ -35,18 +29,6 @@ namespace ds {
 	class AbstractAction;
 	class CollisionAction;
 	struct ActionSettings;
-
-	struct Behavior {
-		StaticHash hash;
-		Array<ActionSettings*> settings;
-	};
-
-	struct BehaviorTransition {
-		ID from;
-		ID to;
-		ActionType type;
-		int objectType;
-	};
 
 	class World {
 
@@ -141,24 +123,21 @@ namespace ds {
 
 		ID createBehavior(const char* name);
 		void addSettings(ID behaviorID, ActionSettings* settings);
+		void addSettings(SettingsDefinition* definitions, int num);
 		void startBehavior(const StaticHash& hash, ID id);
 		void connectBehaviors(ID first, const ActionType& type, ID second, int objectType);
+		void connectBehaviors(ConnectionDefinition* definitions, int num, int objectType);
 		void connectBehaviors(StaticHash first, const ActionType& type, StaticHash second, int objectType);
 	private:
-		void startBehavior(int index, ID id);
-		ID findTransition(ActionType type, int objectType);
-		void createAction(ActionType type);
 		int _numChannels;
 		AdditionalData _additionalData;
-		CollisionAction* _collisionAction;
 		ChannelArray* _data;
-		AbstractAction* _actions[32];
+		ActionManager* _actionManager;
 		Array<AbstractAction*> _customActions;
 		ActionEventBuffer _buffer;
 		Rect _boundingRect;
 		WorldEntityTemplates* _templates;
-		Array<Behavior*> _behaviors;
-		Array<BehaviorTransition> _transitions;
+		Behaviors* _behaviors;
 	};
 
 }

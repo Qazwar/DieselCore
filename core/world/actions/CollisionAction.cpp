@@ -8,8 +8,8 @@ namespace ds {
 	// 
 	// -------------------------------------------------------
 	CollisionAction::CollisionAction(ChannelArray* array, const Rect& boundingRect) : AbstractAction(array, boundingRect, "collision") {
-		int sizes[] = { sizeof(ID), sizeof(v3), sizeof(ShapeType), sizeof(v3) };
-		_buffer.init(sizes, 4);
+		int sizes[] = { sizeof(ID), sizeof(v3), sizeof(ShapeType), sizeof(v3), sizeof(bool) };
+		_buffer.init(sizes, 5);
 	}
 
 	// -------------------------------------------------------
@@ -23,18 +23,30 @@ namespace ds {
 			_previous = (v3*)_buffer.get_ptr(1);
 			_types = (ShapeType*)_buffer.get_ptr(2);
 			_extents = (v3*)_buffer.get_ptr(3);
+			_attached = (bool*)_buffer.get_ptr(4);
 		}
+	}
+
+	// -------------------------------------------------------
+	// 
+	// -------------------------------------------------------
+	void CollisionAction::attach(ID id, ActionSettings* settings) {
+		CollisionActionSettings* s = (CollisionActionSettings*)settings;
+		const Texture& t = _array->get<Texture>(id, WEC_TEXTURE);
+		v3 extent = v3(t.dim.x, t.dim.y, 0.0f);
+		attach(id, s->shapeType, extent);
 	}
 	// -------------------------------------------------------
 	// 
 	// -------------------------------------------------------
 	void CollisionAction::attach(ID id, ShapeType type, const v3& extent) {
 		int idx = create(id);
-		LOGC("physics") << "attach collider - id: " << id << " index: " << idx << " type: " << type << " extent: " << extent;
+		//LOGC("physics") << "attach collider - id: " << id << " index: " << idx << " type: " << type << " extent: " << extent;
 		_ids[idx] = id;
 		_previous[idx] = _array->get<v3>(id, WEC_POSITION);
 		_types[idx] = type;
 		_extents[idx] = extent;
+		_attached[idx] = false;
 	}
 
 	bool CollisionAction::containsCollision(const Collision& c) const {
@@ -77,8 +89,12 @@ namespace ds {
 		ZoneTracker z("CollisionAction::update");
 		_collisions.clear();
 		float dist = 0.0f;
-		if (_buffer.size > 0) {
+		if (_buffer.size > 0) {			
 			for (uint32_t i = 0; i < _buffer.size; ++i) {
+				if (!_attached[i]) {
+					_attached[i] = true;
+					buffer.add(_ids[i], AT_COLLIDER_ATTACHED, _array->get<int>(_ids[i], WEC_TYPE));
+				}
 				for (uint32_t j = i + 1; j < _buffer.size; ++j) {
 					if (_ids[i] != _ids[j]) {
 						Collision c;

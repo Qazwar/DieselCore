@@ -5,6 +5,14 @@
 
 namespace ds {
 
+	enum ShapeType {
+		PST_BOX,
+		PST_CIRCLE,
+		PST_QUAD,
+		PST_SPHERE,
+		PST_NONE
+	};
+
 	struct Collision {
 
 		v3 firstPos;

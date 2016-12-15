@@ -8,19 +8,23 @@ namespace ds {
 
 		float amplitude;
 		float frequency;
-		float ttl;
-		float ttlVariance;
 
-		WiggleActionSettings() : amplitude(0.0f), frequency(0.0f), ttl(0.0f), ttlVariance(0.0f) {
+		WiggleActionSettings() : amplitude(0.0f), frequency(0.0f) {
 			type = AT_WIGGLE;
+			ttl = 0.0f;
+			ttlVariance = 0.0f;
 		}
 
-		WiggleActionSettings(float a,float f) : amplitude(a), frequency(f), ttl(-1.0f), ttlVariance(0.0f) {
+		WiggleActionSettings(float a,float f) : amplitude(a), frequency(f) {
 			type = AT_WIGGLE;
+			ttl = 0.0f;
+			ttlVariance = 0.0f;
 		}
 
-		WiggleActionSettings(float a, float f, float t) : amplitude(a), frequency(f), ttl(t), ttlVariance(0.0f) {
+		WiggleActionSettings(float a, float f, float t) : amplitude(a), frequency(f) {
 			type = AT_WIGGLE;
+			ttl = t;
+			ttlVariance = 0.0f;
 		}
 		
 

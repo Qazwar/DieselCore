@@ -4,28 +4,28 @@
 
 namespace ds {
 
-	struct MoveByActionSettings : public ActionSettings {
+	struct MoveBySettings : public ActionSettings {
 
 		v3 velocity;
 		float radialVelocity;
 		bool bounce;
 
-		MoveByActionSettings() : velocity(0.0f), radialVelocity(0.0f), bounce(false) {
+		MoveBySettings() : velocity(0.0f), radialVelocity(0.0f), bounce(false) {
 			type = AT_MOVE_BY;
 			ttl = 0.0f;
 			ttlVariance = 0.0f;
 		}
-		MoveByActionSettings(const v3& vel,float t) : velocity(vel), radialVelocity(0.0f), bounce(false) {
+		MoveBySettings(const v3& vel,float t) : velocity(vel), radialVelocity(0.0f), bounce(false) {
 			type = AT_MOVE_BY;
 			ttl = t;
 			ttlVariance = 0.0f;
 		}
-		MoveByActionSettings(float vel, float t) : velocity(0.0f), radialVelocity(vel), bounce(false) {
+		MoveBySettings(float vel, float t) : velocity(0.0f), radialVelocity(vel), bounce(false) {
 			type = AT_MOVE_BY;
 			ttl = t;
 			ttlVariance = 0.0f;
 		}
-		MoveByActionSettings(float vel, float t,bool b) : velocity(0.0f), radialVelocity(vel), bounce(b) {
+		MoveBySettings(float vel, float t,bool b) : velocity(0.0f), radialVelocity(vel), bounce(b) {
 			type = AT_MOVE_BY;
 			ttl = t;
 			ttlVariance = 0.0f;

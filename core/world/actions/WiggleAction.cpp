@@ -23,7 +23,7 @@ namespace ds {
 	}
 
 	void WiggleAction::attach(ID id, ActionSettings* settings) {
-		WiggleActionSettings* s = (WiggleActionSettings*)settings;
+		WiggleSettings* s = (WiggleSettings*)settings;
 		attach(id, s->amplitude, s->frequency, s->ttl);
 	}
 

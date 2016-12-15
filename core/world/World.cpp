@@ -503,6 +503,14 @@ namespace ds {
 		return _behaviors->create(name);		
 	}
 
+	ID World::createBehavior(const char* name, ds::ActionDefinition* definitions, int num) {
+		ID ret = createBehavior(name);
+		for (int i = 0; i < num; ++i) {
+			_behaviors->addSettings(ret, definitions[i].settings);
+		}
+		return ret;
+	}
+
 	// -----------------------------------------------
 	// add array of settings to behavior
 	// -----------------------------------------------

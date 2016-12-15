@@ -30,6 +30,13 @@ namespace ds {
 		ActionType actionType;
 	};
 
+	struct ActionDefinition {
+
+		ActionSettings* settings;
+
+		ActionDefinition(ActionSettings* s) : settings(s) {}
+	};
+
 	struct SettingsDefinition {
 		ID behavior;
 		ActionSettings* settings;

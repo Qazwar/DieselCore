@@ -22,7 +22,7 @@ namespace ds {
 	}
 
 	void MoveByAction::attach(ID id, ActionSettings* settings) {
-		MoveByActionSettings* s = (MoveByActionSettings*)settings;
+		MoveBySettings* s = (MoveBySettings*)settings;
 		v3 vel = s->velocity;
 		if (s->radialVelocity != 0.0f) {
 			v3 angle = _array->get<v3>(id, WEC_ROTATION);

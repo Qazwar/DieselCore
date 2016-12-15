@@ -122,6 +122,7 @@ namespace ds {
 		void generateJSON(std::string& resp);
 
 		ID createBehavior(const char* name);
+		ID createBehavior(const char* name, ds::ActionDefinition* definitions, int num);
 		void addSettings(ID behaviorID, ActionSettings* settings);
 		void addSettings(SettingsDefinition* definitions, int num);
 		void startBehavior(const StaticHash& hash, ID id);

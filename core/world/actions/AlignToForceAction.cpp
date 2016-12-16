@@ -21,7 +21,7 @@ namespace ds {
 	}
 
 	void AlignToForceAction::attach(ID id, ActionSettings* settings) {
-		AlignToForceActionSettings* s = (AlignToForceActionSettings*)settings;
+		AlignToForceSettings* s = (AlignToForceSettings*)settings;
 		attach(id, s->ttl);
 	}
 

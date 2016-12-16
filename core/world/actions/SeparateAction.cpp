@@ -19,6 +19,12 @@ namespace ds {
 			_relaxations = (float*)_buffer.get_ptr(3);
 		}
 	}
+
+	void SeparateAction::attach(ID id, ActionSettings* settings) {
+		SeparateSettings* s = (SeparateSettings*)settings;
+		attach(id, s->objectType, s->minDistance, s->relaxation);
+	}
+
 	// -------------------------------------------------------
 	// 
 	// -------------------------------------------------------

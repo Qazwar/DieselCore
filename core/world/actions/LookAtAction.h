@@ -4,11 +4,11 @@
 
 namespace ds {
 
-	struct LookAtActionSettings : public ActionSettings {
+	struct LookAtSettings : public ActionSettings {
 
 		StaticHash target;
 
-		LookAtActionSettings(StaticHash h, float t) : target(h) {
+		LookAtSettings(StaticHash h, float t) : target(h) {
 			type = AT_LOOK_AT;
 			ttl = t;
 			ttlVariance = 0.0f;

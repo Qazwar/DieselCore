@@ -1,6 +1,7 @@
 #include "SeekAction.h"
 #include "..\..\log\Log.h"
 #include "..\..\math\math.h"
+#include "..\..\base\Assert.h"
 
 namespace ds {
 	// -------------------------------------------------------
@@ -18,6 +19,25 @@ namespace ds {
 			_velocities = (float*)_buffer.get_ptr(2);
 		}
 	}
+
+	void SeekAction::attach(ID id, ActionSettings* settings) {
+		SeekSettings* s = (SeekSettings*)settings;
+		ID target = INVALID_ID;
+		int* indices = _array->_sparse;
+		for (int i = 0; i < _array->capacity; ++i) {
+			if (indices[i] != -1) {
+				StaticHash current = _array->get<StaticHash>(i, WEC_HASH);
+				if (s->target == current) {
+					target = i;
+				}
+			}
+		}
+		XASSERT(target != INVALID_ID, "Cannot find target");
+		if (target != INVALID_ID) {
+			attach(id, target, s->velocity);
+		}
+	}
+
 	// -------------------------------------------------------
 	// 
 	// -------------------------------------------------------

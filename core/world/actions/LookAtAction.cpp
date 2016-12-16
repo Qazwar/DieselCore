@@ -22,7 +22,7 @@ namespace ds {
 	}
 
 	void LookAtAction::attach(ID id, ActionSettings* settings) {
-		LookAtActionSettings* s = (LookAtActionSettings*)settings;
+		LookAtSettings* s = (LookAtSettings*)settings;
 		ID target = INVALID_ID;
 		int* indices = _array->_sparse;
 		for (int i = 0; i < _array->capacity; ++i) {

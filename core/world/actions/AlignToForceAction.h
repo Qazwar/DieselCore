@@ -4,15 +4,15 @@
 
 namespace ds {
 
-	struct AlignToForceActionSettings : public ActionSettings {
+	struct AlignToForceSettings : public ActionSettings {
 		
-		AlignToForceActionSettings() {
+		AlignToForceSettings() {
 			type = AT_ALIGN_TO_FORCE;
 			ttl = 0.0f;
 			ttlVariance = 0.0f;
 		}
 
-		AlignToForceActionSettings(float t) {
+		AlignToForceSettings(float t) {
 			type = AT_ALIGN_TO_FORCE;
 			ttl = t;
 			ttlVariance = 0.0f;

@@ -4,6 +4,8 @@
 #include "..\lib\collection_types.h"
 #include "..\string\StaticHash.h"
 
+void reportLastError();
+
 class AssertOutputHandler {
 
 public:

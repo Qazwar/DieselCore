@@ -15,6 +15,26 @@
 
 #pragma warning(disable: 4996)
 
+void reportLastError() {
+	char lpMsgBuf[255];
+	DWORD dw = GetLastError();
+
+	FormatMessage(
+		FORMAT_MESSAGE_ALLOCATE_BUFFER |
+		FORMAT_MESSAGE_FROM_SYSTEM |
+		FORMAT_MESSAGE_IGNORE_INSERTS,
+		NULL,
+		dw,
+		MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT),
+		(LPTSTR)&lpMsgBuf,
+		255, NULL);
+
+	if (lpMsgBuf != 0) {
+		LOG << "ERROR: " << lpMsgBuf;
+		//LocalFree(lpMsgBuf);
+	}
+}
+
 struct LogCategory {
 	StaticHash hash;
 	LogLevel level;

@@ -321,6 +321,8 @@ namespace ds {
 				++it;
 			}
 			clear();
+			DEALLOC(_data);
+			_data = 0;
 		}
 
 		void clear() {

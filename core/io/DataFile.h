@@ -6,6 +6,9 @@
 
 namespace ds {
 
+	// -----------------------------------------------
+	// DataFile
+	// -----------------------------------------------
 	class DataFile {
 
 	public:
@@ -30,6 +33,9 @@ namespace ds {
 		int _nameIndex;
 	};
 
+	// -----------------------------------------------
+	// JSON file
+	// -----------------------------------------------
 	class JSONAssetFile : public DataFile {
 
 	public:
@@ -40,6 +46,9 @@ namespace ds {
 		bool load();
 	};
 
+	// -----------------------------------------------
+	// Flat JSON file
+	// -----------------------------------------------
 	class FlatJSONAssetFile : public DataFile {
 
 	public:
@@ -50,6 +59,9 @@ namespace ds {
 		bool load();
 	};
 
+	// -----------------------------------------------
+	// Text Asset file
+	// -----------------------------------------------
 	class TextAssetFile : public DataFile {
 
 	public:

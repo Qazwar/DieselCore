@@ -6,13 +6,14 @@
 #include "..\log\Log.h"
 #include "..\io\ReportWriter.h"
 
-/*
-namespace ds {
+namespace timer {
 
-	class ReportWriter;
+	void init_timing();
+
+	void shutdown_timing();
 
 }
-*/
+
 class StopWatch {
 
 public:	
@@ -24,9 +25,10 @@ public:
 	double elapsed();
 	double elapsedMS();
 private:
-	std::chrono::steady_clock::time_point _start, _end;
+	LARGE_INTEGER _start, _end;
 	char _name[32];
 	bool _running;
+	double _elapsed;
 };
 
 #define TIMER(name) StopWatch s(name); s.start();

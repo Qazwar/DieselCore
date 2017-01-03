@@ -7,15 +7,42 @@
 #include <functional>
 #include "..\string\StaticHash.h"
 
+namespace timer {
+
+	struct BasicTimingInfo {
+		LARGE_INTEGER frequency;
+		LONGLONG overhead;
+	};
+
+	static BasicTimingInfo* basicTimingInfo = 0;
+
+	void init_timing() {
+		basicTimingInfo = new BasicTimingInfo;
+		QueryPerformanceFrequency(&basicTimingInfo->frequency);
+		LARGE_INTEGER start;
+		LARGE_INTEGER stop;
+		QueryPerformanceCounter(&start);
+		QueryPerformanceCounter(&stop);
+		basicTimingInfo->overhead = stop.QuadPart - start.QuadPart;
+	}
+
+	void shutdown_timing() {
+		if (basicTimingInfo != nullptr) {
+			delete basicTimingInfo;
+		}
+	}
+
+}
+
 StopWatch::StopWatch() {
-	//QueryPerformanceFrequency(&_frequency);
 	_running = false;
+	_elapsed = 0.0f;
 	sprintf_s(_name, 32, "StopWatch");
 }
 
 StopWatch::StopWatch(const char* name) {
-	//QueryPerformanceFrequency(&_frequency);
 	_running = false;
+	_elapsed = 0.0f;
 	sprintf_s(_name, 32, "%s", name);
 }
 
@@ -27,7 +54,7 @@ StopWatch::~StopWatch() {
 }
 
 void StopWatch::start() {
-	_start = _end = std::chrono::steady_clock::now();
+	QueryPerformanceCounter(&_start);
 	_running = true;
 }
 
@@ -37,32 +64,23 @@ void StopWatch::start() {
 
 void StopWatch::end() {
 	_running = false;
-	_end = std::chrono::steady_clock::now();
+	QueryPerformanceCounter(&_end);
+	_elapsed = (_end.QuadPart - _start.QuadPart - timer::basicTimingInfo->overhead) * 1000.0 / timer::basicTimingInfo->frequency.QuadPart;
 }
 
 double StopWatch::elapsed() {
-	auto duration = _end - _start;
-	auto time_span = std::chrono::duration_cast<std::chrono::microseconds>(duration).count();
-
-	//auto delta = std::chrono::duration_cast<double>(_end - _start);
-	return static_cast<double>(time_span);
+	return _elapsed;
 }
 
 double StopWatch::elapsedMS() {
-	auto duration = _end - _start;
-	auto time_span = std::chrono::duration_cast<std::chrono::microseconds>(duration).count();
-
-	//auto delta = std::chrono::duration_cast<double>(_end - _start);
-	return static_cast<double>(time_span) / 1000.0;
+	return _elapsed;
 }
 
 namespace perf {
 
 	const int MAX_TIME_TRACKER_VALUES = 16;
 
-	double LIToSecs(LARGE_INTEGER & L, LARGE_INTEGER frequency) {
-		return ((double)L.QuadPart * 1000.0 / (double)frequency.QuadPart);
-	}
+	
 
 	// -----------------------------------------------------------
 	// time tracker array
@@ -102,10 +120,15 @@ namespace perf {
 		int frames;
 		float fpsTimer;
 		int fps;
+		LONGLONG overhead;
 		ds::Array<TimeTrackerArray> timeTrackers;
 	};
 
 	static ZoneTrackerContext* zoneTrackerCtx = 0;
+
+	double LIToSecs(LARGE_INTEGER & L) {
+		return (L.QuadPart - zoneTrackerCtx->overhead) * 1000.0 / zoneTrackerCtx->frequency.QuadPart;
+	}
 
 	// -----------------------------------------------------------
 	// init
@@ -114,6 +137,11 @@ namespace perf {
 		if (zoneTrackerCtx == 0) {
 			zoneTrackerCtx = new ZoneTrackerContext;
 			QueryPerformanceFrequency(&zoneTrackerCtx->frequency);
+			LARGE_INTEGER start;
+			LARGE_INTEGER stop;
+			QueryPerformanceCounter(&start);
+			QueryPerformanceCounter(&stop);
+			zoneTrackerCtx->overhead = stop.QuadPart - start.QuadPart;
 		}
 		zoneTrackerCtx->frames = 0;
 		zoneTrackerCtx->fpsTimer = 0.0f;
@@ -238,7 +266,7 @@ namespace perf {
 		QueryPerformanceCounter(&EndingTime);
 		LARGE_INTEGER time;
 		time.QuadPart = EndingTime.QuadPart - event.started.QuadPart;
-		event.duration = LIToSecs(time, zoneTrackerCtx->frequency);
+		event.duration = LIToSecs(time);
 		if (zoneTrackerCtx->events[zoneTrackerCtx->current_parent].parent != -1) {
 			zoneTrackerCtx->current_parent = zoneTrackerCtx->events[zoneTrackerCtx->current_parent].parent;
 		}
@@ -272,24 +300,34 @@ namespace perf {
 	// -----------------------------------------------------------
 	void save(const ds::ReportWriter& writer) {
 		char buffer[256];
-		sprintf_s(buffer, 256, "Perf - Profiling (%d FPS)", zoneTrackerCtx->fps);
+		sprintf_s(buffer, 256, "Perf - Profiling (%d FPS) events: %d", zoneTrackerCtx->fps, zoneTrackerCtx->events.size());
 		writer.startBox(buffer);
 		const char* HEADERS[] = { "Percent", "Accu", "Name" };
 		writer.startTable(HEADERS, 3);
 		char p[10];
 		float norm = zoneTrackerCtx->events[0].duration;
+		float total = 0.0f;
 		for (uint32_t i = 0; i < zoneTrackerCtx->events.size(); ++i) {
 			writer.startRow();
-			const ZoneTrackerEvent& event = zoneTrackerCtx->events[i];
+			const ZoneTrackerEvent& event = zoneTrackerCtx->events[i];		
+			if (i > 0) {
+				total += event.duration;
+			}
 			int ident = event.ident * 2;
 			float per = event.duration / norm * 100.0f;
 			ds::string::formatPercentage(per, p);
 			writer.addCell(p);
 			writer.addCell(event.duration);
 			const char* n = zoneTrackerCtx->names.data + zoneTrackerCtx->events[i].name_index;
+			//LOG << n << " = " << event.duration << " = " << total;
 			writer.addCell(event.ident * 2, n);
 			writer.endRow();
 		}
+		writer.startRow();
+		writer.addCell("");
+		writer.addCell(total);
+		writer.addCell("Total");
+		writer.endRow();
 		writer.endTable();
 		writer.endBox();
 
@@ -424,7 +462,7 @@ namespace perf {
 		QueryPerformanceCounter(&EndingTime);
 		LARGE_INTEGER time;
 		time.QuadPart = EndingTime.QuadPart - tta.started.QuadPart;
-		tta.values[tta.index++] = LIToSecs(time, zoneTrackerCtx->frequency);
+		tta.values[tta.index++] = LIToSecs(time);
 		if (tta.index >= MAX_TIME_TRACKER_VALUES) {
 			tta.index = 0;
 		}

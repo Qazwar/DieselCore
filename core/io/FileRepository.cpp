@@ -182,18 +182,20 @@ namespace ds {
 				TimeTracker tt("Reload");
 				int reloaded = 0;
 				for (auto& info : _repository->files) {
-					const char* name = _repository->name_buffer.data + info.name_index;
-					if (file::compareFileTime(name, info.filetime)) {
-						HANDLE hData = CreateFile(name, GENERIC_READ, FILE_SHARE_READ, 0, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, 0);
-						if (hData != INVALID_HANDLE_VALUE) {
-							CloseHandle(hData);
-							LOG << "Reloading file: " << name;
-							info.dataFile->load();
-							file::getFileTime(name, info.filetime);
-							++reloaded;
-						}
-						else {
-							LOGE << "Cannot read file: '" << name << "'";
+					if (info.dataFile != nullptr) {
+						const char* name = _repository->name_buffer.data + info.name_index;
+						if (file::compareFileTime(name, info.filetime)) {
+							HANDLE hData = CreateFile(name, GENERIC_READ, FILE_SHARE_READ, 0, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, 0);
+							if (hData != INVALID_HANDLE_VALUE) {
+								CloseHandle(hData);
+								LOG << "Reloading file: " << name;
+								info.dataFile->load();
+								file::getFileTime(name, info.filetime);
+								++reloaded;
+							}
+							else {
+								LOGE << "Cannot read file: '" << name << "'";
+							}
 						}
 					}
 				}

@@ -55,13 +55,13 @@ namespace ds {
 		}
 	}
 
-	void CubicBezierPath::approx(float u, v2* p) {
+	void CubicBezierPath::approx(float u, v2* p) const {
 		assert(u >= 0.0f && u <= 1.0f);
 		float t = find(u);
 		get(t, p);
 	}
 
-	float CubicBezierPath::find(float u) {
+	float CubicBezierPath::find(float u) const {
 		float targetLength = u * m_TotalLength;// [32];
 		int low = 0;
 		int high = MAX_CBP_STEPS;
@@ -90,7 +90,7 @@ namespace ds {
 		}
 	}
 
-	void CubicBezierPath::tanget(float u, v2* tangent) {
+	void CubicBezierPath::tanget(float u, v2* tangent) const {
 		assert(u >= 0.0f && u <= 1.0f);
 		float t = find(u);
 		float ds = 1.0f / m_Elements.size();
@@ -99,23 +99,47 @@ namespace ds {
 			*tangent = m_Elements[m_Elements.size() - 1].p3;
 		}
 		else {
-			BezierCurve& curve = m_Elements[idx];
+			const BezierCurve& curve = m_Elements[idx];
 			float nn = t / ds - idx;
 			curve.getTangent(nn, tangent);
 		}
 	}
 
-	void CubicBezierPath::get(float t,v2* p) {
+	void CubicBezierPath::get(float t,v2* p) const {
 		float ds = 1.0f / m_Elements.size();
 		int idx = t * m_Elements.size();
 		if ( idx == m_Elements.size() ) {
 			*p = m_Elements[m_Elements.size()-1].p3;
 		}
 		else {
-			BezierCurve& curve = m_Elements[idx];			
+			const BezierCurve& curve = m_Elements[idx];			
 			float nn = t / ds - idx;	
 			curve.get(nn,p);
 		}
+	}
+
+	bool CubicBezierPath::loadData(const JSONReader& loader, int category) {
+		int num = 0;
+		loader.get_int(category, "num", &num);
+		char buffer[32];
+		v2 p0,p1,p2,p3;
+		loader.get(category, "p1", &p0);
+		loader.get(category, "p2", &p1);
+		loader.get(category, "p3", &p2);
+		loader.get(category, "p4", &p3);
+		create(p0,p1,p2,p3);
+		int d = (num - 4) / 3;
+		for (int i = 0; i < d; ++i) {
+			sprintf_s(buffer, "p%d", (i * 3 + 2));
+			loader.get(category, buffer, &p0);
+			sprintf_s(buffer, "p%d", (i * 3 + 3));
+			loader.get(category, buffer, &p1);
+			sprintf_s(buffer, "p%d", (i * 3 + 4));
+			loader.get(category, buffer, &p2);
+			add(p0,p1,p2);
+		}
+		build();
+		return true;
 	}
 	/*
 	void CubicBezierPath::load(BinaryLoader* loader) {

@@ -43,13 +43,13 @@ namespace ds {
 		}
 	}
 
-	void StraightPath::approx(float u, Vector2f* p) {
+	void StraightPath::approx(float u, v2* p) const {
 		assert(u >= 0.0f && u <= 1.0f);
 		float t = find(u);
 		get(t, p);
 	}
 
-	float StraightPath::find(float u) {
+	float StraightPath::find(float u) const {
 		if (u == 0.0f) {
 			return 0.0f;
 		}
@@ -80,7 +80,7 @@ namespace ds {
 		}
 	}
 
-	void StraightPath::tanget(float u, Vector2f* tangent) {
+	void StraightPath::tanget(float u, v2* tangent) const {
 		assert(u >= 0.0f && u <= 1.0f);
 		float t = find(u);
 		float ds = 1.0f / m_Elements.size();
@@ -89,23 +89,41 @@ namespace ds {
 			*tangent = m_Elements[m_Elements.size() - 1].end - m_Elements[m_Elements.size() - 1].start;
 		}
 		else {
-			LineSegment& curve = m_Elements[idx];
+			const LineSegment& curve = m_Elements[idx];
 			float nn = t / ds - idx;
 			*tangent = lerp(curve.start, curve.end, nn) - lerp(curve.start, curve.end, nn - 1/60.0f);
 		}
 	}
 
-	void StraightPath::get(float t, Vector2f* p) {
+	void StraightPath::get(float t, v2* p) const {
 		float ds = 1.0f / m_Elements.size();
 		int idx = t * m_Elements.size();
 		if (idx == m_Elements.size()) {
 			*p = m_Elements[m_Elements.size() - 1].end;
 		}
 		else {
-			LineSegment& curve = m_Elements[idx];
+			const LineSegment& curve = m_Elements[idx];
 			float nn = t / ds - idx;
 			*p = lerp(curve.start, curve.end, nn);
 		}
+	}
+
+	bool StraightPath::loadData(const JSONReader& loader, int category) {
+		int num = 0;
+		loader.get_int(category, "num", &num);
+		char buffer[32];
+		v2 start;
+		v2 end;
+		loader.get(category, "p1", &start);
+		loader.get(category, "p2", &end);
+		create(start, end);
+		for (int i = 2; i < num; ++i) {
+			sprintf_s(buffer, "p%d", (i + 1));
+			loader.get(category, buffer, &start);
+			add(start);
+		}
+		build();
+		return true;
 	}
 	/*
 	void StraightPath::load(BinaryLoader* loader) {

@@ -21,14 +21,15 @@ namespace ds {
 		virtual void create(const Vector2f& start, const Vector2f& end);
 		virtual void add(const Vector2f& end);
 		void build();
-		void get(float t, Vector2f* p);
-		void approx(float u, Vector2f* p);
-		void tanget(float u, Vector2f* tangent);
+		void get(float t, v2* p) const;
+		void approx(float u, Vector2f* p) const;
+		void tanget(float u, Vector2f* tangent) const;
 		const int size() const {
 			return m_Elements.size();
 		}
+		bool loadData(const JSONReader& loader, int category);
 	protected:
-		float find(float u);
+		float find(float u) const;
 		LineElements m_Elements;
 		float m_TotalLength;
 		float m_ArcLength[MAX_CBP_STEPS + 1];

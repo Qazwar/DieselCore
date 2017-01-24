@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<Project DefaultTargets="Build" ToolsVersion="12.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+<Project DefaultTargets="Build" ToolsVersion="14.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup Label="ProjectConfigurations">
     <ProjectConfiguration Include="Debug|Win32">
       <Configuration>Debug</Configuration>
@@ -18,13 +18,13 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
     <ConfigurationType>StaticLibrary</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
-    <PlatformToolset>v120</PlatformToolset>
+    <PlatformToolset>v140</PlatformToolset>
     <CharacterSet>MultiByte</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
     <ConfigurationType>StaticLibrary</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
-    <PlatformToolset>v120</PlatformToolset>
+    <PlatformToolset>v140</PlatformToolset>
     <WholeProgramOptimization>true</WholeProgramOptimization>
     <CharacterSet>MultiByte</CharacterSet>
   </PropertyGroup>
@@ -101,6 +101,7 @@
     <ClCompile Include="core\lib\collection_types.cpp" />
     <ClCompile Include="core\log\Log.cpp" />
     <ClCompile Include="core\math\CubicBezierPath.cpp" />
+    <ClCompile Include="core\math\FourierPath.cpp" />
     <ClCompile Include="core\math\GameMath.cpp" />
     <ClCompile Include="core\math\hex.cpp" />
     <ClCompile Include="core\math\math.cpp" />
@@ -110,6 +111,7 @@
     <ClCompile Include="core\memory\DefaultAllocator.cpp" />
     <ClCompile Include="core\net\GameServer.cpp" />
     <ClCompile Include="core\physics\ColliderArray.cpp" />
+    <ClCompile Include="core\plugin\Plugin.cpp" />
     <ClCompile Include="core\profiler\Profiler.cpp" />
     <ClCompile Include="core\script\vm.cpp" />
     <ClCompile Include="core\string\StaticHash.cpp" />
@@ -144,6 +146,7 @@
     <ClInclude Include="core\base\CrashReporter.h" />
     <ClInclude Include="core\base\EventStream.h" />
     <ClInclude Include="core\base\ShortcutsHandler.h" />
+    <ClInclude Include="core\base\StateObject.h" />
     <ClInclude Include="core\base\system_info.h" />
     <ClInclude Include="core\Common.h" />
     <ClInclude Include="core\data\DynamicSettings.h" />
@@ -168,6 +171,7 @@
     <ClInclude Include="core\math\Bitset.h" />
     <ClInclude Include="core\math\CubicBezierPath.h" />
     <ClInclude Include="core\math\FloatArray.h" />
+    <ClInclude Include="core\math\FourierPath.h" />
     <ClInclude Include="core\math\GameMath.h" />
     <ClInclude Include="core\math\hex.h" />
     <ClInclude Include="core\math\HexGrid.h" />
@@ -180,6 +184,7 @@
     <ClInclude Include="core\memory\memory_types.h" />
     <ClInclude Include="core\net\GameServer.h" />
     <ClInclude Include="core\physics\ColliderArray.h" />
+    <ClInclude Include="core\plugin\Plugin.h" />
     <ClInclude Include="core\profiler\Profiler.h" />
     <ClInclude Include="core\script\vm.h" />
     <ClInclude Include="core\string\StaticHash.h" />

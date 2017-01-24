@@ -49,6 +49,9 @@
     <Filter Include="net">
       <UniqueIdentifier>{7c38b7d2-9ff9-4b6f-bca0-b2f9904f5ae2}</UniqueIdentifier>
     </Filter>
+    <Filter Include="plugin">
+      <UniqueIdentifier>{f9485f6d-5dbd-4a44-8994-bbb05fbc73ff}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="core\base\CrashReporter.cpp">
@@ -215,6 +218,12 @@
     </ClCompile>
     <ClCompile Include="core\world\Behaviors.cpp">
       <Filter>world</Filter>
+    </ClCompile>
+    <ClCompile Include="core\plugin\Plugin.cpp">
+      <Filter>plugin</Filter>
+    </ClCompile>
+    <ClCompile Include="core\math\FourierPath.cpp">
+      <Filter>math</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -425,6 +434,15 @@
     </ClInclude>
     <ClInclude Include="core\world\Behaviors.h">
       <Filter>world</Filter>
+    </ClInclude>
+    <ClInclude Include="core\plugin\Plugin.h">
+      <Filter>plugin</Filter>
+    </ClInclude>
+    <ClInclude Include="core\base\StateObject.h">
+      <Filter>base</Filter>
+    </ClInclude>
+    <ClInclude Include="core\math\FourierPath.h">
+      <Filter>math</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

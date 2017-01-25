@@ -4,6 +4,7 @@ namespace ds {
 
 	FourierPath::FourierPath() {
 		num = 0;
+		screenWidth = 1024.0f;
 	}
 
 	void FourierPath::build() {
@@ -70,7 +71,7 @@ namespace ds {
 			v += values[i] / PI * sin(f * t + DEGTORAD(offset));
 		}
 		p->y = v * height;
-		p->x = 1280.0f - 1280.0f * time;
+		p->x = screenWidth - screenWidth * time;
 	}
 
 	bool FourierPath::loadData(const JSONReader& loader, int category) {			
@@ -85,6 +86,7 @@ namespace ds {
 		loader.get(category, "v8", &values[7]);
 		loader.get(category, "height", &height);
 		loader.get(category, "offset", &offset);
+		loader.get(category, "screen_width", &screenWidth);
 		loader.get(category, "intervall", &frequency);
 		min = 10000.0f;
 		max = -10000.0f;

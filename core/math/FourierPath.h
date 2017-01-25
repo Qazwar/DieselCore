@@ -29,6 +29,7 @@ namespace ds {
 		float offset;
 		float totalLength;
 		float arcLength[MAX_FP_STEPS + 1];
+		float screenWidth;
 	};
 
 

@@ -85,6 +85,7 @@
   <ItemGroup>
     <ClCompile Include="core\base\CrashReporter.cpp" />
     <ClCompile Include="core\base\EventStream.cpp" />
+    <ClCompile Include="core\base\GameObject.cpp" />
     <ClCompile Include="core\base\ShortcutsHandler.cpp" />
     <ClCompile Include="core\base\system_info.cpp" />
     <ClCompile Include="core\data\DynamicSettings.cpp" />
@@ -145,6 +146,7 @@
     <ClInclude Include="core\base\Assert.h" />
     <ClInclude Include="core\base\CrashReporter.h" />
     <ClInclude Include="core\base\EventStream.h" />
+    <ClInclude Include="core\base\GameObject.h" />
     <ClInclude Include="core\base\ShortcutsHandler.h" />
     <ClInclude Include="core\base\StateObject.h" />
     <ClInclude Include="core\base\system_info.h" />

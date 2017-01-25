@@ -225,6 +225,9 @@
     <ClCompile Include="core\math\FourierPath.cpp">
       <Filter>math</Filter>
     </ClCompile>
+    <ClCompile Include="core\base\GameObject.cpp">
+      <Filter>base</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="core\base\Assert.h">
@@ -443,6 +446,9 @@
     </ClInclude>
     <ClInclude Include="core\math\FourierPath.h">
       <Filter>math</Filter>
+    </ClInclude>
+    <ClInclude Include="core\base\GameObject.h">
+      <Filter>base</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

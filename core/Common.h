@@ -9,10 +9,6 @@ const RID INVALID_RID = UINT32_MAX;
 
 const ID INVALID_ID = UINT32_MAX;
 
-enum InternalEvents {
-	ENGINE_SHUTDOWN
-};
-
 const float PI = 3.1415926535897932384626433832795f;
 const float TWO_PI = 2.0f * PI;
 const float HALF_PI = 0.5f * PI;

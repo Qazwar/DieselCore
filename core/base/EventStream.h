@@ -5,6 +5,12 @@ namespace ds {
 
 	namespace events {
 
+		enum SystemEvents {
+			SE_SHUTDOWN_SYSTEM,
+			SE_BUTTON_ONE_DOWN,
+			SE_BUTTON_ONE_UP
+		};
+
 		void init();
 
 		void reset();

@@ -111,6 +111,10 @@ namespace ds {
 		_data->set<v3>(id, WEC_POSITION, v3(pos));
 	}
 
+	void World::setPosition(ID id, const v3& pos) {
+		_data->set<v3>(id, WEC_POSITION, pos);
+	}
+
 	const v3& World::getPosition(ID id) const {
 		return _data->get<v3>(id, WEC_POSITION);
 	}

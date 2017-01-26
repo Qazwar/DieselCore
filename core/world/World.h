@@ -70,6 +70,7 @@ namespace ds {
 		void flashColor(ID id, const Color& startColor, const Color& endColor, float ttl, int mode = 0, const tweening::TweeningType& tweeningType = &tweening::linear);
 
 		void setPosition(ID id, const v2& pos);
+		void setPosition(ID id, const v3& pos);
 		const v3& getPosition(ID id) const;
 		void setRotation(ID id, const v3& rotation);
 		void setRotation(ID id, float rotation);

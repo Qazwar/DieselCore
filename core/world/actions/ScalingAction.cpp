@@ -63,13 +63,14 @@ namespace ds {
 						_timers[i] = 0.0f;
 					}
 					else if ( _modes[i] == 0 ) {
-						_array->set(_ids[i], _channels[i], _endScale[i]);
+						///_array->set(_ids[i], _channels[i], _endScale[i]);
 						buffer.add(_ids[i], AT_SCALE, _array->get<int>(_ids[i],WEC_TYPE));
 						removeByIndex(i);
 					}
 					else {
 						--_modes[i];
 						_timers[i] = 0.0f;
+						//_array->set(_ids[i], _channels[i], _startScale[i]);
 
 					}
 				}

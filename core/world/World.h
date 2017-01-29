@@ -54,6 +54,7 @@ namespace ds {
 		uint32_t numCollisions() const;		
 		void moveBy(ID id, const v2& velocity, float ttl = -1.0f, bool bounce = true);
 		void moveBy(ID id, const v3& velocity, float ttl = -1.0f, bool bounce = true);
+		void moveTo(ID id, const v3& start, const v3& end, float ttl, const tweening::TweeningType& tweeningType = &tweening::linear);
 		void scaleByPath(ID id, V3Path* path, float ttl);
 		void scale(ID id, const v3& start, const v3& end, float ttl, int mode = 0, const tweening::TweeningType& tweeningType = &tweening::linear);
 		void scaleAxes(ID id, int axes, float start, float end, float ttl, int mode = 0, const tweening::TweeningType& tweeningType = &tweening::linear);

@@ -3,6 +3,7 @@
 #include "actions\RemoveAfterAction.h"
 #include "actions\ScaleByPathAction.h"
 #include "actions\MoveByAction.h"
+#include "actions\MoveToAction.h"
 #include "actions\RotateByAction.h"
 #include "actions\RotateAction.h"
 #include "actions\RotateToTargetAction.h"
@@ -105,6 +106,7 @@ namespace ds {
 			case AT_SCALE: _actions[AT_SCALE] = new ScalingAction(_data, _boundingRect); break;
 			case AT_COLLISION: _collisionAction = new CollisionAction(_data, _boundingRect); break;
 			case AT_MOVE_BY: _actions[AT_MOVE_BY] = new MoveByAction(_data, _boundingRect); break;
+			case AT_MOVE_TO: _actions[AT_MOVE_TO] = new MoveToAction(_data, _boundingRect); break;
 			case AT_REMOVE_AFTER: _actions[AT_REMOVE_AFTER] = new RemoveAfterAction(_data, _boundingRect); break;
 			case AT_COLOR_FLASH: _actions[AT_COLOR_FLASH] = new ColorFlashAction(_data, _boundingRect); break;
 			case AT_ALPHA_FADE_TO: _actions[AT_ALPHA_FADE_TO] = new AlphaFadeToAction(_data, _boundingRect); break;

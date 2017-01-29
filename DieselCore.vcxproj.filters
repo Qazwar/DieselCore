@@ -228,6 +228,9 @@
     <ClCompile Include="core\base\GameObject.cpp">
       <Filter>base</Filter>
     </ClCompile>
+    <ClCompile Include="core\world\actions\MoveToAction.cpp">
+      <Filter>world\actions</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="core\base\Assert.h">
@@ -449,6 +452,9 @@
     </ClInclude>
     <ClInclude Include="core\base\GameObject.h">
       <Filter>base</Filter>
+    </ClInclude>
+    <ClInclude Include="core\world\actions\MoveToAction.h">
+      <Filter>world\actions</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

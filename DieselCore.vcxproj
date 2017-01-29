@@ -127,6 +127,7 @@
     <ClCompile Include="core\world\actions\ColorFlashAction.cpp" />
     <ClCompile Include="core\world\actions\LookAtAction.cpp" />
     <ClCompile Include="core\world\actions\MoveByAction.cpp" />
+    <ClCompile Include="core\world\actions\MoveToAction.cpp" />
     <ClCompile Include="core\world\actions\RemoveAfterAction.cpp" />
     <ClCompile Include="core\world\actions\RotateAction.cpp" />
     <ClCompile Include="core\world\actions\RotateByAction.cpp" />
@@ -203,6 +204,7 @@
     <ClInclude Include="core\world\actions\ColorFlashAction.h" />
     <ClInclude Include="core\world\actions\LookAtAction.h" />
     <ClInclude Include="core\world\actions\MoveByAction.h" />
+    <ClInclude Include="core\world\actions\MoveToAction.h" />
     <ClInclude Include="core\world\actions\RemoveAfterAction.h" />
     <ClInclude Include="core\world\actions\RotateAction.h" />
     <ClInclude Include="core\world\actions\RotateByAction.h" />

@@ -4,6 +4,7 @@
 #include "actions\RemoveAfterAction.h"
 #include "actions\ScaleByPathAction.h"
 #include "actions\MoveByAction.h"
+#include "actions\MoveToAction.h"
 #include "actions\RotateByAction.h"
 #include "actions\RotateAction.h"
 #include "actions\RotateToTargetAction.h"
@@ -292,6 +293,11 @@ namespace ds {
 	void World::moveBy(ID id, const v3& velocity, float ttl, bool bounce) {
 		MoveByAction* action = (MoveByAction*)_actionManager->get(AT_MOVE_BY);
 		action->attach(id, velocity, ttl, bounce);
+	}
+
+	void World::moveTo(ID id, const v3& start, const v3& end, float ttl, const tweening::TweeningType& type) {
+		MoveToAction* action = (MoveToAction*)_actionManager->get(AT_MOVE_TO);
+		action->attach(id, start, end, ttl, type);
 	}
 
 	// -----------------------------------------------

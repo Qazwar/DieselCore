@@ -80,7 +80,7 @@ namespace ds {
 		const v3& getScale(ID id) const;
 		void setScale(ID id, const v3& s);
 		int getType(ID id) const;
-
+		void setTexture(ID id, const Texture& texture);
 		void tick(float dt);
 		void remove(ID id);
 		void removeByType(int type);

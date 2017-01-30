@@ -132,6 +132,10 @@ namespace ds {
 		return _data->get<v3>(id, WEC_SCALE);
 	}
 
+	void World::setTexture(ID id, const Texture& texture) {
+		_data->set<Texture>(id, WEC_TEXTURE, texture);
+	}
+
 	void World::setScale(ID id, const v3& s) {
 		_data->set<v3>(id, WEC_SCALE, s);
 	}
